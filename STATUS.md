@@ -11,30 +11,32 @@
 ## What is half done
 
 - Latest raid/crowd changes have isolated demo/browser verification but still need real Twitch and OBS verification. Restart the app and refresh Settings/OBS to load API version `robot-alerts-scenes-11`.
+- **Latest requested work is not implemented:** running limbs move too quickly; raid text should default to 3 seconds; text duration should be configurable per animation; add a custom-media animation where the viewer's robot runs in and the streamer's uploaded MP4/WebM/GIF/PNG/JPG appears above the fixed alert box. A preliminary duration change failed a regression check and was reverted; all 42 tests pass after reverting. No upload implementation or gait fix was completed.
 - Art and animations need the user's visual feedback. Actual cosmetic selection/rendering is hidden; replacement limbs/materials and sockets are groundwork, not a finished cosmetic catalog.
 - CRT resub time capsule, optional LLM styling/theme prompt, viewer page, full cross-install portability and comprehensive first-clip history are unfinished or deferred. The CRT currently displays only the avatar.
-- **Repository state:** before this status commit there were no commits; application files were untracked. This commit contains only `STATUS.md`, so the rest of the project still needs to be tracked and committed before submission.
+- **Repository state:** only `STATUS.md` has been committed; application files remain untracked and need to be tracked and committed before submission.
 
 ## Decisions and reasoning
 
 - One modular rig with separate replaceable body parts: future cosmetics can change geometry, limb length and materials. Use an original angular CRT design with shading and visible mechanical connections; the user rejected Foozle inspiration and rounded, floating parts.
 - One square CRT displays the Twitch picture; side/rear views show the monitor housing. Uniform baseline robot for now; cosmetics later. No ambient auras; small button feedback and raid collision smoke are allowed.
 - Meteor: fall, sideways CRT/profile picture, card grows upward, launch, rotate, land and dance. Button stays left of the card and visibly contacts the hand. Running feet should plant instead of sliding.
+- Slow arm and leg movement to match travel speed. Default raid text to 3 seconds, with configurable text durations for each animation. Custom uploaded alerts must prominently show the triggering viewer's robot; future chosen clothing should carry through when cosmetics are implemented.
 - The alert text box must stay at the same position and size for every animation; themes affect alert styling, not the robot. Browser source URL stays unchanged when resolution changes.
 - Ordinary live alerts/commands/bot replies remain restricted to **Trizze** and **itsTrizze** during testing. Raids from any channel and the subsequent visual-only chat crowd are exceptions; other chatters gain no progress or bot reply from that participation. Twitch does not provide a verified raid attendee list.
 - Visually inspect actual rendered results and fresh unseeked motion before reporting completion. Ask the user for help after 20 unsuccessful attempts, or sooner if a design decision is needed or the same issue repeats.
 
 ## Open questions for the user
 
-- Does the latest button/raid animation look and feel right in their real OBS stream? Previews were sent to the Robot Alerts folder on the Windows PC.
+- What file-size and duration limits should apply to uploaded custom alerts? Choose reasonable defaults if no preference is given. Does the latest button/raid animation look right in a real OBS stream?
 - When should the two-account testing restriction be lifted? Which cosmetic parts and unlock/equip behavior should be exposed first?
 - Resolve the remaining cross-install identity/hosting and time-capsule scope before promising those features for submission.
 
 ## Next steps, in priority order
 
-1. Restart the current app, refresh Settings/OBS, and verify a real raid, chat crowd, button press and cleanup with the user; incorporate visual feedback.
-2. Track and commit the application and documentation deliberately, excluding secrets and local data; prepare the hackathon submission and a working Twitch demo video. Deadline: **November 2, 2026, 23:00 Sweden**; internal target 22:00. After deadline, preserve submitted artifacts until results.
-3. Finish agreed cosmetic/time-capsule scope and validate real Twitch permissions and data limitations. Keep the demo usable without Twitch/OpenAI credentials.
+1. Implement and visually review the slower gait, 3-second raid default, per-animation text timing and custom-media upload/animation. Preserve fixed card bounds and show the triggering viewer's rig; validate uploads and keep demo isolated.
+2. Restart the app, refresh Settings/OBS, and verify real Twitch events, raid crowd, custom media and cleanup; incorporate user feedback.
+3. Track and commit the application and documentation deliberately, excluding secrets and local data; prepare the submission and Twitch demo video. Deadline: **November 2, 2026, 23:00 Sweden**; internal target 22:00. Preserve submitted artifacts after the deadline until results.
 
 ## Setup and rules to remember
 
