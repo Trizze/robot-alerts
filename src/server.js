@@ -17,7 +17,7 @@ import { Profiles } from './twitch/profiles.js';
 import { DemoWorkspace } from './demo-workspace.js';
 import { chatProfiles, testEvent } from './preview-events.js';
 import { API_VERSION } from '../public/shared/release.js';
-import { allowedViewer, allowedReaction, TEST_ACCOUNTS } from './reaction-policy.js';
+import { allowedViewer, allowedReaction, reactionPolicy } from './reaction-policy.js';
 
 const hasTwitch = Boolean(process.env.TWITCH_USER_ACCESS_TOKEN);
 const demo = process.env.ROBOT_DEMO === '1' || !hasTwitch;
@@ -78,7 +78,7 @@ const demoWorkspace = new DemoWorkspace(demoStore, queue, channel, log, () => {
 function availableTestViewers() { const real = chatProfiles(store.list()).filter(viewer => allowedViewer(viewer.id)); return real.length ? real : demo ? demoStore.list().filter(viewer => viewer.avatar && !/^\d+$/.test(viewer.id)) : []; }
 function makeTest(type, index = 0, sourceViewerId) { return testEvent(type, index, chatProfiles(store.list()).filter(viewer => allowedViewer(viewer.id)), { sourceViewerId, allowFixtures: demo }); }
 const replay = new DemoReplay(event => demoWorkspace.ingest(event).catch(() => log('error', 'Demo event failed.')), () => broadcast({ kind: 'replay', running: replay?.running || false }), makeTest);
-function state() { return { apiVersion: API_VERSION, serverTime: Date.now(), mode: demo ? 'demo' : 'live', liveReady: true, connections, channel, settings: store.settings(channel), viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)), demoViewers: demoStore.list(), testViewers: availableTestViewers(), testAccounts: Object.values(TEST_ACCOUNTS), unlocks, registry, feed, running: replay.running, current: queue.current, queued: queue.pending.length, aiEnabled: false }; }
+function state() { return { apiVersion: API_VERSION, serverTime: Date.now(), mode: demo ? 'demo' : 'live', liveReady: true, connections, channel, settings: store.settings(channel), viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)), demoViewers: demoStore.list(), testViewers: availableTestViewers(), testAccounts: reactionPolicy.ids, unlocks, registry, feed, running: replay.running, current: queue.current, queued: queue.pending.length, aiEnabled: false }; }
 function allowedHost(value) { return value === `127.0.0.1:${port}` || value === `localhost:${port}`; }
 function allowedOrigin(value) { try { const url = new URL(value); return url.protocol === 'http:' && allowedHost(url.host); } catch { return false; } }
 function send(res, code, body, type = 'application/json') { res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(type === 'application/json' && !Buffer.isBuffer(body) ? JSON.stringify(body) : body); }
@@ -117,7 +117,7 @@ const server = http.createServer(async (req, res) => {
       if (url.pathname === '/api/preview/viewer') {
         const viewer = typeof input.id === 'string' ? store.viewer(input.id) : null;
         if (!viewer) throw new Error('Viewer not found.');
-        if (!demo && !allowedViewer(viewer.id)) return send(res, 403, { error: 'Testing is restricted to Trizze and itsTrizze.' });
+        if (!demo && !allowedViewer(viewer.id)) return send(res, 403, { error: 'This viewer is not in the configured live allowlist.' });
         queue.enqueue({ type: 'preview', channel, viewer, demo: true, unlocked: [] });
         return send(res, 200, { ok: true });
       }
@@ -154,6 +154,7 @@ server.listen(port, host, () => {
   console.log(`Robot Alerts · ${demo ? 'DEMO' : 'LIVE'} · http://${host}:${port}/settings`);
   console.log(`OBS browser source · http://${host}:${port}/overlay · 1920 × 1080`);
   console.log(demo ? 'Synthetic events only. No Twitch or OpenAI requests.' : 'Connecting to Twitch. Credentials: ***');
+  if (!demo && !reactionPolicy.all && !reactionPolicy.ids.length) console.log('Live reactions are disabled until ALLOWED_VIEWER_IDS is configured.');
   if (process.env.ROBOT_DEMO === '1') setTimeout(() => replay.play(), 2000);
   if (!demo) connectTwitch().catch(() => { log('error', 'Twitch authorization failed. Check setup privately; no credential values were logged.'); for (const transport of transports) transport.stop(); });
 });

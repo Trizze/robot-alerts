@@ -23,7 +23,7 @@ Run `npm run demo` to replay synthetic alerts without Twitch credentials; demo d
 
 ## Important limitations
 
-- Normal live reactions and bot responses are temporarily restricted to the test accounts Trizze and itsTrizze. Raid visual participation has separate behavior. This restriction must be revisited before a general release.
+- Live reactions and bot responses use `ALLOWED_VIEWER_IDS`: a comma-separated list of Twitch user IDs. An empty value disables normal live reactions; set `*` explicitly to allow all Twitch IDs. Raid visual participation has separate behavior. Restart the app after changing the value.
 - Shared Twitch login, cross-channel points and persistent appearance selection have not been tested end to end or deployed. The OBS overlay does not yet render the viewer's selected website pattern or chest image. Pattern preview is not a completed unlock system.
 - Real Twitch event and OBS testing is still required for the latest renderer. Twitch's resubscription message event depends on the viewer sharing it, so it cannot reliably report every renewal.
 - A small list of Twitch global emotes is available in the disconnected website preview. The full global list requires the shared backend. Animated chest preview depends on browser support and has not been verified with an actual animated Twitch emote.

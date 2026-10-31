@@ -17,7 +17,7 @@ test('isolated demo serves UI, enforces origin/CSRF and delivers alerts over Web
     assert.equal((await fetch(`${base}/settings`)).status, 200); assert.equal((await fetch(`${base}/overlay`)).status, 200);
     assert.equal((await fetch(`${base}/shared/robot.js`)).status, 200);
     const gsap = await fetch(`${base}/vendor/gsap.min.js`); assert.equal(gsap.status, 200); assert.match(await gsap.text(), /GSAP 3\.13\.0/);
-    const state = await (await fetch(`${base}/api/state`)).json(); assert.equal(state.mode, 'demo'); assert.equal(state.viewers.length, 4); assert.equal(state.apiVersion, 'robot-alerts-cards-18'); assert.ok(Math.abs(state.serverTime-Date.now())<5000);
+    const state = await (await fetch(`${base}/api/state`)).json(); assert.equal(state.mode, 'demo'); assert.equal(state.viewers.length, 4); assert.equal(state.apiVersion, 'robot-alerts-cards-19'); assert.ok(Math.abs(state.serverTime-Date.now())<5000);
     assert.equal((await fetch(`${base}/api/demo/event`, { method: 'POST', headers: { 'Content-Type': 'application/json', Origin: 'http://hostile.invalid' }, body: '{}' })).status, 403);
     assert.equal((await fetch(`${base}/api/session`, { headers: { 'Sec-Fetch-Site': 'cross-site' } })).status, 403);
     const session = await (await fetch(`${base}/api/session`)).json();
