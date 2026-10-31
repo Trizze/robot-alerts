@@ -125,7 +125,12 @@ export class SharedStore {
       this.db.exec('COMMIT');
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
-  deleteViewer(id) { if (!validId(id)) return; this.db.prepare('DELETE FROM viewers WHERE id=?').run(id); this.db.prepare("DELETE FROM sessions WHERE user_id=? AND role='viewer'").run(id); }
+  deleteViewer(id) {
+    if (!validId(id)) return;
+    this.db.exec('BEGIN IMMEDIATE');
+    try { this.db.prepare('DELETE FROM viewers WHERE id=?').run(id); this.db.prepare('DELETE FROM sessions WHERE user_id=?').run(id); this.db.exec('COMMIT'); }
+    catch (error) { this.db.exec('ROLLBACK'); throw error; }
+  }
   cleanup(now=Date.now()) { this.db.prepare('DELETE FROM receipts WHERE expires_at<=?').run(now); this.db.prepare('DELETE FROM sessions WHERE expires_at<=?').run(now); }
   health() { this.db.prepare('SELECT 1').get(); }
   close() { this.db.close(); }

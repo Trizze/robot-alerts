@@ -43,3 +43,8 @@ test('appearance preferences are validated and removed with the viewer', () => {
   s.deleteViewer('3');assert.equal(s.viewer('3'),null);
  } finally { s.close(); }
 });
+test('viewer deletion ends both viewer and streamer sessions but does not disconnect the channel', () => {
+ const s=create();try {channel(s,'1');s.upsertViewer('1','Channel');s.upsertViewer('2','Other');const viewer=s.createSession('1','viewer'),streamer=s.createSession('1','streamer'),other=s.createSession('2','viewer');
+ s.deleteViewer('1');assert.equal(s.session(viewer),null);assert.equal(s.session(streamer),null);assert.equal(s.session(other).id,'2');assert.equal(s.hasChannel('1'),true);
+ }finally{s.close();}
+});
