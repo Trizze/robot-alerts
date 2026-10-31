@@ -26,7 +26,6 @@ export class Store {
     return { id: row.id, name: row.name, color: row.color, avatar: row.avatar, palette: row.palette ? JSON.parse(row.palette) : null, look: JSON.parse(row.look), owned: this.db.prepare('SELECT part FROM owned WHERE viewer=?').all(id).map(r => r.part), metrics: this.db.prepare('SELECT MAX(months) months, SUM(bits) bits, SUM(gifts) gifts, MAX(streak) streak FROM observations WHERE viewer=?').get(id) };
   }
   list() { return this.db.prepare('SELECT id FROM viewers ORDER BY rowid DESC LIMIT 60').all().map(r => this.viewer(r.id)); }
-  cacheClip(id, channel, value) { this.db.prepare('INSERT OR REPLACE INTO clip_cache VALUES(?,?,?,?)').run(id, channel, JSON.stringify(value), new Date().toISOString()); }
   setLook(id, patch, reset = false) {
     const viewer = this.viewer(id); if (!viewer) throw new Error('Say !robot first to build your robot.');
     const explicit = reset ? [] : [...new Set([...JSON.parse(this.db.prepare('SELECT explicit FROM viewers WHERE id=?').get(id).explicit), ...Object.keys(patch)])];
