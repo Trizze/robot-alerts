@@ -1,0 +1,85 @@
+{
+  "status": "preview candidates",
+  "textures": [
+    {
+      "id": "black_and_gold_marble",
+      "name": "Black And Gold Marble",
+      "file": "black-and-gold-marble.jpg",
+      "source": "https://www.meshy.ai/textures/marble/black-and-gold-marble",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "gold_leaf_gilding",
+      "name": "Gold Leaf Gilding",
+      "file": "gold-leaf-gilding.jpg",
+      "source": "https://www.meshy.ai/textures/metal/gold-leaf-gilding",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "polished_gold_metal",
+      "name": "Polished Gold Metal",
+      "file": "polished-gold-metal.jpg",
+      "source": "https://www.meshy.ai/textures/metal/polished-gold-metal",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "calacatta_gold_marble",
+      "name": "Calacatta Gold Marble",
+      "file": "calacatta-gold-marble.jpg",
+      "source": "https://www.meshy.ai/textures/marble/calacatta-gold-marble",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "black_marquina_marble",
+      "name": "Black Marquina Marble",
+      "file": "black-marquina-marble.jpg",
+      "source": "https://www.meshy.ai/textures/marble/black-marquina-marble",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "crinkled_gold_foil",
+      "name": "Crinkled Gold Foil",
+      "file": "crinkled-gold-foil.jpg",
+      "source": "https://www.meshy.ai/textures/metal/crinkled-gold-foil",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "green_verde_marble",
+      "name": "Green Verde Marble",
+      "file": "green-verde-marble.jpg",
+      "source": "https://www.meshy.ai/textures/marble/green-verde-marble",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "rose_gold_foil",
+      "name": "Rose Gold Foil",
+      "file": "rose-gold-foil.jpg",
+      "source": "https://www.meshy.ai/textures/metal/rose-gold-foil",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "gold_glitter",
+      "name": "Gold Glitter",
+      "file": "gold-glitter.jpg",
+      "source": "https://www.meshy.ai/textures/metal/gold-glitter",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "blue_green_agate",
+      "name": "Blue Green Agate",
+      "file": "blue-green-agate.jpg",
+      "source": "https://www.meshy.ai/textures/marble/blue-green-agate",
+      "license": "CC0-1.0",
+      "tier": 5
+    }
+  ]
+}

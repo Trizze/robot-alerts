@@ -1,0 +1,340 @@
+{
+  "status": "provisional visual selection",
+  "textures": [
+    {
+      "id": "denim_fabric_06",
+      "name": "Denim Fabric 06",
+      "authors": [
+        "Greg Zaal",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/denim_fabric_06",
+      "license": "CC0-1.0",
+      "file": "denim_fabric_06.jpg",
+      "tier": 1
+    },
+    {
+      "id": "fabric_pattern_05",
+      "name": "Fabric Pattern 05",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/fabric_pattern_05",
+      "license": "CC0-1.0",
+      "file": "fabric_pattern_05.jpg",
+      "tier": 1
+    },
+    {
+      "id": "brown_leather",
+      "name": "Brown Leather",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/brown_leather",
+      "license": "CC0-1.0",
+      "file": "brown_leather.jpg",
+      "tier": 1
+    },
+    {
+      "id": "blue_painted_planks",
+      "name": "Blue Painted Planks",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/blue_painted_planks",
+      "license": "CC0-1.0",
+      "file": "blue_painted_planks.jpg",
+      "tier": 1
+    },
+    {
+      "id": "marble_01",
+      "name": "Marble 01",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/marble_01",
+      "license": "CC0-1.0",
+      "file": "marble_01.jpg",
+      "tier": 1
+    },
+    {
+      "id": "rusty_metal_02",
+      "name": "Rusty Metal 02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/rusty_metal_02",
+      "license": "CC0-1.0",
+      "file": "rusty_metal_02.jpg",
+      "tier": 1
+    },
+    {
+      "id": "denim_fabric_03",
+      "name": "Denim Fabric 03",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/denim_fabric_03",
+      "license": "CC0-1.0",
+      "file": "denim_fabric_03.jpg",
+      "tier": 2
+    },
+    {
+      "id": "fabric_pattern_07",
+      "name": "Fabric Pattern 07",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/fabric_pattern_07",
+      "license": "CC0-1.0",
+      "file": "fabric_pattern_07.jpg",
+      "tier": 2
+    },
+    {
+      "id": "leather_red_02",
+      "name": "Leather Red 02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/leather_red_02",
+      "license": "CC0-1.0",
+      "file": "leather_red_02.jpg",
+      "tier": 2
+    },
+    {
+      "id": "green_metal_rust",
+      "name": "Green Metal Rust",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/green_metal_rust",
+      "license": "CC0-1.0",
+      "file": "green_metal_rust.jpg",
+      "tier": 2
+    },
+    {
+      "id": "blue_metal_plate",
+      "name": "Blue Metal Plate",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/blue_metal_plate",
+      "license": "CC0-1.0",
+      "file": "blue_metal_plate.jpg",
+      "tier": 2
+    },
+    {
+      "id": "quatrefoil_jacquard_fabric",
+      "name": "Quatrefoil Jacquard Fabric",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/quatrefoil_jacquard_fabric",
+      "license": "CC0-1.0",
+      "file": "quatrefoil_jacquard_fabric.jpg",
+      "tier": 2
+    },
+    {
+      "id": "metal_plate_02",
+      "name": "Metal Plate 02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/metal_plate_02",
+      "license": "CC0-1.0",
+      "file": "metal_plate_02.jpg",
+      "tier": 3
+    },
+    {
+      "id": "rusty_metal_04",
+      "name": "Rusty Metal 04",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/rusty_metal_04",
+      "license": "CC0-1.0",
+      "file": "rusty_metal_04.jpg",
+      "tier": 3
+    },
+    {
+      "id": "leather_white",
+      "name": "Leather White",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/leather_white",
+      "license": "CC0-1.0",
+      "file": "leather_white.jpg",
+      "tier": 3
+    },
+    {
+      "id": "marble_tiles",
+      "name": "Marble Tiles",
+      "authors": [
+        "Charlotte Baglioni"
+      ],
+      "source": "https://polyhaven.com/a/marble_tiles",
+      "license": "CC0-1.0",
+      "file": "marble_tiles.jpg",
+      "tier": 3
+    },
+    {
+      "id": "terrazzo_tiles",
+      "name": "Terrazzo Tiles",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/terrazzo_tiles",
+      "license": "CC0-1.0",
+      "file": "terrazzo_tiles.jpg",
+      "tier": 3
+    },
+    {
+      "id": "rosewood_veneer1",
+      "name": "Rosewood Veneer1",
+      "authors": [
+        "Jenelle van Heerden"
+      ],
+      "source": "https://polyhaven.com/a/rosewood_veneer1",
+      "license": "CC0-1.0",
+      "file": "rosewood_veneer1.jpg",
+      "tier": 3
+    },
+    {
+      "id": "marble_mosaic_tiles",
+      "name": "Marble Mosaic Tiles",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/marble_mosaic_tiles",
+      "license": "CC0-1.0",
+      "file": "marble_mosaic_tiles.jpg",
+      "tier": 4
+    },
+    {
+      "id": "lacquered_cherry_wood",
+      "name": "Lacquered Cherry Wood",
+      "authors": [
+        "Jenelle van Heerden",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/lacquered_cherry_wood",
+      "license": "CC0-1.0",
+      "file": "lacquered_cherry_wood.jpg",
+      "tier": 4
+    },
+    {
+      "id": "metal_grate_rusty",
+      "name": "Metal Grate Rusty",
+      "authors": [
+        "Rob Tuytel",
+        "Dimitrios Savva"
+      ],
+      "source": "https://polyhaven.com/a/metal_grate_rusty",
+      "license": "CC0-1.0",
+      "file": "metal_grate_rusty.jpg",
+      "tier": 4
+    },
+    {
+      "id": "black_painted_planks",
+      "name": "Black Painted Planks",
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "source": "https://polyhaven.com/a/black_painted_planks",
+      "license": "CC0-1.0",
+      "file": "black_painted_planks.jpg",
+      "tier": 4
+    },
+    {
+      "id": "blue_floor_tiles_01",
+      "name": "Blue Floor Tiles 01",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/blue_floor_tiles_01",
+      "license": "CC0-1.0",
+      "file": "blue_floor_tiles_01.jpg",
+      "tier": 4
+    },
+    {
+      "id": "dark_paneled_wood",
+      "name": "Dark Paneled Wood",
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "source": "https://polyhaven.com/a/dark_paneled_wood",
+      "license": "CC0-1.0",
+      "file": "dark_paneled_wood.jpg",
+      "tier": 4
+    },
+    {
+      "id": "rusty_metal_05",
+      "name": "Rusty Metal 05",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/rusty_metal_05",
+      "license": "CC0-1.0",
+      "file": "rusty_metal_05.jpg",
+      "tier": 5
+    },
+    {
+      "id": "marble_cliff_03",
+      "name": "Marble Cliff 03",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/marble_cliff_03",
+      "license": "CC0-1.0",
+      "file": "marble_cliff_03.jpg",
+      "tier": 5
+    },
+    {
+      "id": "leather_red_03",
+      "name": "Leather Red 03",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/leather_red_03",
+      "license": "CC0-1.0",
+      "file": "leather_red_03.jpg",
+      "tier": 5
+    },
+    {
+      "id": "marble_rock_03",
+      "name": "Marble Rock 03",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/marble_rock_03",
+      "license": "CC0-1.0",
+      "file": "marble_rock_03.jpg",
+      "tier": 5
+    },
+    {
+      "id": "rusty_metal_grid",
+      "name": "Rusty Metal Grid",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/rusty_metal_grid",
+      "license": "CC0-1.0",
+      "file": "rusty_metal_grid.jpg",
+      "tier": 5
+    },
+    {
+      "id": "marble_cliff_05",
+      "name": "Marble Cliff 05",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/marble_cliff_05",
+      "license": "CC0-1.0",
+      "file": "marble_cliff_05.jpg",
+      "tier": 5
+    }
+  ]
+}

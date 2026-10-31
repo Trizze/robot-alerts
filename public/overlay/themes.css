@@ -1,0 +1,81 @@
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:transparent;font-family:Arial,Helvetica,ui-sans-serif,sans-serif}
+#stage{position:relative;width:100%;height:100%;--scale:1}
+.alert{--event:#ff7348;position:absolute;bottom:6%;left:50%;width:1000px;max-width:94%;transform:translateX(-50%) scale(var(--scale));transform-origin:bottom center;display:flex;align-items:center;justify-content:center;gap:20px;isolation:isolate;animation:card-enter .35s steps(4,end) both}
+.alert.bottom-left{left:4%;transform:scale(var(--scale));transform-origin:bottom left}
+.alert.bottom-right{left:auto;right:4%;transform:scale(var(--scale));transform-origin:bottom right}
+.alert.center{bottom:34%}
+.bot-wrap{width:280px;height:364px;flex:none;position:relative;z-index:2}
+.card{position:relative;width:620px;min-height:248px;padding:35px 40px 37px;isolation:isolate}
+.eyebrow{position:relative;z-index:1;display:flex;align-items:center;gap:11px;font-size:16px;font-weight:800;letter-spacing:2px;line-height:1}
+.event-icon{display:grid;place-items:center;width:28px;height:28px;font-size:21px;letter-spacing:0;line-height:1}
+.viewer-name{position:relative;z-index:1;font-size:var(--name-size,76px);font-weight:900;letter-spacing:-2.5px;line-height:1.04;margin:16px 0 13px;overflow-wrap:anywhere}
+.name-typed{display:block;animation:type-name .65s steps(var(--letters,12),end) .4s both}
+.detail{position:relative;z-index:1;font-size:22px;line-height:1.4;font-weight:500}
+.deco{position:absolute;pointer-events:none}
+.unlock-badge{position:absolute;right:24px;top:23px;font:700 11px/1.3 monospace;letter-spacing:1px}
+.demo-label{position:absolute;right:54px;bottom:-20px;font:700 9px/1 monospace;letter-spacing:2px;color:#d4d9d9;background:#172027c9;padding:5px 8px}
+
+/* Default: clean streetwear tag, warm paper, strong ink typography. */
+.default .card{background:#f4f0e8;color:#171d22;border:2px solid #20282b;border-radius:2px;box-shadow:8px 8px 0 #18222855}
+.default .card:before{content:"";position:absolute;top:0;left:0;bottom:0;width:7px;background:var(--event)}
+.default .event-icon{background:#1c2428;color:#f4f0e8}
+.default .event-type{color:#454b4c;font-size:13px;letter-spacing:2.5px}
+.default .detail{color:#545b5d}
+.default .deco-0{width:46px;height:5px;right:33px;top:30px;background:var(--event)}
+.default .deco-1{width:26px;height:3px;right:33px;bottom:25px;background:#20282b}
+.default .deco-2{width:3px;height:26px;right:33px;bottom:25px;background:#20282b}
+.default .unlock-badge{color:#684b28;right:33px;top:44px}
+.default[data-event=resub]{--event:#bf9d6c}
+.default[data-event=gift]{--event:#b988a6}
+.default[data-event=cheer]{--event:#d6b33d}
+.default[data-event=raid]{--event:#72a9a5}
+.default[data-event=follow]{--event:#b8ce77}
+
+/* Gaming: neon HUD framing, layered color offsets and a restrained vaporwave grid. */
+.gaming{--event:#30f1ee}
+.gaming .card{background:linear-gradient(118deg,#120c29f8,#21103df8);color:#fff4ff;border:2px solid #ff51dc;box-shadow:7px 7px 0 #25e9ee,0 0 28px #b72aff33;clip-path:polygon(0 0,95% 0,100% 12%,100% 100%,5% 100%,0 88%)}
+.gaming .card:before{content:"";position:absolute;inset:0;z-index:-1;opacity:.2;background-image:linear-gradient(#bd49ff35 1px,transparent 1px),linear-gradient(90deg,#bd49ff35 1px,transparent 1px);background-size:24px 24px;mask-image:linear-gradient(90deg,transparent,#000)}
+.gaming .card:after{content:"";position:absolute;inset:7px;border-top:1px solid #3fe8ed88;border-bottom:1px solid #f647d78c;pointer-events:none}
+.gaming .eyebrow{color:var(--event);font-family:"Courier New",monospace;font-weight:900;letter-spacing:3px}
+.gaming .event-icon{color:#170d29;background:var(--event);box-shadow:3px 3px 0 #f047cf}
+.gaming .viewer-name{text-shadow:3px 0 0 #e831d5,-2px 0 0 #2be7ef,0 0 22px #bc36df44}
+.gaming .detail{color:#d7c4f0;font-family:"Courier New",monospace;font-size:20px;letter-spacing:-.4px}
+.gaming .deco-0{right:30px;top:25px;width:28px;height:7px;background:#ff51dc;box-shadow:-9px 10px 0 -2px #3de5ee}
+.gaming .deco-1{right:22px;bottom:22px;width:54px;height:4px;background:repeating-linear-gradient(90deg,#2ee3e9 0 4px,transparent 4px 8px)}
+.gaming .deco-2{left:16px;bottom:18px;width:4px;height:24px;background:#ed47da}
+.gaming .unlock-badge{color:#f4dc74;top:45px;right:30px}
+.gaming[data-event=resub]{--event:#ed8bff}
+.gaming[data-event=gift]{--event:#ff76bc}
+.gaming[data-event=cheer]{--event:#e5ff55}
+.gaming[data-event=raid]{--event:#28f2dc}
+.gaming[data-event=follow]{--event:#72ffb9}
+
+/* Rigid sprite motion: translations on steps; no rotation, skew or elastic scaling. */
+.arrival .bot-wrap{animation:robot-enter .65s steps(5,end) both}
+.arrival .arm-right{animation:servo .8s steps(2,end) 1s 2}
+.surge .bot-wrap{animation:charge .32s steps(2,end) .2s 4}
+.surge .chest-light{animation:power .4s steps(2,end) 5 alternate}
+.energy-ring{position:absolute;inset:35% 8% 18%;border:3px solid var(--event);opacity:0;animation:energy 1.1s steps(4,end) .3s 2;pointer-events:none}
+.energy-ring:nth-child(2){inset:28% 0 12%;animation-delay:.55s}
+.parade{width:1100px;flex-direction:column;gap:8px}
+.parade .parade-bots{display:flex;align-items:flex-end;justify-content:center;width:100%;height:230px}
+.parade .bot-wrap{width:150px;height:195px;margin:0 -6px;animation:robot-enter .9s steps(7,end) both;animation-delay:calc(var(--i)*.1s)}
+.parade .bot-wrap:first-child{width:180px;height:234px;z-index:3}
+.parade .leg-left{animation:march-foot .48s steps(2,end) infinite alternate}
+.parade .leg-right{animation:march-foot .48s steps(2,end) .24s infinite alternate}
+.parade .card{width:680px;min-height:220px;text-align:center;padding-top:28px;padding-bottom:28px}
+.parade .eyebrow{justify-content:center}
+.parade .viewer-name{margin:12px 0}
+.exiting{animation:card-exit .35s steps(4,end) forwards!important}
+#connection{position:absolute;bottom:10px;left:10px;font:11px monospace;color:#d1d9d2;background:#1b2525;padding:6px 10px}
+@keyframes card-enter{from{opacity:0;margin-bottom:-18px}to{opacity:1;margin-bottom:0}}
+@keyframes robot-enter{from{opacity:0;translate:-120px 0}to{opacity:1;translate:0 0}}
+@keyframes servo{0%,100%{translate:0 0}50%{translate:0 -2px}}
+@keyframes charge{0%,100%{translate:0 0}50%{translate:0 -4px}}
+@keyframes power{from{opacity:.55}to{opacity:1}}
+@keyframes energy{0%{opacity:0;translate:0 12px}25%{opacity:.7}100%{opacity:0;translate:0 -18px}}
+@keyframes march-foot{from{translate:0 0}to{translate:0 -2px}}
+@keyframes card-exit{to{opacity:0;margin-bottom:12px}}
+@keyframes type-name{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 0 0 0)}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;animation-delay:0ms!important;animation-iteration-count:1!important}}

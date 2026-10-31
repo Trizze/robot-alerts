@@ -1,0 +1,476 @@
+{
+  "status": "reviewable tier candidates; not yet integrated into progression or overlay",
+  "thresholds": [
+    10,
+    100,
+    250,
+    500,
+    1000
+  ],
+  "patterns": [
+    {
+      "id": "denim_fabric_06",
+      "name": "Denim Fabric 06",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/denim_fabric_06.jpg",
+      "source": "https://polyhaven.com/a/denim_fabric_06",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fabric_pattern_05",
+      "name": "Fabric Pattern 05",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/fabric_pattern_05.jpg",
+      "source": "https://polyhaven.com/a/fabric_pattern_05",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "brown_leather",
+      "name": "Brown Leather",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/brown_leather.jpg",
+      "source": "https://polyhaven.com/a/brown_leather",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "blue_painted_planks",
+      "name": "Blue Painted Planks",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/blue_painted_planks.jpg",
+      "source": "https://polyhaven.com/a/blue_painted_planks",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "marble_01",
+      "name": "Marble 01",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/marble_01.jpg",
+      "source": "https://polyhaven.com/a/marble_01",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "rusty_metal_02",
+      "name": "Rusty Metal 02",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/rusty_metal_02.jpg",
+      "source": "https://polyhaven.com/a/rusty_metal_02",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "denim_fabric_03",
+      "name": "Denim Fabric 03",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/denim_fabric_03.jpg",
+      "source": "https://polyhaven.com/a/denim_fabric_03",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "fabric_pattern_07",
+      "name": "Fabric Pattern 07",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/fabric_pattern_07.jpg",
+      "source": "https://polyhaven.com/a/fabric_pattern_07",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "leather_red_02",
+      "name": "Leather Red 02",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/leather_red_02.jpg",
+      "source": "https://polyhaven.com/a/leather_red_02",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "green_metal_rust",
+      "name": "Green Metal Rust",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/green_metal_rust.jpg",
+      "source": "https://polyhaven.com/a/green_metal_rust",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "blue_metal_plate",
+      "name": "Blue Metal Plate",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/blue_metal_plate.jpg",
+      "source": "https://polyhaven.com/a/blue_metal_plate",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "quatrefoil_jacquard_fabric",
+      "name": "Quatrefoil Jacquard Fabric",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/quatrefoil_jacquard_fabric.jpg",
+      "source": "https://polyhaven.com/a/quatrefoil_jacquard_fabric",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "metal_plate_02",
+      "name": "Metal Plate 02",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/metal_plate_02.jpg",
+      "source": "https://polyhaven.com/a/metal_plate_02",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "rusty_metal_04",
+      "name": "Rusty Metal 04",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/rusty_metal_04.jpg",
+      "source": "https://polyhaven.com/a/rusty_metal_04",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "leather_white",
+      "name": "Leather White",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/leather_white.jpg",
+      "source": "https://polyhaven.com/a/leather_white",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "marble_tiles",
+      "name": "Marble Tiles",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/marble_tiles.jpg",
+      "source": "https://polyhaven.com/a/marble_tiles",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "terrazzo_tiles",
+      "name": "Terrazzo Tiles",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/terrazzo_tiles.jpg",
+      "source": "https://polyhaven.com/a/terrazzo_tiles",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "rosewood_veneer1",
+      "name": "Rosewood Veneer1",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/rosewood_veneer1.jpg",
+      "source": "https://polyhaven.com/a/rosewood_veneer1",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "marble_mosaic_tiles",
+      "name": "Marble Mosaic Tiles",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/marble_mosaic_tiles.jpg",
+      "source": "https://polyhaven.com/a/marble_mosaic_tiles",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "lacquered_cherry_wood",
+      "name": "Lacquered Cherry Wood",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/lacquered_cherry_wood.jpg",
+      "source": "https://polyhaven.com/a/lacquered_cherry_wood",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "metal_grate_rusty",
+      "name": "Metal Grate Rusty",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/metal_grate_rusty.jpg",
+      "source": "https://polyhaven.com/a/metal_grate_rusty",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "black_painted_planks",
+      "name": "Black Painted Planks",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/black_painted_planks.jpg",
+      "source": "https://polyhaven.com/a/black_painted_planks",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "blue_floor_tiles_01",
+      "name": "Blue Floor Tiles 01",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/blue_floor_tiles_01.jpg",
+      "source": "https://polyhaven.com/a/blue_floor_tiles_01",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "dark_paneled_wood",
+      "name": "Dark Paneled Wood",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/dark_paneled_wood.jpg",
+      "source": "https://polyhaven.com/a/dark_paneled_wood",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "rusty_metal_05",
+      "name": "Rusty Metal 05",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/rusty_metal_05.jpg",
+      "source": "https://polyhaven.com/a/rusty_metal_05",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "marble_cliff_03",
+      "name": "Marble Cliff 03",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/marble_cliff_03.jpg",
+      "source": "https://polyhaven.com/a/marble_cliff_03",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "leather_red_03",
+      "name": "Leather Red 03",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/leather_red_03.jpg",
+      "source": "https://polyhaven.com/a/leather_red_03",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "marble_rock_03",
+      "name": "Marble Rock 03",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/marble_rock_03.jpg",
+      "source": "https://polyhaven.com/a/marble_rock_03",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "rusty_metal_grid",
+      "name": "Rusty Metal Grid",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/rusty_metal_grid.jpg",
+      "source": "https://polyhaven.com/a/rusty_metal_grid",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "marble_cliff_05",
+      "name": "Marble Cliff 05",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/marble_cliff_05.jpg",
+      "source": "https://polyhaven.com/a/marble_cliff_05",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "floral_jacquard",
+      "name": "Floral Jacquard",
+      "tier": 4,
+      "texture": "/assets/third-party/poly-haven-materials/floral_jacquard.jpg",
+      "source": "https://polyhaven.com/a/floral_jacquard",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "floor_pattern_01",
+      "name": "Floor Pattern 01",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/floor_pattern_01.jpg",
+      "source": "https://polyhaven.com/a/floor_pattern_01",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "floor_pattern_02",
+      "name": "Floor Pattern 02",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/floor_pattern_02.jpg",
+      "source": "https://polyhaven.com/a/floor_pattern_02",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "patterned_slate_tiles",
+      "name": "Patterned Slate Tiles",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/patterned_slate_tiles.jpg",
+      "source": "https://polyhaven.com/a/patterned_slate_tiles",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "patterned_terracotta_tiling",
+      "name": "Patterned Terracotta Tiling",
+      "tier": 2,
+      "texture": "/assets/third-party/poly-haven-materials/patterned_terracotta_tiling.jpg",
+      "source": "https://polyhaven.com/a/patterned_terracotta_tiling",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "velour_velvet",
+      "name": "Velour Velvet",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/velour_velvet.jpg",
+      "source": "https://polyhaven.com/a/velour_velvet",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "crepe_satin",
+      "name": "Crepe Satin",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/crepe_satin.jpg",
+      "source": "https://polyhaven.com/a/crepe_satin",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "gingham_check",
+      "name": "Gingham Check",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/gingham_check.jpg",
+      "source": "https://polyhaven.com/a/gingham_check",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "curly_teddy_checkered",
+      "name": "Curly Teddy Checkered",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/curly_teddy_checkered.jpg",
+      "source": "https://polyhaven.com/a/curly_teddy_checkered",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "poly_wool_herringbone",
+      "name": "Poly Wool Herringbone",
+      "tier": 3,
+      "texture": "/assets/third-party/poly-haven-materials/poly_wool_herringbone.jpg",
+      "source": "https://polyhaven.com/a/poly_wool_herringbone",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "patterned_plaster_wall",
+      "name": "Patterned Plaster Wall",
+      "tier": 1,
+      "texture": "/assets/third-party/poly-haven-materials/patterned_plaster_wall.jpg",
+      "source": "https://polyhaven.com/a/patterned_plaster_wall",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "black_and_gold_marble",
+      "name": "Black And Gold Marble",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/black-and-gold-marble.jpg",
+      "source": "https://www.meshy.ai/textures/marble/black-and-gold-marble",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "gold_leaf_gilding",
+      "name": "Gold Leaf Gilding",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/gold-leaf-gilding.jpg",
+      "source": "https://www.meshy.ai/textures/metal/gold-leaf-gilding",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "polished_gold_metal",
+      "name": "Polished Gold Metal",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/polished-gold-metal.jpg",
+      "source": "https://www.meshy.ai/textures/metal/polished-gold-metal",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "calacatta_gold_marble",
+      "name": "Calacatta Gold Marble",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/calacatta-gold-marble.jpg",
+      "source": "https://www.meshy.ai/textures/marble/calacatta-gold-marble",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "black_marquina_marble",
+      "name": "Black Marquina Marble",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/black-marquina-marble.jpg",
+      "source": "https://www.meshy.ai/textures/marble/black-marquina-marble",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "crinkled_gold_foil",
+      "name": "Crinkled Gold Foil",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/crinkled-gold-foil.jpg",
+      "source": "https://www.meshy.ai/textures/metal/crinkled-gold-foil",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "green_verde_marble",
+      "name": "Green Verde Marble",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/green-verde-marble.jpg",
+      "source": "https://www.meshy.ai/textures/marble/green-verde-marble",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "rose_gold_foil",
+      "name": "Rose Gold Foil",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/rose-gold-foil.jpg",
+      "source": "https://www.meshy.ai/textures/metal/rose-gold-foil",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "gold_glitter",
+      "name": "Gold Glitter",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/gold-glitter.jpg",
+      "source": "https://www.meshy.ai/textures/metal/gold-glitter",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "blue_green_agate",
+      "name": "Blue Green Agate",
+      "tier": 5,
+      "texture": "/assets/third-party/meshy-materials/blue-green-agate.jpg",
+      "source": "https://www.meshy.ai/textures/marble/blue-green-agate",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "yellow_geometric_mosaic_floor",
+      "name": "Yellow Geometric Mosaic Floor",
+      "tier": 4,
+      "texture": "/assets/third-party/meshy-materials/yellow-geometric-mosaic-floor.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/yellow-geometric-mosaic-floor",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "blue_painted_ceramic_tiles",
+      "name": "Blue Painted Ceramic Tiles",
+      "tier": 4,
+      "texture": "/assets/third-party/meshy-materials/blue-painted-ceramic-tiles.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/blue-painted-ceramic-tiles",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "black_and_white_graphic_marble_tiles",
+      "name": "Black And White Graphic Marble Tiles",
+      "tier": 4,
+      "texture": "/assets/third-party/meshy-materials/black-and-white-graphic-marble-tiles.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/black-and-white-graphic-marble-tiles",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "blue_pool_mosaic",
+      "name": "Blue Pool Mosaic",
+      "tier": 4,
+      "texture": "/assets/third-party/meshy-materials/blue-pool-mosaic.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/blue-pool-mosaic",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "white_hexagon_mosaic",
+      "name": "White Hexagon Mosaic",
+      "tier": 4,
+      "texture": "/assets/third-party/meshy-materials/white-hexagon-mosaic.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/white-hexagon-mosaic",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "green_marble_pattern_tiles",
+      "name": "Green Marble Pattern Tiles",
+      "tier": 4,
+      "texture": "/assets/third-party/meshy-materials/green-marble-pattern-tiles.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/green-marble-pattern-tiles",
+      "license": "CC0-1.0"
+    },
+    {
+      "id": "blue_glossy_mosaic",
+      "name": "Blue Glossy Mosaic",
+      "tier": 4,
+      "texture": "/assets/third-party/meshy-materials/blue-glossy-mosaic.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/blue-glossy-mosaic",
+      "license": "CC0-1.0"
+    }
+  ]
+}

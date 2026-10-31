@@ -1,0 +1,144 @@
+{
+  "status": "candidate study; final tier allocation not approved",
+  "textures": [
+    {
+      "id": "floral_jacquard",
+      "name": "Floral Jacquard",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/floral_jacquard",
+      "license": "CC0-1.0",
+      "file": "floral_jacquard.jpg",
+      "tier": 5
+    },
+    {
+      "id": "quatrefoil_jacquard_fabric",
+      "name": "Quatrefoil Jacquard Fabric",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/quatrefoil_jacquard_fabric",
+      "license": "CC0-1.0",
+      "file": "quatrefoil_jacquard_fabric.jpg",
+      "tier": 5
+    },
+    {
+      "id": "floor_pattern_01",
+      "name": "Floor Pattern 01",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/floor_pattern_01",
+      "license": "CC0-1.0",
+      "file": "floor_pattern_01.jpg",
+      "tier": 5
+    },
+    {
+      "id": "floor_pattern_02",
+      "name": "Floor Pattern 02",
+      "authors": [
+        "Rob Tuytel"
+      ],
+      "source": "https://polyhaven.com/a/floor_pattern_02",
+      "license": "CC0-1.0",
+      "file": "floor_pattern_02.jpg",
+      "tier": 5
+    },
+    {
+      "id": "patterned_slate_tiles",
+      "name": "Patterned Slate Tiles",
+      "authors": [
+        "Dimitrios Savva"
+      ],
+      "source": "https://polyhaven.com/a/patterned_slate_tiles",
+      "license": "CC0-1.0",
+      "file": "patterned_slate_tiles.jpg",
+      "tier": 5
+    },
+    {
+      "id": "patterned_terracotta_tiling",
+      "name": "Patterned Terracotta Tiling",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/patterned_terracotta_tiling",
+      "license": "CC0-1.0",
+      "file": "patterned_terracotta_tiling.jpg",
+      "tier": 5
+    },
+    {
+      "id": "velour_velvet",
+      "name": "Velour Velvet",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/velour_velvet",
+      "license": "CC0-1.0",
+      "file": "velour_velvet.jpg",
+      "tier": 5
+    },
+    {
+      "id": "crepe_satin",
+      "name": "Crepe Satin",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/crepe_satin",
+      "license": "CC0-1.0",
+      "file": "crepe_satin.jpg",
+      "tier": 5
+    },
+    {
+      "id": "gingham_check",
+      "name": "Gingham Check",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/gingham_check",
+      "license": "CC0-1.0",
+      "file": "gingham_check.jpg",
+      "tier": 5
+    },
+    {
+      "id": "curly_teddy_checkered",
+      "name": "Curly Teddy Checkered",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/curly_teddy_checkered",
+      "license": "CC0-1.0",
+      "file": "curly_teddy_checkered.jpg",
+      "tier": 5
+    },
+    {
+      "id": "poly_wool_herringbone",
+      "name": "Poly Wool Herringbone",
+      "authors": [
+        "colormass",
+        "Rico Cilliers"
+      ],
+      "source": "https://polyhaven.com/a/poly_wool_herringbone",
+      "license": "CC0-1.0",
+      "file": "poly_wool_herringbone.jpg",
+      "tier": 5
+    },
+    {
+      "id": "patterned_plaster_wall",
+      "name": "Patterned Plaster Wall",
+      "authors": [
+        "Amal Kumar"
+      ],
+      "source": "https://polyhaven.com/a/patterned_plaster_wall",
+      "license": "CC0-1.0",
+      "file": "patterned_plaster_wall.jpg",
+      "tier": 5
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "name": "robot-alerts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Your community, built one robot at a time.",
+  "engines": {
+    "node": ">=22.16.0"
+  },
+  "scripts": {
+    "start": "node --env-file-if-exists=.env scripts/start.js",
+    "setup": "node scripts/setup.js",
+    "demo": "node scripts/start.js --demo",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "gsap": "3.13.0",
+    "ws": "8.18.3"
+  }
+}

@@ -1,0 +1,27 @@
+.theme-switch{display:flex;gap:3px;padding:4px;margin-top:29px;border:1px solid #ffffff15;border-radius:7px;background:#0d1511}
+.theme-switch button{flex:1;border:0;border-radius:4px;padding:8px 7px;font-size:10px;font-weight:650;background:transparent;color:#879a8c}
+.theme-switch button[aria-pressed=true]{background:#eae5d8;color:#212a2c}
+.theme-switch button:hover{color:#d4dfcb}
+.theme-switch button[aria-pressed=true]:hover{color:#212a2c}
+.workspace-label{margin-top:25px}
+.event-buttons{grid-template-columns:repeat(6,minmax(0,1fr))}
+body[data-theme=gaming]{background:#100e1c}
+body[data-theme=gaming] .sidebar{background:#151123;border-color:#b05dff24}
+body[data-theme=gaming] .panel{background:#1b162b;border-color:#bd59ff21}
+body[data-theme=gaming] .theme-switch{background:#100b1f;border-color:#a546eb55}
+body[data-theme=gaming] .theme-switch button[aria-pressed=true]{background:#d488ff;color:#20102c;box-shadow:2px 2px 0 #39d4df}
+body[data-theme=gaming] .nav.active{color:#d9b4ff;background:#b153ff19}
+body[data-theme=gaming] .brand-icon{border-color:#e08aff;color:#e08aff}
+body[data-theme=gaming] .brand-icon:after{background:#3ce6df}
+body[data-theme=gaming] .button.primary{background:#d488ff;color:#1e102b;box-shadow:3px 3px 0 #36cdd4}
+body[data-theme=gaming] .button.secondary{background:#2b2042;border-color:#9a64b333}
+body[data-theme=gaming] .preview-world{background:radial-gradient(ellipse at 50% 45%,#ac32d43b,transparent 60%),linear-gradient(#171127,#27133e)}
+body[data-theme=gaming] .world-horizon{border-color:#fa49d970;background:repeating-linear-gradient(0deg,transparent 0 23px,#ad39cb33 23px 24px),repeating-linear-gradient(90deg,transparent 0 39px,#3ae6eb22 39px 40px),#1a0f2d;transform:none}
+body[data-theme=gaming] .world-dot{border-color:#b259e34d}
+body[data-theme=gaming] .url-field,body[data-theme=gaming] .command-panel input,body[data-theme=gaming] .command-panel select{background:#110d1d;border-color:#bd59ff20}
+body[data-theme=gaming] .mode-tag{color:#d4aff0;border-color:#b573da44}
+body[data-theme=gaming] .install-panel{background:radial-gradient(ellipse at 100% 0,#c83df41c,transparent 70%),#21172f}
+body[data-theme=gaming] .event-buttons button:hover{background:#bb57e918;border-color:#d989ff55}
+body[data-theme=gaming] h1 em{color:#caa2ec}
+@media(max-width:1200px){.event-buttons{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:680px){.sidebar{flex-wrap:wrap;gap:15px}.theme-switch{order:3;flex-basis:100%;margin:0}.theme-switch button{padding:9px}.event-buttons{grid-template-columns:repeat(3,minmax(0,1fr))}}

@@ -1,0 +1,61 @@
+{
+  "status": "preview candidates",
+  "textures": [
+    {
+      "id": "yellow_geometric_mosaic_floor",
+      "name": "Yellow Geometric Mosaic Floor",
+      "file": "yellow-geometric-mosaic-floor.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/yellow-geometric-mosaic-floor",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "blue_painted_ceramic_tiles",
+      "name": "Blue Painted Ceramic Tiles",
+      "file": "blue-painted-ceramic-tiles.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/blue-painted-ceramic-tiles",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "black_and_white_graphic_marble_tiles",
+      "name": "Black And White Graphic Marble Tiles",
+      "file": "black-and-white-graphic-marble-tiles.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/black-and-white-graphic-marble-tiles",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "blue_pool_mosaic",
+      "name": "Blue Pool Mosaic",
+      "file": "blue-pool-mosaic.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/blue-pool-mosaic",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "white_hexagon_mosaic",
+      "name": "White Hexagon Mosaic",
+      "file": "white-hexagon-mosaic.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/white-hexagon-mosaic",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "green_marble_pattern_tiles",
+      "name": "Green Marble Pattern Tiles",
+      "file": "green-marble-pattern-tiles.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/green-marble-pattern-tiles",
+      "license": "CC0-1.0",
+      "tier": 5
+    },
+    {
+      "id": "blue_glossy_mosaic",
+      "name": "Blue Glossy Mosaic",
+      "file": "blue-glossy-mosaic.jpg",
+      "source": "https://www.meshy.ai/textures/tiles/blue-glossy-mosaic",
+      "license": "CC0-1.0",
+      "tier": 5
+    }
+  ]
+}

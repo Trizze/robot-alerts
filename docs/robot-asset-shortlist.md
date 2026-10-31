@@ -1,0 +1,20 @@
+# Robot asset shortlist
+
+Latest decision: build the original angular modular CRT design; do not use Foozle as inspiration. This shortlist is retained as research only.
+
+Prices and license statements were checked on the creator pages during this research. No pack has been purchased, imported or substituted for the placeholder rig.
+
+| Candidate | Listed price | What it supplies | Permissions and project fit |
+| --- | --- | --- | --- |
+| [Cute Platformer Robot — Foozle](https://foozlecc.itch.io/cute-platformer-robot) | Free / optional donation | Four animations (idle, jump, walk, run), plus separated sprite parts. Commissioned from mayakhan95; listing marks no generative AI. | CC0, explicitly including commercial use and modifications, with no attribution required. Strongest 2D starting point here for part-based animation. Eight directions, CRT head and dance would need adaptation; they are not advertised as supplied. |
+| [Robot character — styloo](https://styloo.itch.io/robot-character) | Free FBX/glTF; Blender source $0.50 minimum | Rigged 3D robot, 11 animations and material maps. Listing marks no generative AI. | Listing specifies CC0. Useful for genuine depth and eight camera directions, but changing to a 3D workflow or pre-rendering sprites is a separate decision. Requires CRT modification and our crash/dance choreography. Source is a cheap paid option for editing. |
+| [Animated Robot Pack — Quaternius](https://quaternius.com/packs/animatedrobot.html) | Free | One cute animated robot in FBX, OBJ and Blender formats. | Creator specifies CC0 and personal/commercial use. Another 3D foundation for eight views; not a ready-made CRT cosmetics system. |
+| [Droid Workshop — imaya zing](https://imayazing.itch.io/droid) | $5.99 minimum | Nearly 50 modular layers, six body types, individual PNG parts and an avatar-creation web app. Creator explicitly describes human-created pixel art without generative AI. | Custom license permits commercial use and modifications and calls for credit, while prohibiting resale. It does not clearly grant redistributing editable layers in our self-hosted source repo. Obtain creator permission for that distribution before importing. Eight-direction animated coverage is not confirmed. |
+
+| [SciFi Pixel Robot Characters — Valettus](https://valettus.itch.io/robot-characters) | $1.50 minimum | Two animated pixel-art robots, Eye-Bot and Grasshopper Bot, with multiple movement/combat states. Listing marks no generative AI. | Custom license permits personal/commercial projects and modifications but prohibits distributing the assets as-is or modified on their own or in asset collections. Do not bundle editable source assets in the self-hosted repo without clarifying permission. Eight-direction coverage and CRT heads are not supplied as confirmed features. |
+
+CC0 is the cleanest fit for a downloadable self-hosted project because it permits copying, modifying and distributing the artwork, including commercially: [CC0 deed](https://creativecommons.org/publicdomain/zero/1.0/). Keep provenance and the downloaded license with any assets we actually select. A marketplace listing alone does not establish that a pack includes the required animation angles or replaceable parts.
+
+My technical shortlist is Foozle for a 2D rig, or styloo if genuine 3D depth is the desired style. These are starting assets, not drop-in replacements for our CRT profile display, eight views, variable-length replacement limbs and bespoke alert animations. The current renderer stays a placeholder until the user chooses the art direction.
+
+If requesting permission for a paid pack, the creator needs to know that Robot Alerts is a self-hosted Twitch overlay distributed as source, that modified image/part files are delivered with it, and that viewers can equip those parts. Ask specifically about bundling those editable files, commercial streams, redistribution to every installer, and attribution. Do not assume commercial-game permission covers all of this.

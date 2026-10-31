@@ -1,0 +1,4 @@
+.preview-transport{position:fixed;left:24px;bottom:24px;display:flex;align-items:center;gap:10px;max-width:calc(100vw - 48px);padding:12px 14px;border-radius:10px;background:#18211f;color:#f3f5f4;box-shadow:0 6px 24px #0007;font:14px system-ui,sans-serif;z-index:2}
+.preview-transport button{font:inherit;color:#15201d;background:#e5f0eb;border:0;border-radius:5px;padding:8px 11px;cursor:pointer}
+.preview-transport input[type=range]{width:min(32vw,360px);min-width:100px;accent-color:#8ccab2;cursor:pointer}
+.preview-transport output{min-width:88px;font-variant-numeric:tabular-nums}
