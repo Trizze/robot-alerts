@@ -125,14 +125,18 @@ function service(path) {
 async function request(path, options = {}) {
   const response = await fetch(service(path), {
     credentials: "include",
+    signal: AbortSignal.timeout(12000),
     ...options,
   });
-  if (!response.ok)
-    throw new Error(
+  if (!response.ok) {
+    const failure = new Error(
       response.status === 401
         ? "Please sign in first."
         : "The service could not complete that request.",
     );
+    failure.status = response.status;
+    throw failure;
+  }
   return response.status === 204 ? null : response.json();
 }
 function error(message) {
@@ -693,6 +697,18 @@ $("#disconnect").addEventListener("click", async () => {
     error(e.message);
   }
 });
+async function loadAccount() {
+  $("#account-status").textContent = "Checking sign-in…";
+  try {
+    const data = await request("/api/me");
+    setViewer(data);
+  } catch (failure) {
+    setViewer(null);
+    if (failure.status !== 401)
+      error("Could not check your sign-in. Please refresh and try again.");
+  }
+}
+const accountReady = loadAccount();
 try {
   const r = await fetch("./patterns/catalog.json");
   if (!r.ok) throw Error();
@@ -701,10 +717,5 @@ try {
 } catch {
   error("The pattern catalog could not be loaded.");
 }
-await loadEmotes();
-try {
-  const data = await request("/api/me");
-  setViewer(data);
-} catch {
-  setViewer(null);
-}
+void loadEmotes();
+await accountReady;
