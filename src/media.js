@@ -1,4 +1,5 @@
 import { ValidationError } from './errors.js';
+import { mediaDirectory } from './paths.js';
 import { mkdir, readFile, writeFile, readdir, stat, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -16,17 +17,17 @@ export async function saveMedia(req) {
   for await(const chunk of req){size+=chunk.length;if(size>limit)throw new ValidationError('File exceeds 25 MB.');chunks.push(chunk);}
   const bytes=Buffer.concat(chunks), match=signatures.find(([,,check])=>check(bytes));
   if(!match||bytes.length<12)throw new ValidationError('Use an MP4, WebM, GIF, PNG, JPG or WebP file.');
-  const name=`${randomUUID()}.${match[0]}`;await mkdir('data/media',{recursive:true});await writeFile(`data/media/${name}`,bytes,{flag:'wx'});return `/media/${name}`;
+  const name=`${randomUUID()}.${match[0]}`;await mkdir(mediaDirectory,{recursive:true});await writeFile(join(mediaDirectory,name),bytes,{flag:'wx'});return `/media/${name}`;
 }
 export async function getMedia(name){
   if(!/^[a-f0-9-]{36}\.(png|jpg|gif|webp|mp4|webm)$/.test(name))return null;
   const type=signatures.find(([ext])=>name.endsWith(`.${ext}`))?.[1];
-  try{return {bytes:await readFile(`data/media/${name}`),type};}catch{return null;}
+  try{return {bytes:await readFile(join(mediaDirectory,name)),type};}catch{return null;}
 }
 
 // Only old, unreferenced uploads are removed; the grace period protects uploads
 // that are still being configured in another open settings tab.
-export async function cleanupMedia(references, { directory='data/media', now=Date.now(), graceMs=86400000 } = {}) {
+export async function cleanupMedia(references, { directory=mediaDirectory, now=Date.now(), graceMs=86400000 } = {}) {
   const keep=new Set(references); let files;
   try { files=await readdir(directory,{withFileTypes:true}); } catch(error) { if(error.code==='ENOENT') return; throw error; }
   for(const file of files) {

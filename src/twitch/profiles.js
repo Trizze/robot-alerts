@@ -1,9 +1,10 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { deleteAvatarFiles } from '../avatar-files.js';
+import { avatarDirectory } from '../paths.js';
 
 export class Profiles {
-  constructor(api, store, channel) { this.api = api; this.store = store; this.channel = channel; this.cache = new Map(); this.pending = new Map(); this.avatarPending = new Map(); this.deleting = new Set(); this.generations = new Map(); }
+  constructor(api, store, channel, {avatarDir=avatarDirectory}={}) { this.api = api; this.store = store; this.channel = channel; this.avatarDir = avatarDir; this.cache = new Map(); this.pending = new Map(); this.avatarPending = new Map(); this.deleting = new Set(); this.generations = new Map(); }
   async enrich(event) {
     if (!event.viewer?.id) return;
     const id = event.viewer.id;
@@ -40,7 +41,7 @@ export class Profiles {
   }
   async deleteCachedAvatar(id) {
     this.deleting.add(id); this.generations.set(id,(this.generations.get(id) || 0)+1);
-    try { await Promise.allSettled([...(this.avatarPending.get(id) || []),...(this.pending.has(id) ? [this.pending.get(id)] : [])]); await deleteAvatarFiles(id); this.cache.delete(id); }
+    try { await Promise.allSettled([...(this.avatarPending.get(id) || []),...(this.pending.has(id) ? [this.pending.get(id)] : [])]); await deleteAvatarFiles(id,this.avatarDir); this.cache.delete(id); }
     finally { this.deleting.delete(id); }
   }
   async downloadAvatar(id, src) {
@@ -55,7 +56,7 @@ export class Profiles {
       if (!response.ok || !extensions[type] || Number(response.headers.get('content-length')) > 1048576) return null;
       const reader = response.body.getReader(); const chunks = []; let size = 0;
       while (true) { const { value, done } = await reader.read(); if (done) break; size += value.byteLength; if (size > 1048576) { await reader.cancel(); return null; } chunks.push(Buffer.from(value)); }
-      await mkdir('data/avatars', { recursive: true }); await writeFile(join('data/avatars', `${id}.${extensions[type]}`), Buffer.concat(chunks));
+      await mkdir(this.avatarDir, { recursive: true }); await writeFile(join(this.avatarDir, `${id}.${extensions[type]}`), Buffer.concat(chunks));
       return `/avatars/${id}.${extensions[type]}`;
     } catch { return null; }
   }

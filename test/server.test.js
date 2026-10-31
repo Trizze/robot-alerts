@@ -10,7 +10,7 @@ import { WebSocket } from 'ws';
 async function unusedPort() { const server = createServer(); await new Promise(resolve => server.listen(0, '127.0.0.1', resolve)); const port = server.address().port; await new Promise(resolve => server.close(resolve)); return port; }
 test('isolated demo serves UI, enforces origin/CSRF and delivers alerts over WebSocket', { timeout: 15000 }, async () => {
   const folder = await mkdtemp(join(tmpdir(), 'robot-server-test-')), port = await unusedPort(), base = `http://127.0.0.1:${port}`;
-  const child = spawn(process.execPath, [fileURLToPath(new URL('../src/server.js', import.meta.url))], { cwd: folder, env: { PATH: process.env.PATH, PORT: String(port) }, stdio: ['ignore', 'pipe', 'pipe'] });
+  const child = spawn(process.execPath, [fileURLToPath(new URL('../src/server.js', import.meta.url))], { cwd: folder, env: { PATH: process.env.PATH, PORT: String(port), ROBOT_DATA_DIR:join(folder,'data') }, stdio: ['ignore', 'pipe', 'pipe'] });
   let socket;
   try {
     await new Promise((resolve, reject) => { child.stdout.on('data', data => { if (String(data).includes('Robot Alerts · DEMO')) resolve(); }); child.once('exit', () => reject(new Error('Demo server exited before startup.'))); child.once('error', reject); });

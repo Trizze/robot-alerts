@@ -31,7 +31,7 @@ test('avatar deletion waits for in-flight downloads and blocks new ones', async 
  const dir=await mkdtemp(join(tmpdir(),'robot-profile-race-')),previous=process.cwd();let release;
  try {
   process.chdir(dir);await mkdir('data/avatars',{recursive:true});
-  const profiles=new Profiles({}, {}, '1');
+  const profiles=new Profiles({}, {}, '1',{avatarDir:join(dir,'data/avatars')});
   profiles.downloadAvatar=async id=>{await new Promise(resolve=>{release=resolve;});await writeFile(`data/avatars/${id}.png`,'image');return `/avatars/${id}.png`;};
   const pending=profiles.avatar('123','unused');await new Promise(resolve=>setImmediate(resolve));
   const deletion=profiles.deleteCachedAvatar('123');assert.equal(await profiles.avatar('123','unused'),null);

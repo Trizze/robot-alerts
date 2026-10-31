@@ -1,4 +1,6 @@
 import { ValidationError, classifyRequestError } from './errors.js';
+import { dataRoot, avatarDirectory } from './paths.js';
+import { join } from 'node:path';
 import { saveMedia, getMedia, cleanupMedia } from './media.js';
 import { deleteAvatarFiles } from './avatar-files.js';
 import { readJsonBody } from './http-body.js';
@@ -29,8 +31,8 @@ if (!demo && (!/^\d+$/.test(channel || '') || !/^\d+$/.test(process.env.TWITCH_B
 const port = Number(process.env.PORT || 3210);
 if (!Number.isInteger(port) || port < 1024 || port > 65535) throw new Error('PORT must be an integer between 1024 and 65535.');
 const host = '127.0.0.1';
-const store = new Store(demo ? 'data/demo.sqlite' : 'data/robots.sqlite');
-const demoStore = demo ? store : new Store('data/demo.sqlite');
+const store = new Store(join(dataRoot,demo ? 'demo.sqlite' : 'robots.sqlite'));
+const demoStore = demo ? store : new Store(join(dataRoot,'demo.sqlite'));
 seedDemo(demoStore);
 let twitch, profiles, validationTimer, replyTimer, replyBusy = false;
 const connections = { broadcaster: demo ? 'Demo only' : 'Not connected', bot: demo ? 'Demo only' : 'Not connected' };
@@ -134,7 +136,7 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method !== 'GET') return send(res, 405, { error: 'Method not allowed.' });
     if (/^\/avatars\/\d+\.(png|jpg|webp)$/.test(url.pathname)) {
-      try { return send(res, 200, await readFile(`data${url.pathname}`), mime['.' + url.pathname.split('.').pop()]); } catch { return send(res, 404, { error: 'Avatar unavailable.' }); }
+      try { return send(res, 200, await readFile(join(avatarDirectory,url.pathname.slice('/avatars/'.length))), mime['.' + url.pathname.split('.').pop()]); } catch { return send(res, 404, { error: 'Avatar unavailable.' }); }
     }
     let decoded; try { decoded=decodeURIComponent(url.pathname); } catch { throw new ValidationError('Invalid URL encoding.'); }
     const path = url.pathname === '/' || url.pathname === '/settings' ? 'settings/index.html' : url.pathname === '/overlay' ? 'overlay/index.html' : decoded.replace(/^\//, '');

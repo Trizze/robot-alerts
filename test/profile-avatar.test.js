@@ -17,7 +17,7 @@ test('avatar downloader requests 600px Twitch image and rejects foreign hosts', 
   try {
     process.chdir(dir);
     globalThis.fetch = async url => { requested = String(url); return new Response(new Uint8Array([1, 2, 3]), { headers: { 'Content-Type': 'image/png' } }); };
-    const profiles = new Profiles(null, null, 'channel');
+    const profiles = new Profiles(null, null, 'channel',{avatarDir:join(dir,'data/avatars')});
     assert.equal(await profiles.avatar('123', 'https://static-cdn.jtvnw.net/jtv_user_pictures/test-profile_image-300x300.png'), '/avatars/123.png');
     assert.equal(requested, 'https://static-cdn.jtvnw.net/jtv_user_pictures/test-profile_image-600x600.png');
     assert.deepEqual([...await readFile('data/avatars/123.png')], [1, 2, 3]);
