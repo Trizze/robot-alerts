@@ -1,6 +1,6 @@
 # Shared Robot Alerts service (work in progress)
 
-This is a separate service, not part of the static site or the current OBS overlay. It is not ready to expose publicly: Twitch OAuth and EventSub have not been tested against a real authorized channel, the overlay does not yet fetch or render selected patterns, and there is no operational recovery for revoked subscriptions. A streamer should not be told it is connected until the complete flow is verified.
+This separate service handles Twitch OAuth, points, channel settings and public read-only overlay events. The new `/robot/start/` onboarding flow and `/robot/overlay/` source are implemented and tested locally; production rollout and real-channel verification remain required. Hosted alerts currently support subs, resubs, gift summaries and cheers using the default rendered robot. Saved viewer patterns are not yet mapped onto the animated robot. Revoked channels are marked disconnected and their display streams close.
 
 The service uses SQLite on a persistent volume, encrypted broadcaster credentials, hashed expiring sessions, an award ledger and seven-day EventSub deduplication records. A scheduled hourly cleanup removes expired receipts and sessions. The container assumes a single process and one persistent volume; do not run multiple independent copies against different databases. Configure the reverse proxy to terminate HTTPS and avoid retaining request logs, IP addresses, user agents or authorization query strings. Backups and database access need the same deletion and confidentiality policy.
 
@@ -19,3 +19,9 @@ The frontend and service must share the same HTTPS origin: `https://trizze.tv/ro
 The service listens on `0.0.0.0` inside its container. Only the reverse proxy should reach port 8080: place the service on a private container network, or bind a published port to host loopback only. Do not expose port 8080 directly to the internet. `/healthz` is a minimal health probe. The Node base image is digest-pinned; update and review the pin deliberately to receive security fixes.
 
 Deleting viewer data ends all sessions for that Twitch user, including any streamer session. It does not disconnect the user’s channel; channel disconnection remains a separate action and removes that channel’s ledger contributions.
+
+## Streamer onboarding and hosted overlay
+
+The static `/robot/start/` flow connects a streamer, saves 720p/1080p/1440p preferences, provides the OBS source URL and previews the existing nine alert-box styles. Settings belong to the authenticated streamer only. The source uses the public numeric channel ID, never a token. `/overlay/<channel-id>/events` sends only public display data over SSE; other channel data and credentials are never exposed. An authenticated, origin-checked test endpoint sends visual test alerts without recording points, limited to one per ten seconds and requiring a connected source.
+
+Streams are capped at three per channel and 200 total, with backpressure disconnects and 25-second heartbeats. The browser queues at most twelve alerts and stops animation when idle. No Twitch polling is introduced. Settings changes push to the existing source. Streamer preferences are removed with their channel. Follow/raid delivery, live chat raid crowds, moving-robot pattern mapping and hosted uploads remain separate work; the local app and its renderer stay available.

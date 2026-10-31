@@ -1,5 +1,13 @@
 # Status — 2026-10-31
 
+## Streamer onboarding checkpoint (latest)
+
+- LIVE before this checkpoint: shared container on Hetzner `127.0.0.1:8100`, public `/robot/api/healthz` 204, root-only env created privately by user, Caddy `/robot/api/*` route installed with access logging disabled. Runtime about 27 MiB / 192 MiB; CPU 0.5. No credentials were read. Picker, examples pitch, button feedback and guarded deletion are published.
+- PREPARED, NOT DEPLOYED: Get started flow at `/robot/start/`: streamer OAuth → 720p/1080p/1440p source → OBS instructions/test → nine card presets and Default/Gaming. Channel-owned settings and bounded public SSE overlay stream, no tokens in source URLs, no points for tests. Static source staged in `~/robot-site`; dry run 134 files. New image `robot-alerts:onboarding` built from the existing local service image with no base pull; packaged health 204.
+- Verification: 97 overall tests, 29 shared-service tests passed. Browser wizard checked at desktop/mobile, source animation at 1280×720 / 1920×1080 / 2560×1440, cleanup after alerts. Card preview style corrected after visual inspection. Final regression rerun passed with the no-connected-source guard.
+- Deployment pending review of the expanded 134-file static list and renewing `universe-admin` (expired). Keep existing env/keys/data; replace only robot-alerts, retain rollback image, use `robot-deploy` for static publishing. Never use the universe application deploy commands for this project.
+- Remaining hosted milestones: real streamer OAuth/EventSub + OBS test, moving-robot pattern mapping (current hosted source uses default robot), follow/raid/chat crowd delivery and hosted custom uploads. Existing local renderer remains available. Resub renewal limitations still apply.
+
 ## Current shared-service update (supersedes older unresolved scope notes below)
 
 - Cross-channel milestone, local checkpoint: `shared-service/test/cross-channel.test.js` verifies signed events from two channels (15 + 10 points), retry deduplication, no gift-recipient award, one shared unlock/selection, no stored chat text, and recalculation after channel deletion. All 70 tests pass. This is a synthetic local proof; no real Twitch event or hosted service has been verified yet. Next checkpoint: deploy the service through the user's hosting setup and verify two channel authorizations and viewer login.
