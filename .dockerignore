@@ -1,0 +1,13 @@
+**
+!package.json
+!shared-service
+!shared-service/src
+!shared-service/src/**
+!src
+!src/robots
+!src/robots/pattern-points.js
+!src/twitch
+!src/twitch/normalize.js
+!website-staging
+!website-staging/patterns
+!website-staging/patterns/catalog.json

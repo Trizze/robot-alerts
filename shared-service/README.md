@@ -15,3 +15,5 @@ The website retrieves global Twitch emote names and animation metadata from the 
 ## Browser origin and request limits
 
 The frontend and service must share the same registrable domain and use HTTPS, for example `https://trizze.tv/robot/` and `https://alerts.trizze.tv`. Sessions use `SameSite=Lax; Secure` cookies. A frontend hosted on an unrelated site is not supported; CORS does not make these cookies cross-site. Protect the public `/auth/start` endpoint with reverse-proxy rate limiting as well as the service’s bounded, expiring in-memory state map.
+
+The service listens on `0.0.0.0` inside its container. Only the reverse proxy should reach port 8080: place the service on a private container network, or bind a published port to host loopback only. Do not expose port 8080 directly to the internet. `/healthz` is a minimal health probe. The Node base image is digest-pinned; update and review the pin deliberately to receive security fixes.

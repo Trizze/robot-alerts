@@ -67,6 +67,7 @@ export function createService({store, twitch, webhookSecret, frontendUrl, maxOAu
     const path = new URL(req.url,'https://local.invalid'); const jar = cookies(req); const session = store.session(jar[SESSION]);
     const respond = (status, data) => { res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'}); res.end(JSON.stringify(data)); };
     try {
+      if (req.method === 'GET' && path.pathname === '/healthz') { store.health(); res.writeHead(204).end(); return; }
       if (req.method === 'GET' && path.pathname === '/auth/start') {
         const role = path.searchParams.get('role'); if (!['viewer','streamer'].includes(role)) return respond(400,{error:'Invalid role'});
         const now = clock();

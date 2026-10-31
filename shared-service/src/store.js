@@ -127,5 +127,6 @@ export class SharedStore {
   }
   deleteViewer(id) { if (!validId(id)) return; this.db.prepare('DELETE FROM viewers WHERE id=?').run(id); this.db.prepare("DELETE FROM sessions WHERE user_id=? AND role='viewer'").run(id); }
   cleanup(now=Date.now()) { this.db.prepare('DELETE FROM receipts WHERE expires_at<=?').run(now); this.db.prepare('DELETE FROM sessions WHERE expires_at<=?').run(now); }
+  health() { this.db.prepare('SELECT 1').get(); }
   close() { this.db.close(); }
 }

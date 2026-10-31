@@ -117,3 +117,10 @@ test('emote failures without a cached result are shared and briefly cached', asy
  const responses=await Promise.all(Array.from({length:6},()=>fetch(url)));assert.ok(responses.every(r=>r.status===503));assert.equal(calls,1);
  assert.equal((await fetch(url)).status,503);assert.equal(calls,1);now+=60001;assert.equal((await fetch(url)).status,503);assert.equal(calls,2);
 });
+
+test('health endpoint reports database availability without requiring a session', async t => {
+ const store=new SharedStore(':memory:',{encryptionKey:randomBytes(32),patternSeed:randomBytes(32),catalog:[]});
+ const server=createService({store,twitch:{},webhookSecret:randomBytes(32).toString('hex'),frontendUrl:'https://trizze.tv/robot/'});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(async()=>{await new Promise(resolve=>server.close(resolve));store.close();});
+ const response=await fetch(`http://127.0.0.1:${server.address().port}/healthz`);assert.equal(response.status,204);assert.equal(await response.text(),'');
+ store.health=()=>{throw new Error('unavailable');};assert.equal((await fetch(`http://127.0.0.1:${server.address().port}/healthz`)).status,503);
+});
