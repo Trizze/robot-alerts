@@ -1,7 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "./vendor/loaders/GLTFLoader.js";
 import { OrbitControls } from "./vendor/controls/OrbitControls.js";
-import { API_BASE } from "./config.js";
+import { API_BASE } from "./config.js?v=shared-service-1";
 import { installPatternMapping } from "./pattern-mapping.js?v=2";
 
 const $ = (selector) => document.querySelector(selector);
