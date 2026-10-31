@@ -97,3 +97,23 @@ test('signed revocation disconnects the channel without deleting point history',
  const me=await(await fetch(base+'/api/me',{headers:{cookie:`__Host-robot_session=${session}`}})).json();assert.equal(me.channel,false);assert.equal(me.channelStored,true);
  store.saveChannel('123','Channel',credentials);assert.equal(store.hasChannel('123'),true);assert.equal(store.viewer('456').points,1);
 });
+
+test('emote requests share in-flight work and back off failures while serving stale results', async t => {
+ const store=new SharedStore(':memory:',{encryptionKey:randomBytes(32),patternSeed:randomBytes(32),catalog:[]});let now=1000,calls=0,fail=false;
+ const twitch={globalEmotes:async()=>{calls++;await new Promise(resolve=>setTimeout(resolve,15));if(fail)throw new Error('unavailable');return [{id:'25',name:'Kappa',format:['static']}];}};
+ const server=createService({store,twitch,webhookSecret:randomBytes(32).toString('hex'),frontendUrl:'https://trizze.tv/robot/',clock:()=>now});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(async()=>{await new Promise(resolve=>server.close(resolve));store.close();});
+ const url=`http://127.0.0.1:${server.address().port}/api/emotes/global`;
+ let responses=await Promise.all(Array.from({length:8},()=>fetch(url)));assert.ok(responses.every(r=>r.status===200));assert.equal(calls,1);
+ now+=3600001;fail=true;responses=await Promise.all(Array.from({length:8},()=>fetch(url)));assert.ok(responses.every(r=>r.status===200));assert.equal(calls,2);
+ assert.equal((await(await fetch(url)).json()).emotes[0].name,'Kappa');assert.equal(calls,2);
+ now+=60001;assert.equal((await fetch(url)).status,200);assert.equal(calls,3);
+});
+
+test('emote failures without a cached result are shared and briefly cached', async t => {
+ const store=new SharedStore(':memory:',{encryptionKey:randomBytes(32),patternSeed:randomBytes(32),catalog:[]});let now=1000,calls=0;
+ const twitch={globalEmotes:async()=>{calls++;await new Promise(resolve=>setTimeout(resolve,15));throw new Error('unavailable');}};
+ const server=createService({store,twitch,webhookSecret:randomBytes(32).toString('hex'),frontendUrl:'https://trizze.tv/robot/',clock:()=>now});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(async()=>{await new Promise(resolve=>server.close(resolve));store.close();});
+ const url=`http://127.0.0.1:${server.address().port}/api/emotes/global`;
+ const responses=await Promise.all(Array.from({length:6},()=>fetch(url)));assert.ok(responses.every(r=>r.status===503));assert.equal(calls,1);
+ assert.equal((await fetch(url)).status,503);assert.equal(calls,1);now+=60001;assert.equal((await fetch(url)).status,503);assert.equal(calls,2);
+});

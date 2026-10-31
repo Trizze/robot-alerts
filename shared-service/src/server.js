@@ -14,11 +14,34 @@ async function body(req) {
 }
 export function createService({store, twitch, webhookSecret, frontendUrl, maxOAuthStates = 10000, clock = Date.now}) {
   const frontend = new URL(frontendUrl), states = new Map(), refreshes = new Map();
-  let emoteCache = {expires:0,items:[]};
+  let emoteCache = {expires:0,items:[],failureUntil:0}, emotePending = null;
   if (frontend.protocol !== 'https:') throw new Error('Frontend must use HTTPS');
   if (!Number.isSafeInteger(maxOAuthStates) || maxOAuthStates < 1) throw new Error('Invalid OAuth state limit');
   const timer = setInterval(() => { store.cleanup(); const now = clock(); for (const [id, state] of states) if (state.expires <= now) states.delete(id); }, 60 * 60 * 1000); timer.unref();
   store.cleanup();
+  async function globalEmotes() {
+    const now = clock();
+    if (emoteCache.expires > now) return emoteCache.items;
+    if (emoteCache.failureUntil > now) {
+      if (emoteCache.items.length) return emoteCache.items;
+      throw new Error('Emote list temporarily unavailable');
+    }
+    if (!emotePending) {
+      emotePending = (async () => {
+        try {
+          const items = publicEmotes(await twitch.globalEmotes());
+          if (!items.length) throw new Error('Empty emote list');
+          emoteCache = {expires:clock()+3600000,items,failureUntil:0};
+          return items;
+        } catch (error) {
+          emoteCache.failureUntil = clock()+60000;
+          if (emoteCache.items.length) return emoteCache.items;
+          throw error;
+        }
+      })().finally(() => { emotePending = null; });
+    }
+    return emotePending;
+  }
   async function refreshChannel(channel, oldCredentials) {
     if (!refreshes.has(channel)) {
       const work = (async () => {
@@ -87,11 +110,7 @@ export function createService({store, twitch, webhookSecret, frontendUrl, maxOAu
         res.writeHead(204).end(); return;
       }
       if (path.pathname === '/api/emotes/global' && req.method === 'GET') {
-        if (emoteCache.expires <= Date.now()) {
-          const items = await twitch.globalEmotes();
-          emoteCache = {expires:Date.now()+3600000, items:publicEmotes(items)};
-        }
-        return respond(200,{emotes:emoteCache.items});
+        return respond(200,{emotes:await globalEmotes()});
       }
       if (path.pathname.startsWith('/api/') && req.method !== 'GET' && req.headers.origin !== frontend.origin) return respond(403,{error:'Invalid origin'});
       if (!session) return respond(401,{error:'Sign in required'});
