@@ -53,12 +53,13 @@ async function ingest(event) {
   const crowdChat=handleRaidChat(event,{queue,store,profiles});
   if (!demo && !allowedReaction(event) && event.type!=='raid') return;
   const result = store.apply(event); if (result.duplicate) return;
+  let viewerBroadcastDone = false;
   if (profiles && (event.type !== 'chat' || !result.viewer?.avatar || /^!robot(?:\s|$)/i.test(event.message))) {
     let timeout;
     const enrichment = profiles.enrich(event).then(() => {
       if (!event.viewer?.id || !store.viewer(event.viewer.id)) return [];
       const observed = store.apply({ ...event, id: `${event.id}:profile`, type: 'observation', bits: undefined, gifts: undefined });
-      broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) });
+      if (viewerBroadcastDone) broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) });
       broadcast({ kind: 'test-viewers', viewers: availableTestViewers() });
       if (queue.current?.viewer?.id === event.viewer.id) { queue.current.viewer = store.viewer(event.viewer.id); broadcast({ kind: 'profile', key: queue.current.key, viewer: queue.current.viewer }); }
 
@@ -71,6 +72,7 @@ async function ingest(event) {
   else if (event.type !== 'observation') { enqueue(event, result.unlocked); log('event', `${event.viewer?.name || 'Anonymous'} · ${event.type}${event.bits ? ` · ${event.bits} bits` : ''}${event.gifts ? ` · ${event.gifts} gifts` : ''}`); }
   const pending = store.db.prepare("SELECT * FROM announcements WHERE status='pending'").all();
   for (const row of pending) { if (!demo && !allowedViewer(row.viewer)) continue; store.db.prepare("UPDATE announcements SET status='sent' WHERE id=?").run(row.id); log('unlock', row.message); if (!demo) await reply(row.channel, row.message, row.viewer); }
+  viewerBroadcastDone = true;
   broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) });
 }
 const demoWorkspace = new DemoWorkspace(demoStore, queue, channel, log, () => {
