@@ -1,3 +1,4 @@
+import { ValidationError } from './errors.js';
 import { mkdir, readFile, writeFile, readdir, stat, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
@@ -12,9 +13,9 @@ const signatures = [
 const limit=25*1024*1024;
 export async function saveMedia(req) {
   const chunks=[];let size=0;
-  for await(const chunk of req){size+=chunk.length;if(size>limit)throw new Error('File exceeds 25 MB.');chunks.push(chunk);}
+  for await(const chunk of req){size+=chunk.length;if(size>limit)throw new ValidationError('File exceeds 25 MB.');chunks.push(chunk);}
   const bytes=Buffer.concat(chunks), match=signatures.find(([,,check])=>check(bytes));
-  if(!match||bytes.length<12)throw new Error('Use an MP4, WebM, GIF, PNG, JPG or WebP file.');
+  if(!match||bytes.length<12)throw new ValidationError('Use an MP4, WebM, GIF, PNG, JPG or WebP file.');
   const name=`${randomUUID()}.${match[0]}`;await mkdir('data/media',{recursive:true});await writeFile(`data/media/${name}`,bytes,{flag:'wx'});return `/media/${name}`;
 }
 export async function getMedia(name){

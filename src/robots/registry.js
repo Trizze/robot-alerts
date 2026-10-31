@@ -1,3 +1,4 @@
+import { ValidationError } from '../errors.js';
 import { CARD_PRESETS, CARD_SYMBOLS, CARD_EVENTS } from '../../public/shared/card-presets.js';
 export const defaults = Object.freeze({ version: 1, head: 'crt-classic', screen: 'avatar', hat: 'none', chest: 'beacon', paint: 'avatar-palette', pose: 'wave', entrance: 'walk' });
 export const unlocks = [
@@ -32,12 +33,12 @@ export const baseSettings = {
   duration: 9, textDurations: { robot: 6, meteor: 6, 'run-button': 6, simple: 6, parade: 3, custom: 6 }, customMedia: {}, showAlertBox: true, thresholds: Object.fromEntries(unlocks.map(p => [p.id, p.threshold]))
 };
 export function validateLook(look, owned) {
-  if (!look || typeof look !== 'object' || Object.keys(look).some(k => k !== 'version' && !layers.includes(k))) throw new Error('Unknown robot layer.');
-  for (const layer of layers) if (look[layer] !== undefined && (!registry[layer].includes(look[layer]) || (look[layer] !== defaults[layer] && !owned.includes(look[layer])))) throw new Error(`You have not earned that ${layer} yet.`);
+  if (!look || typeof look !== 'object' || Object.keys(look).some(k => k !== 'version' && !layers.includes(k))) throw new ValidationError('Unknown robot layer.');
+  for (const layer of layers) if (look[layer] !== undefined && (!registry[layer].includes(look[layer]) || (look[layer] !== defaults[layer] && !owned.includes(look[layer])))) throw new ValidationError(`You have not earned that ${layer} yet.`);
   return { ...defaults, ...look, version: 1 };
 }
 export function validateSettings(input) {
-  if (!input || typeof input !== 'object') throw new Error('Settings must be an object.');
+  if (!input || typeof input !== 'object') throw new ValidationError('Settings must be an object.');
   const result = structuredClone(baseSettings);
   if (['default', 'gaming'].includes(input.theme)) result.theme = input.theme;
   else if (input.theme === 'arcade') result.theme = 'gaming';

@@ -1,3 +1,4 @@
+import { ValidationError, classifyRequestError } from './errors.js';
 import { saveMedia, getMedia, cleanupMedia } from './media.js';
 import { deleteAvatarFiles } from './avatar-files.js';
 import { readJsonBody } from './http-body.js';
@@ -103,21 +104,21 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname.startsWith('/media/')) { const file=await getMedia(url.pathname.slice(7)); return file ? send(res,200,file.bytes,file.type) : send(res,404,{error:'Media unavailable.'}); }
     if (req.method === 'POST' && url.pathname === '/api/media') {
       if (!allowedOrigin(req.headers.origin) || req.headers['x-robot-csrf'] !== csrf || req.headers['content-type'] !== 'application/octet-stream') return send(res,403,{error:'Open the local settings page to upload.'});
-      try { return send(res,200,{url:await saveMedia(req)}); } catch(error) { return send(res,400,{error:error.message}); }
+      return send(res,200,{url:await saveMedia(req)});
     }
     if (req.method === 'POST' && url.pathname.startsWith('/api/')) {
       if (!allowedOrigin(req.headers.origin) || req.headers['x-robot-csrf'] !== csrf || !req.headers['content-type']?.startsWith('application/json')) return send(res, 403, { error: 'Open the local settings page to make changes.' });
       const input = await readJsonBody(req);
       if (url.pathname === '/api/settings' || url.pathname === '/api/settings/theme') {
         const themeOnly = url.pathname.endsWith('/theme');
-        if (themeOnly && !['default', 'gaming'].includes(input.theme)) throw new Error('Unknown theme.');
+        if (themeOnly && !['default', 'gaming'].includes(input.theme)) throw new ValidationError('Unknown theme.');
         const settings = store.saveSettings(channel, themeOnly ? { ...store.settings(channel), theme: input.theme } : input);
         await cleanupMedia([...store.mediaReferences(),...(demoStore === store ? [] : demoStore.mediaReferences())]);
         queue.updateTheme(settings.theme); broadcast({ kind: 'settings', settings }); return send(res, 200, settings);
       }
       if (url.pathname === '/api/preview/viewer') {
         const viewer = typeof input.id === 'string' ? store.viewer(input.id) : null;
-        if (!viewer) throw new Error('Viewer not found.');
+        if (!viewer) throw new ValidationError('Viewer not found.');
         if (!demo && !allowedViewer(viewer.id)) return send(res, 403, { error: 'This viewer is not in the configured live allowlist.' });
         queue.enqueue({ type: 'preview', channel, viewer, demo: true, unlocked: [] });
         return send(res, 200, { ok: true });
@@ -128,18 +129,19 @@ const server = http.createServer(async (req, res) => {
       if (url.pathname === '/api/demo/event') { if (!['sub', 'resub', 'gift', 'cheer', 'raid', 'follow', 'preview'].includes(input.type)) return send(res, 400, { error: 'Unknown test alert type.' }); if (input.animation && !['robot', 'meteor', 'parachute', 'run-button', 'custom'].includes(input.animation)) return send(res, 400, { error: 'Unknown test animation.' }); if (!demo && !availableTestViewers().length) return send(res, 409, { error: 'Send !robot in chat to cache a Twitch profile picture, then retry.' }); await demoWorkspace.ingest({ ...makeTest(input.type, Math.max(0, Math.min(3, Number(input.viewer) || 0)), input.sourceViewerId), animationOverride: input.animation === 'parachute' ? 'meteor' : input.animation }); return send(res, 200, { ok: true }); }
       if (url.pathname === '/api/demo/command') { const event = makeDemo('chat', Math.max(0, Math.min(3, Number(input.viewer) || 0))); event.message = String(input.message || '').slice(0, 300); await demoWorkspace.ingest(event); return send(res, 200, { ok: true }); }
       if (url.pathname === '/api/demo/reset') { replay.stop(); demoWorkspace.reset(); return send(res, 200, { ok: true }); }
-      if (url.pathname === '/api/viewer/delete') { if (typeof input.id !== 'string') throw new Error('A viewer ID is required.'); store.deleteViewer(input.id); if (profiles) await profiles.deleteCachedAvatar(input.id); else await deleteAvatarFiles(input.id); broadcast({ kind: 'viewers', viewers: visibleViewers() }); return send(res, 200, { ok: true }); }
+      if (url.pathname === '/api/viewer/delete') { if (typeof input.id !== 'string') throw new ValidationError('A viewer ID is required.'); store.deleteViewer(input.id); if (profiles) await profiles.deleteCachedAvatar(input.id); else await deleteAvatarFiles(input.id); broadcast({ kind: 'viewers', viewers: visibleViewers() }); return send(res, 200, { ok: true }); }
       return send(res, 404, { error: 'Unknown API route.' });
     }
     if (req.method !== 'GET') return send(res, 405, { error: 'Method not allowed.' });
     if (/^\/avatars\/\d+\.(png|jpg|webp)$/.test(url.pathname)) {
       try { return send(res, 200, await readFile(`data${url.pathname}`), mime['.' + url.pathname.split('.').pop()]); } catch { return send(res, 404, { error: 'Avatar unavailable.' }); }
     }
-    const path = url.pathname === '/' || url.pathname === '/settings' ? 'settings/index.html' : url.pathname === '/overlay' ? 'overlay/index.html' : decodeURIComponent(url.pathname).replace(/^\//, '');
+    let decoded; try { decoded=decodeURIComponent(url.pathname); } catch { throw new ValidationError('Invalid URL encoding.'); }
+    const path = url.pathname === '/' || url.pathname === '/settings' ? 'settings/index.html' : url.pathname === '/overlay' ? 'overlay/index.html' : decoded.replace(/^\//, '');
     if (!/^[a-zA-Z0-9/_\-.]+$/.test(path) || path.split('/').some(p => p === '..' || p.startsWith('.'))) return send(res, 404, { error: 'Not found.' });
     const ext = '.' + path.split('.').pop(); if (!mime[ext]) return send(res, 404, { error: 'Not found.' });
     try { return send(res, 200, await readFile(publicRoot + path), mime[ext]); } catch { return send(res, 404, { error: 'Not found.' }); }
-  } catch { return send(res, 400, { error: 'Invalid request. Check the values and try again.' }); }
+  } catch (error) { const failure=classifyRequestError(error,message=>console.error(message)); return send(res,failure.status,{error:failure.message}); }
 });
 const ws = new WebSocketServer({ noServer: true, maxPayload: 1024 });
 server.on('upgrade', (req, socket, head) => {

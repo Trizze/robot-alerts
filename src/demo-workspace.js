@@ -1,3 +1,4 @@
+import { ValidationError } from './errors.js';
 import { Commands } from './commands.js';
 import { seedDemo } from './demo.js';
 
@@ -14,7 +15,7 @@ export class DemoWorkspace {
     this.queue.enqueue({ ...event, demoRaidChatters, channel: this.channel, viewer, unlocked, demo: true });
   }
   async ingest(event) {
-    if (event.channel !== 'demo' || !event.id.startsWith('demo:') || !event.viewer?.id.startsWith('demo-')) throw new Error('Synthetic events must use demo identities.');
+    if (event.channel !== 'demo' || !event.id.startsWith('demo:') || !event.viewer?.id.startsWith('demo-')) throw new ValidationError('Synthetic events must use demo identities.');
     this.store.saveSettings('demo', this.settings());
     const result = this.store.apply(event); if (result.duplicate) return;
     if (event.type === 'chat') await this.commands.handle(event);

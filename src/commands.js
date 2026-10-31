@@ -1,3 +1,4 @@
+import { ValidationError } from './errors.js';
 import { layers, unlocks } from './robots/registry.js';
 
 export class Commands {
@@ -20,7 +21,7 @@ export class Commands {
       else if (command === 'style') message = 'AI styling is not enabled. Use !robot parts, then !robot <layer> <part-id>.';
       else if (layers.includes(command) && words.length === 1) { this.store.setLook(event.viewer.id, { [command]: words[0] }); message = `${command} set to ${words[0]}. Try !robot`; }
       else message = 'Try !robot help for commands, or !robot parts to see what you own.';
-    } catch (error) { message = error.message; }
+    } catch (error) { message = error instanceof ValidationError ? error.message : 'Could not complete the command.'; }
     await this.reply(event.channel, `${event.viewer.name.slice(0, 40)}: ${message}`.slice(0, 450), event.viewer.id);
   }
 }

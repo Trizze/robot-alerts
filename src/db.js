@@ -1,3 +1,4 @@
+import { ValidationError } from './errors.js';
 import { DatabaseSync } from 'node:sqlite';
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
@@ -58,7 +59,7 @@ export class Store {
   viewer(id) { return this.mapViewer(this.sql.viewer.get(id)); }
   list() { return this.sql.list.all().map(row=>this.mapViewer(row)); }
   setLook(id, patch, reset = false) {
-    const viewer = this.viewer(id); if (!viewer) throw new Error('Say !robot first to build your robot.');
+    const viewer = this.viewer(id); if (!viewer) throw new ValidationError('Say !robot first to build your robot.');
     const explicit = reset ? [] : [...new Set([...JSON.parse(this.sql.explicit.get(id).explicit), ...Object.keys(patch)])];
     const look = reset ? { ...defaults } : validateLook({ ...viewer.look, ...patch }, viewer.owned);
     this.sql.setLook.run(JSON.stringify(look), JSON.stringify(explicit), id);

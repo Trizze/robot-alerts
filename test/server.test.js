@@ -35,6 +35,7 @@ test('isolated demo serves UI, enforces origin/CSRF and delivers alerts over Web
     const alert = await nextAlert; assert.equal(alert.type, 'resub'); assert.equal(alert.viewer.name, 'iris.exe'); assert.equal(alert.capsule, undefined); assert.ok(alert.unlocked.some(p => p.id === 'crown'));
     socket.send(JSON.stringify({ kind: 'complete', key: alert.key }));
     const headers = { 'Content-Type': 'application/json', Origin: base, 'X-Robot-CSRF': session.csrf };
+    assert.equal((await fetch(`${base}/api/settings`,{method:'POST',headers,body:'{broken'})).status,400);
     assert.equal((await fetch(`${base}/api/settings`, { method: 'POST', headers, body: JSON.stringify({ ...state.settings, volume: 0, theme: 'gaming' }) })).status, 200);
     assert.equal((await (await fetch(`${base}/api/state`)).json()).settings.theme, 'gaming');
     assert.equal((await fetch(`${base}/api/settings/theme`, { method: 'POST', headers, body: JSON.stringify({ theme: 'default' }) })).status, 200);
