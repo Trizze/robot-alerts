@@ -1,16 +1,41 @@
-const NS = 'http://www.w3.org/2000/svg';
+const NS = "http://www.w3.org/2000/svg";
 export const SCREEN = Object.freeze({ x: 20, y: 18, size: 40, center: 40 });
 let counter = 0;
-const paintColors = { copper: ['#dc9b71', '#995b44'], neon: ['#c8ff7a', '#7271ad'], patina: ['#8bd2bd', '#537e75'], comet: ['#d3bcff', '#7e6aa1'] };
-function seedColor(id = '') { let hash = 0; for (const ch of id) hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0; return `hsl(${Math.abs(hash) % 360} 42% 68%)`; }
+const paintColors = {
+  copper: ["#dc9b71", "#995b44"],
+  neon: ["#c8ff7a", "#7271ad"],
+  patina: ["#8bd2bd", "#537e75"],
+  comet: ["#d3bcff", "#7e6aa1"],
+};
+function seedColor(id = "") {
+  let hash = 0;
+  for (const ch of id) hash = ((hash << 5) - hash + ch.charCodeAt(0)) | 0;
+  return `hsl(${Math.abs(hash) % 360} 42% 68%)`;
+}
 // An integer-grid sprite rig. Themes never enter the renderer or change its parts.
 export function robot(viewer, { silhouette = false } = {}) {
-  const look = viewer?.look || {}, uid = `robot-${++counter}`;
-  const svg = document.createElementNS(NS, 'svg'); svg.setAttribute('viewBox', '0 0 80 104'); svg.classList.add('robot');
-  svg.setAttribute('role', 'img'); svg.setAttribute('aria-label', silhouette ? 'An unidentified member of the raid' : `${viewer?.name || 'Viewer'}’s robot`);
-  const light = /^#[\da-f]{6}$/i.test(viewer?.color || '') ? viewer.color : seedColor(viewer?.id);
-  const palette = paintColors[look.paint] || [viewer?.palette?.[0] || seedColor(viewer?.id), viewer?.palette?.[1] || '#637783'];
-  svg.style.setProperty('--metal', silhouette ? '#46505f' : palette[0]); svg.style.setProperty('--shade', silhouette ? '#303a49' : palette[1]); svg.style.setProperty('--light', silhouette ? '#6d7f8d' : light);
+  const look = viewer?.look || {},
+    uid = `robot-${++counter}`;
+  const svg = document.createElementNS(NS, "svg");
+  svg.setAttribute("viewBox", "0 0 80 104");
+  svg.classList.add("robot");
+  svg.setAttribute("role", "img");
+  svg.setAttribute(
+    "aria-label",
+    silhouette
+      ? "An unidentified member of the raid"
+      : `${viewer?.name || "Viewer"}’s robot`,
+  );
+  const light = /^#[\da-f]{6}$/i.test(viewer?.color || "")
+    ? viewer.color
+    : seedColor(viewer?.id);
+  const palette = paintColors[look.paint] || [
+    viewer?.palette?.[0] || seedColor(viewer?.id),
+    viewer?.palette?.[1] || "#637783",
+  ];
+  svg.style.setProperty("--metal", silhouette ? "#46505f" : palette[0]);
+  svg.style.setProperty("--shade", silhouette ? "#303a49" : palette[1]);
+  svg.style.setProperty("--light", silhouette ? "#6d7f8d" : light);
   // Original static artwork. Variable identity data is assigned with DOM APIs.
   svg.innerHTML = `<defs><clipPath id="${uid}-screen"><rect x="20" y="18" width="40" height="40"/></clipPath></defs>
   <rect x="18" y="100" width="44" height="2" fill="#101a29" opacity=".24"/>
@@ -23,42 +48,109 @@ export function robot(viewer, { silhouette = false } = {}) {
   <path d="M22 61h8m2 0h3" stroke="#182630" stroke-width="1"/><rect x="57" y="61" width="3" height="1" fill="var(--light)"/><g class="head-extra" fill="#e8d8ac"><path d="M14 12h8v2h-6v6h-2zm44 0h8v8h-2v-6h-6zM14 52h2v6h6v2h-8zm50 0h2v8h-8v-2h6z"/></g><path class="visor-frame" d="M18 16h44v3H18z" fill="#e0ca8e"/></g>
   <g class="arm-right"><path d="M54 70h8v-4h4V54h8v10h-4v12H54z" fill="#182630"/><path d="M56 72h10v-8h4v-4h-4v-4h6v6h-4v12H56z" fill="var(--metal)"/><rect x="56" y="72" width="4" height="2" fill="var(--shade)"/></g>
   <g data-layer="hat" class="hat"></g><g data-layer="entrance" class="entrance-effect"><path d="M6 36v-6h6M68 30h6v6M6 48v6h6m56 0h6v-6" fill="none" stroke="var(--light)" stroke-width="2"/></g>`;
-  const avatar = svg.querySelector('.avatar');
-  if (!silhouette && /^\/(?:assets\/avatars\/|avatars\/)[a-zA-Z0-9_.-]+$/.test(viewer?.avatar || '')) {
-    avatar.setAttribute('href', viewer.avatar); avatar.addEventListener('error', () => avatar.remove());
-    extractPalette(viewer.avatar).then(colors => { if (!paintColors[look.paint] && colors) { svg.style.setProperty('--metal', colors[0]); svg.style.setProperty('--shade', colors[1]); } });
+  const avatar = svg.querySelector(".avatar");
+  if (
+    !silhouette &&
+    /^\/(?:assets\/avatars\/|avatars\/)[a-zA-Z0-9_.-]+$/.test(
+      viewer?.avatar || "",
+    )
+  ) {
+    avatar.setAttribute("href", viewer.avatar);
+    avatar.addEventListener("error", () => avatar.remove());
+    extractPalette(viewer.avatar).then((colors) => {
+      if (!paintColors[look.paint] && colors) {
+        svg.style.setProperty("--metal", colors[0]);
+        svg.style.setProperty("--shade", colors[1]);
+      }
+    });
   } else avatar.remove();
   const hats = {
-    antenna: '<path d="M38 2h4v6h-4z" fill="#65788a"/><path d="M36 0h8v4h-8z" fill="var(--light)"/>',
-    crown: '<path d="M24 0h4v4h8V0h8v4h8V0h4v10H24z" fill="#e7b55e"/><path d="M26 6h28v2H26z" fill="#ffe8a1"/><rect x="38" y="4" width="4" height="3" fill="var(--light)"/>',
-    sprout: '<path d="M38 2h4v6h-4z" fill="#548b58"/><path d="M28 0h10v2h-8v2h8v2h-8V4h-2zm14 2h10V0H42z" fill="#a7d990"/>',
-    parcel: '<path d="M38 0h4v8h-4zM24 2h12v4H24zm20 0h12v4H44z" fill="#f18c96"/><path d="M28 0h8v2h-8zm16 0h8v2h-8z" fill="#ffc0b8"/>',
-    mug: '<path d="M34 0h12v8H34zM46 2h4v4h-4" fill="#f0dfba"/><path d="M36 0h8v2h-8z" fill="#7f6257"/>'
+    antenna:
+      '<path d="M38 2h4v6h-4z" fill="#65788a"/><path d="M36 0h8v4h-8z" fill="var(--light)"/>',
+    crown:
+      '<path d="M24 0h4v4h8V0h8v4h8V0h4v10H24z" fill="#e7b55e"/><path d="M26 6h28v2H26z" fill="#ffe8a1"/><rect x="38" y="4" width="4" height="3" fill="var(--light)"/>',
+    sprout:
+      '<path d="M38 2h4v6h-4z" fill="#548b58"/><path d="M28 0h10v2h-8v2h8v2h-8V4h-2zm14 2h10V0H42z" fill="#a7d990"/>',
+    parcel:
+      '<path d="M38 0h4v8h-4zM24 2h12v4H24zm20 0h12v4H44z" fill="#f18c96"/><path d="M28 0h8v2h-8zm16 0h8v2h-8z" fill="#ffc0b8"/>',
+    mug: '<path d="M34 0h12v8H34zM46 2h4v4h-4" fill="#f0dfba"/><path d="M36 0h8v2h-8z" fill="#7f6257"/>',
   };
-  if (!silhouette) svg.querySelector('.hat').innerHTML = hats[look.hat] || '';
-  svg.querySelector('.head-extra').style.display = ['reinforced', 'clockwork'].includes(look.head) ? '' : 'none';
-  if (look.head === 'clockwork') svg.querySelector('.head-extra').setAttribute('fill', '#e9ba6b');
-  svg.querySelector('.visor-frame').style.display = look.screen === 'visor' ? '' : 'none';
-  if (look.pose === 'salute') svg.querySelector('.arm-right').setAttribute('transform', 'translate(0 -4)');
-  if (look.pose === 'cape') { const cape = document.createElementNS(NS, 'path'); cape.setAttribute('d', 'M28 68h24v8h4v8h4v12H20V84h4v-8h4z'); cape.setAttribute('fill', '#a46683'); svg.insertBefore(cape, svg.querySelector('[data-layer="pose"]')); }
-  const marks = { star: 'M39 76h2v2h3v1h-3v2h-2v-2h-3v-1h3z', helper: 'M36 77h3v1h2v-1h3v3h-2v1h-4v-1h-2z', coil: 'M40 76h3l-3 3h3l-4 3 1-3h-3z', veteran: 'M35 77h2v1h2v1h2v-1h2v-1h2v2h-2v1h-2v1h-2v-1h-2v-1h-2z' };
-  if (marks[look.chest]) { const mark = svg.querySelector('.chest-mark'); mark.setAttribute('d', marks[look.chest]); mark.setAttribute('stroke', 'none'); mark.setAttribute('fill', '#fff'); mark.setAttribute('opacity', '.8'); }
-  if (['spark', 'beacon'].includes(look.entrance)) svg.classList.add('earned-entrance');
-  if (silhouette) svg.classList.add('silhouette');
+  if (!silhouette) svg.querySelector(".hat").innerHTML = hats[look.hat] || "";
+  svg.querySelector(".head-extra").style.display = [
+    "reinforced",
+    "clockwork",
+  ].includes(look.head)
+    ? ""
+    : "none";
+  if (look.head === "clockwork")
+    svg.querySelector(".head-extra").setAttribute("fill", "#e9ba6b");
+  svg.querySelector(".visor-frame").style.display =
+    look.screen === "visor" ? "" : "none";
+  if (look.pose === "salute")
+    svg
+      .querySelector(".arm-right")
+      .setAttribute("transform", "translate(0 -4)");
+  if (look.pose === "cape") {
+    const cape = document.createElementNS(NS, "path");
+    cape.setAttribute("d", "M28 68h24v8h4v8h4v12H20V84h4v-8h4z");
+    cape.setAttribute("fill", "#a46683");
+    svg.insertBefore(cape, svg.querySelector('[data-layer="pose"]'));
+  }
+  const marks = {
+    star: "M39 76h2v2h3v1h-3v2h-2v-2h-3v-1h3z",
+    helper: "M36 77h3v1h2v-1h3v3h-2v1h-4v-1h-2z",
+    coil: "M40 76h3l-3 3h3l-4 3 1-3h-3z",
+    veteran: "M35 77h2v1h2v1h2v-1h2v-1h2v2h-2v1h-2v1h-2v-1h-2v-1h-2z",
+  };
+  if (marks[look.chest]) {
+    const mark = svg.querySelector(".chest-mark");
+    mark.setAttribute("d", marks[look.chest]);
+    mark.setAttribute("stroke", "none");
+    mark.setAttribute("fill", "#fff");
+    mark.setAttribute("opacity", ".8");
+  }
+  if (["spark", "beacon"].includes(look.entrance))
+    svg.classList.add("earned-entrance");
+  if (silhouette) svg.classList.add("silhouette");
   return svg;
 }
 const palettes = new Map();
 function extractPalette(src) {
-  if (!palettes.has(src)) palettes.set(src, new Promise(resolve => {
-    const img = new Image(); img.onload = () => {
-      try {
-        const canvas = document.createElement('canvas'); canvas.width = canvas.height = 16; const ctx = canvas.getContext('2d', { willReadFrequently: true }); ctx.drawImage(img, 0, 0, 16, 16);
-        const data = ctx.getImageData(0, 0, 16, 16).data; const sums = [0, 0, 0]; let count = 0;
-        for (let i = 0; i < data.length; i += 4) if (data[i + 3] > 150 && Math.max(data[i], data[i + 1], data[i + 2]) > 60) { for (let k = 0; k < 3; k++) sums[k] += data[i + k]; count++; }
-        if (!count) return resolve(null);
-        const rgb = sums.map(v => Math.round(v / count)); resolve([`rgb(${rgb.map(v => Math.round(v * .6 + 95)).join(' ')})`, `rgb(${rgb.map(v => Math.round(v * .45 + 25)).join(' ')})`]);
-      } catch { resolve(null); }
-    }; img.onerror = () => resolve(null); img.src = src;
-  }));
+  if (!palettes.has(src))
+    palettes.set(
+      src,
+      new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          try {
+            const canvas = document.createElement("canvas");
+            canvas.width = canvas.height = 16;
+            const ctx = canvas.getContext("2d", { willReadFrequently: true });
+            ctx.drawImage(img, 0, 0, 16, 16);
+            const data = ctx.getImageData(0, 0, 16, 16).data;
+            const sums = [0, 0, 0];
+            let count = 0;
+            for (let i = 0; i < data.length; i += 4)
+              if (
+                data[i + 3] > 150 &&
+                Math.max(data[i], data[i + 1], data[i + 2]) > 60
+              ) {
+                for (let k = 0; k < 3; k++) sums[k] += data[i + k];
+                count++;
+              }
+            if (!count) return resolve(null);
+            const rgb = sums.map((v) => Math.round(v / count));
+            resolve([
+              `rgb(${rgb.map((v) => Math.round(v * 0.6 + 95)).join(" ")})`,
+              `rgb(${rgb.map((v) => Math.round(v * 0.45 + 25)).join(" ")})`,
+            ]);
+          } catch {
+            resolve(null);
+          }
+        };
+        img.onerror = () => resolve(null);
+        img.src = src;
+      }),
+    );
   return palettes.get(src);
 }
