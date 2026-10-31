@@ -1,5 +1,5 @@
 // All credentials stay in request bodies or Authorization headers, never URLs.
-export function twitchClient({ clientId, clientSecret, callback, webhookSecret, fetcher = fetch }) {
+export function twitchClient({ clientId, clientSecret, callback, webhookCallback, webhookSecret, fetcher = fetch }) {
   let appToken;
   async function json(url, options = {}) {
     const response = await fetcher(url, {...options, signal:AbortSignal.timeout(8000), redirect:'error'});
@@ -33,7 +33,7 @@ export function twitchClient({ clientId, clientSecret, callback, webhookSecret, 
     async subscribe(channel) {
       const value = await app();
       for (const type of ['channel.subscribe','channel.subscription.message','channel.subscription.gift','channel.cheer']) {
-        try { await helix('eventsub/subscriptions',value,{ method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,version:'1',condition:{broadcaster_user_id:channel},transport:{method:'webhook',callback:callback.replace(/\/auth\/callback$/, '/eventsub'),secret:webhookSecret}}) }); } catch (error) { if (error.status !== 409) throw error; }
+        try { await helix('eventsub/subscriptions',value,{ method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({type,version:'1',condition:{broadcaster_user_id:channel},transport:{method:'webhook',callback:webhookCallback,secret:webhookSecret}}) }); } catch (error) { if (error.status !== 409) throw error; }
       }
     },
     async subscription(channel, viewer, value) {

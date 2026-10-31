@@ -62,8 +62,7 @@ export function createService({store, twitch, webhookSecret, frontendUrl, maxOAu
   }
   const server = createServer(async (req,res) => {
     res.setHeader('Cache-Control','no-store'); res.setHeader('Referrer-Policy','no-referrer'); res.setHeader('X-Content-Type-Options','nosniff');
-    if (req.headers.origin === frontend.origin) { res.setHeader('Access-Control-Allow-Origin',frontend.origin); res.setHeader('Access-Control-Allow-Credentials','true'); res.setHeader('Vary','Origin'); }
-    if (req.method === 'OPTIONS') { if (req.headers.origin !== frontend.origin) { res.writeHead(403).end(); return; } res.writeHead(204,{'Access-Control-Allow-Methods':'GET, POST, DELETE, OPTIONS','Access-Control-Allow-Headers':'Content-Type'}).end(); return; }
+    if (req.method === 'OPTIONS') { if (req.headers.origin !== frontend.origin) { res.writeHead(403).end(); return; } res.writeHead(204).end(); return; }
     const path = new URL(req.url,'https://local.invalid'); const jar = cookies(req); const session = store.session(jar[SESSION]);
     const respond = (status, data) => { res.writeHead(status,{'Content-Type':'application/json; charset=utf-8'}); res.end(JSON.stringify(data)); };
     try {

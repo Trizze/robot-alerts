@@ -14,7 +14,7 @@ let emotes = [{name:'Kappa',id:'25',animated:false},{name:'mcaT',id:'35063',anim
 const emojis = ['😀','😃','😄','😁','😆','😅','😂','🤣','😊','😇','🙂','🙃','😉','😍','🥰','😘','😋','😎','🤩','🥳','😏','😜','🤪','🤔','🤗','🤭','🤫','🤖','👾','👻','💀','😺','😸','😹','😻','🙀','😼','❤️','🧡','💛','💚','💙','💜','🖤','🤍','💖','💯','✨','🔥','⭐','🌟','💫','🎉','🎊','🎮','🏆','👑','🚀','🌈','🌙','☀️','⚡','💎','💰','🍕','🍔','🍿','☕','🐱','🐶','🦊','🐸','🐼','🐙','🦄','🐲','👍','👋','🤘','🫶','👏','💪'];
 let model, material, screenMaterial, viewer = null, catalog = [], currentFilter = 'all', previewId = null, imageRequest = 0, avatarRequest = 0;
 const owned = () => new Set((viewer?.owned || []).map(p => typeof p === 'string' ? p : p.id));
-function service(path) { if (!API_BASE) throw new Error('The shared service is not configured yet.'); return new URL(path, API_BASE).href; }
+function service(path) { if (!API_BASE) throw new Error('The shared service is not configured yet.'); const base = new URL(API_BASE.replace(/\/?$/, '/'), location.origin); return new URL(path.replace(/^\/+/, ''),base).href; }
 async function request(path, options = {}) {
   const response = await fetch(service(path), { credentials:'include', ...options });
   if (!response.ok) throw new Error(response.status === 401 ? 'Please sign in first.' : 'The service could not complete that request.');

@@ -1,2 +1,2 @@
-// Set this to the HTTPS origin of your separately hosted Robot Alerts service.
-export const API_BASE = '';
+// Same-origin API route; the reverse proxy strips this prefix.
+export const API_BASE = '/robot/api';
