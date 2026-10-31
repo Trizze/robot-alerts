@@ -11,7 +11,8 @@
     "start": "node --env-file-if-exists=.env scripts/start.js",
     "setup": "node scripts/setup.js",
     "demo": "node scripts/start.js --demo",
-    "test": "node --test"
+    "test": "node --test",
+    "emotes:refresh": "node --env-file-if-exists=.env scripts/refresh-global-emotes.js"
   },
   "dependencies": {
     "gsap": "3.13.0",

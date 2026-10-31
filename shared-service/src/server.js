@@ -1,6 +1,7 @@
 import { createServer } from 'node:http';
 import { randomBytes, timingSafeEqual } from 'node:crypto';
 import { parseWebhook } from './eventsub.js';
+import { publicEmotes } from './emote-catalog.js';
 
 const SESSION = '__Host-robot_session', STATE = '__Host-robot_state';
 const cookie = (name, value, maxAge) => `${name}=${value}; Path=/; HttpOnly; Secure; SameSite=Lax; Max-Age=${maxAge}`;
@@ -83,7 +84,7 @@ export function createService({store, twitch, webhookSecret, frontendUrl}) {
       if (path.pathname === '/api/emotes/global' && req.method === 'GET') {
         if (emoteCache.expires <= Date.now()) {
           const items = await twitch.globalEmotes();
-          emoteCache = {expires:Date.now()+3600000, items:items.filter(item => typeof item.name === 'string' && typeof item.id === 'string' && /^[A-Za-z0-9_-]{1,80}$/.test(item.id) && item.name.length <= 80).map(item => ({name:item.name,id:item.id,animated:Array.isArray(item.format) && item.format.includes('animated')}))};
+          emoteCache = {expires:Date.now()+3600000, items:publicEmotes(items)};
         }
         return respond(200,{emotes:emoteCache.items});
       }

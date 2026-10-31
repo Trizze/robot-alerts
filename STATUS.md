@@ -2,6 +2,9 @@
 
 ## Current shared-service update (supersedes older unresolved scope notes below)
 
+- Private GitHub repository: `Trizze/robot-alerts`, default branch `master`; runnable app, source assets and licenses are committed. Large intermediate render archives remain local. A clean staged copy passed the tests and served demo Settings and overlay.
+- Global emote upkeep: the unhosted shared service caches Twitch's global list for one hour; the website rechecks hourly when connected. An operator-run `npm run emotes:refresh` can write a public static snapshot without printing credentials, for later publishing via the approved deploy workflow. It has only mock tests; no credentials were accessed by Codex. `npm test`: 69 pass. The live site has not yet received this snapshot-refresh update.
+
 - Immediate emote-name capitalization and `mcaT` (global emote 35063) were published with permission (site commit `790c7e1`), HTTP 200. Dark emotes have a light chest background. The preview still recognizes only the built-in sample until the shared backend is hosted. `npm test`: 68 pass.
 
 - Emoji grid, case-insensitive Twitch emote names and animated emote chest preview were published after approval (site commit `e610323`); the page and app script returned HTTP 200. The unhosted backend supplies Twitch's current global emote catalog; the static preview has four built-in names and accepts existing emote IDs. Channel-emote names are not searchable yet. Animation uses ImageDecoder; a local two-frame GIF test visibly advanced, but actual Twitch animated emotes and unsupported browsers remain to verify. The 73-file dry run and screenshots were sent before the approved upload. `npm test`: 68 pass.

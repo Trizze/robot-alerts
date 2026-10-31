@@ -73,7 +73,8 @@ function refreshEmoteSuggestions() {
   for (const emote of emotes) { const option = document.createElement('option'); option.value = emote.name; list.append(option); }
 }
 async function loadEmotes() {
-  try { const result = await request('/api/emotes/global'); if (Array.isArray(result.emotes) && result.emotes.length) emotes = result.emotes; } catch { /* Offline preview uses the small built-in list. */ }
+  try { const response = await fetch('./global-emotes.json'); if (response.ok) { const snapshot = await response.json(); if (Array.isArray(snapshot.emotes) && snapshot.emotes.length) emotes = snapshot.emotes; } } catch { /* The built-in list remains available. */ }
+  try { const result = await request('/api/emotes/global'); if (Array.isArray(result.emotes) && result.emotes.length) emotes = result.emotes; } catch { /* Use the latest local snapshot. */ }
   refreshEmoteSuggestions();
 }
 function findEmote(input) {
@@ -195,4 +196,5 @@ $('#delete-viewer').addEventListener('click',async()=>{if(!confirm('Delete your 
 $('#disconnect').addEventListener('click',async()=>{if(!confirm('Disconnect your channel and remove its point records?'))return;try{await request('/api/channel',{method:'DELETE'});setViewer(null);error('Your channel was disconnected.')}catch(e){error(e.message)}});
 try { const r=await fetch('./patterns/catalog.json');if(!r.ok)throw Error();catalog=(await r.json()).patterns;renderInventory(); } catch { error('The pattern catalog could not be loaded.'); }
 await loadEmotes();
+if (API_BASE) setInterval(loadEmotes, 60 * 60 * 1000);
 try { const data=await request('/api/me');setViewer(data); } catch { setViewer(null); }

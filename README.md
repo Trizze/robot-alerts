@@ -32,3 +32,7 @@ Run `npm run demo` to replay synthetic alerts without Twitch credentials; demo d
 ## Credits
 
 The CRT monitor is adapted from Jampre's **Crt Monitor**, and the entrance door from witnessk's **Door with frame**, both under CC BY 4.0. See [CREDITS.md](CREDITS.md) and the license files alongside third-party assets for sources, modifications and other material credits.
+
+## Twitch global emote list
+
+The hosted shared service fetches Twitch's global-emote list and refreshes its cache hourly when needed; an open viewer page checks again hourly. Until that service is hosted, the operator can privately run `npm run emotes:refresh` from the project directory to generate a current, public-only snapshot in `website-staging/global-emotes.json`. The command reads Twitch app credentials from the runtime environment; Node can load the operator's existing `.env` at startup. It prints a count, not credentials. To update the hosted static preview, copy the generated snapshot into the authorized static-site checkout and use the approved deployment workflow. This snapshot remains fixed until refreshed and published again. The command is optional; the app and demo run without it.
