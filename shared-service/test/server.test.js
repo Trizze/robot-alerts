@@ -43,6 +43,13 @@ test('OAuth state is one-use and a failed channel reconnect preserves existing a
   assert.equal((await fetch(url,{headers:{cookie:stateCookie},redirect:'manual'})).status,503);
   assert.equal(store.viewer('456').points,1); assert.equal(store.hasChannel('123'),true);
   assert.equal((await fetch(url,{headers:{cookie:stateCookie},redirect:'manual'})).status,400);
+  store.markChannelDisconnected('123');
+  const again = await fetch(base+'/auth/start?role=streamer',{redirect:'manual'});
+  const nextState = new URL(again.headers.get('location')).searchParams.get('state');
+  const nextCookie = again.headers.get('set-cookie').split(';')[0];
+  const nextUrl = base+'/auth/callback?'+new URLSearchParams({state:nextState,code:randomBytes(16).toString('hex')});
+  assert.equal((await fetch(nextUrl,{headers:{cookie:nextCookie},redirect:'manual'})).status,503);
+  assert.equal(store.hasChannel('123'),false);assert.equal(store.viewer('456').points,1);
 });
 
 test('appearance settings require the viewer session and reject invalid values', async t => {
@@ -75,4 +82,18 @@ test('OAuth state entries are bounded and expired entries are pruned before inse
  for(let i=0;i<2;i++){const r=await fetch(url,{redirect:'manual'});assert.equal(r.status,302);assert.match(r.headers.get('set-cookie'),/SameSite=Lax/);assert.match(r.headers.get('set-cookie'),/Secure/);}
  assert.equal((await fetch(url,{redirect:'manual'})).status,429);now+=600001;
  assert.equal((await fetch(url,{redirect:'manual'})).status,302);
+});
+
+test('signed revocation disconnects the channel without deleting point history', async t => {
+ const store=new SharedStore(':memory:',{encryptionKey:randomBytes(32),patternSeed:randomBytes(32),catalog:[]});
+ const credentials={value:randomBytes(32).toString('hex')};store.saveChannel('123','Channel',credentials);store.record({id:randomUUID(),channel:'123',at:new Date().toISOString(),type:'cheer',bits:500,viewer:{id:'456',name:'Viewer'}});
+ const session=store.createSession('123','streamer'),secret=randomBytes(32).toString('hex');store.upsertViewer('123','Channel');
+ const server=createService({store,twitch:{},webhookSecret:secret,frontendUrl:'https://trizze.tv/robot/'});await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(async()=>{await new Promise(resolve=>server.close(resolve));store.close();});
+ const base=`http://127.0.0.1:${server.address().port}`,id=randomUUID(),time=new Date().toISOString();
+ const body=JSON.stringify({subscription:{id:randomUUID(),type:'channel.cheer',version:'1',condition:{broadcaster_user_id:'123'}}});
+ const signature='sha256='+createHmac('sha256',secret).update(id).update(time).update(body).digest('hex');
+ const headers={'twitch-eventsub-message-id':id,'twitch-eventsub-message-timestamp':time,'twitch-eventsub-message-signature':signature,'twitch-eventsub-message-type':'revocation','twitch-eventsub-subscription-type':'channel.cheer','twitch-eventsub-subscription-version':'1'};
+ assert.equal((await fetch(base+'/eventsub',{method:'POST',headers,body})).status,204);assert.equal(store.hasChannel('123'),false);assert.equal(store.viewer('456').points,1);assert.deepEqual(store.channelCredentials('123'),credentials);
+ const me=await(await fetch(base+'/api/me',{headers:{cookie:`__Host-robot_session=${session}`}})).json();assert.equal(me.channel,false);assert.equal(me.channelStored,true);
+ store.saveChannel('123','Channel',credentials);assert.equal(store.hasChannel('123'),true);assert.equal(store.viewer('456').points,1);
 });

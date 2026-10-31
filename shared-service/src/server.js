@@ -28,7 +28,7 @@ export function createService({store, twitch, webhookSecret, frontendUrl, maxOAu
         const next = await twitch.refresh(current.refresh_token);
         // A disconnect while the network request was in flight must stay deleted.
         const latest = store.channelCredentials(channel);
-        if (!latest) throw new Error('Disconnected channel');
+        if (!latest || !store.hasChannel(channel)) throw new Error('Disconnected channel');
         if (latest.access_token !== current.access_token) return latest;
         store.saveChannel(channel,store.channelName(channel),next); return next;
       })();
@@ -60,9 +60,9 @@ export function createService({store, twitch, webhookSecret, frontendUrl, maxOAu
         if (!user || !/^\d+$/.test(user.id) || !user.display_name) return respond(400,{error:'Invalid Twitch user'});
         store.upsertViewer(user.id,user.display_name);
         if (entry.role === 'streamer') {
-          const previous = store.channelCredentials(user.id), previousName = store.channelName(user.id);
+          const previous = store.channelCredentials(user.id), previousName = store.channelName(user.id), wasConnected = store.hasChannel(user.id);
           store.saveChannel(user.id,user.display_name,credential);
-          try { await twitch.subscribe(user.id); } catch { if (previous) store.saveChannel(user.id,previousName,previous); else store.deleteChannel(user.id); return respond(503,{error:'Could not connect this channel. Please try again.'}); }
+          try { await twitch.subscribe(user.id); } catch { if (previous) { store.saveChannel(user.id,previousName,previous); if (!wasConnected) store.markChannelDisconnected(user.id); } else store.deleteChannel(user.id); return respond(503,{error:'Could not connect this channel. Please try again.'}); }
         }
         const token = store.createSession(user.id,entry.role); res.setHeader('Set-Cookie',[cookie(STATE,'',0),cookie(SESSION,token,30*86400)]);
         res.writeHead(303,{Location:frontend.href}).end(); return;
@@ -71,6 +71,7 @@ export function createService({store, twitch, webhookSecret, frontendUrl, maxOAu
         const parsed = parseWebhook(req.headers,await body(req),webhookSecret);
         if (parsed.status >= 400) { res.writeHead(parsed.status).end(); return; }
         const channel = parsed.event?.channel || parsed.channel;
+        if (parsed.revoked) { if (!store.channelExists(channel)) { res.writeHead(403).end(); return; } store.markChannelDisconnected(channel); res.writeHead(204).end(); return; }
         if (!store.hasChannel(channel)) { res.writeHead(403).end(); return; }
         if (parsed.challenge) { res.writeHead(200,{'Content-Type':'text/plain'}).end(parsed.challenge); return; }
         if (parsed.event) {
@@ -97,7 +98,7 @@ export function createService({store, twitch, webhookSecret, frontendUrl, maxOAu
       if (path.pathname === '/api/me' && req.method === 'GET') {
         const viewer = store.viewer(session.id);
         try { const profile = await twitch.lookup(session.id); const avatar = new URL(profile.profile_image_url); if (avatar.protocol === 'https:' && (avatar.hostname === 'static-cdn.jtvnw.net' || avatar.hostname.endsWith('.jtvnw.net'))) viewer.avatarUrl = avatar.href.replace('300x300','600x600'); } catch {}
-        return respond(200,{viewer,channel:store.hasChannel(session.id)});
+        return respond(200,{viewer,channel:store.hasChannel(session.id),channelStored:session.role === 'streamer' && store.channelExists(session.id)});
       }
       if (path.pathname === '/api/me/appearance' && req.method === 'POST') { let input; try { input=JSON.parse((await body(req)).toString('utf8')); store.updateAppearance(session.id,input); } catch { return respond(400,{error:'Invalid appearance'}); } res.writeHead(204).end(); return; }
       if (path.pathname === '/api/me/pattern' && req.method === 'POST') { let input; try { input=JSON.parse((await body(req)).toString('utf8')); } catch { return respond(400,{error:'Invalid request'}); } try { store.selectPattern(session.id,input.pattern); } catch { return respond(400,{error:'Pattern not unlocked'}); } res.writeHead(204).end(); return; }

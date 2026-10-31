@@ -157,9 +157,9 @@ function setViewer(data) {
   viewer = data?.viewer || null; $('#pattern-scale').value = String(Math.round((viewer?.patternScale ?? 1)*100)); patternScale.value = Number($('#pattern-scale').value)/100; $('#pattern-scale-value').textContent = `${$('#pattern-scale').value}%`;
   const type = viewer?.chestType || 'none', value = viewer?.chestValue || '', emote = emotes.find(item=>item.id === value);
   selectedEmoji = type === 'emoji' ? value : ''; renderEmojiPicker(); setChestControls(type); $('#chest-value').value = emote?.name || (type === 'emote' ? value : ''); renderChest(type,value,Boolean(emote?.animated));
-  if (viewer?.avatarUrl) showAvatar(viewer.avatarUrl); else { avatarRequest++; if (screenMaterial?.map) { screenMaterial.map.dispose(); screenMaterial.map = null; screenMaterial.needsUpdate = true; } } const channel = Boolean(data?.channel);
-  $('#login').hidden=Boolean(viewer);$('#logout').hidden=!viewer;$('#delete-viewer').hidden=!viewer;$('#disconnect').hidden=!channel;
-  $('#account-status').textContent=viewer ? `Signed in as ${viewer.displayName}` : 'Not signed in';
+  if (viewer?.avatarUrl) showAvatar(viewer.avatarUrl); else { avatarRequest++; if (screenMaterial?.map) { screenMaterial.map.dispose(); screenMaterial.map = null; screenMaterial.needsUpdate = true; } } const channel = Boolean(data?.channel), channelStored = Boolean(data?.channelStored || data?.channel);
+  $('#login').hidden=Boolean(viewer);$('#logout').hidden=!viewer;$('#delete-viewer').hidden=!viewer;$('#disconnect').hidden=!channelStored;
+  $('#account-status').textContent=viewer ? `Signed in as ${viewer.displayName}${channelStored && !channel ? ' · Channel disconnected' : ''}` : 'Not signed in';
   $('#inventory-intro').textContent=viewer?'Choose an unlocked pattern to save it to your robot.':'Sign in to see what you’ve earned. You can preview any pattern below.';
   $('#points').replaceChildren(document.createTextNode(viewer ? String(viewer.points) + ' ' : '— '),label('POINTS','small-label'));
   $('#tier').textContent=`TIER ${viewer?.tier ?? '—'}`;renderInventory();

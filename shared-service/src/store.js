@@ -27,13 +27,15 @@ export class SharedStore {
     if (!columns.has('pattern_scale')) this.db.exec('ALTER TABLE viewers ADD COLUMN pattern_scale REAL NOT NULL DEFAULT 1');
     if (!columns.has('chest_type')) this.db.exec("ALTER TABLE viewers ADD COLUMN chest_type TEXT NOT NULL DEFAULT 'none'");
     if (!columns.has('chest_value')) this.db.exec("ALTER TABLE viewers ADD COLUMN chest_value TEXT NOT NULL DEFAULT ''");
+    const channelColumns = new Set(this.db.prepare('PRAGMA table_info(channels)').all().map(column => column.name));
+    if (!channelColumns.has('connected')) this.db.exec('ALTER TABLE channels ADD COLUMN connected INTEGER NOT NULL DEFAULT 1');
   }
   saveChannel(id, displayName, credentials) {
     if (!validId(id) || typeof displayName !== 'string' || !displayName || !credentials || typeof credentials !== 'object') throw new Error('Invalid channel');
     const nonce = randomBytes(12), cipher = createCipheriv('aes-256-gcm', this.key, nonce);
     cipher.setAAD(Buffer.from(id));
     const encrypted = Buffer.concat([cipher.update(JSON.stringify(credentials),'utf8'), cipher.final()]);
-    this.db.prepare('INSERT INTO channels VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET display_name=excluded.display_name, credential=excluded.credential, nonce=excluded.nonce, tag=excluded.tag').run(id, displayName.slice(0,80), encrypted, nonce, cipher.getAuthTag());
+    this.db.prepare('INSERT INTO channels(id,display_name,credential,nonce,tag,connected) VALUES(?,?,?,?,?,1) ON CONFLICT(id) DO UPDATE SET display_name=excluded.display_name, credential=excluded.credential, nonce=excluded.nonce, tag=excluded.tag, connected=1').run(id, displayName.slice(0,80), encrypted, nonce, cipher.getAuthTag());
   }
   channelCredentials(id) {
     if (!validId(id)) return null;
@@ -43,7 +45,9 @@ export class SharedStore {
     return JSON.parse(Buffer.concat([cipher.update(row.credential),cipher.final()]).toString('utf8'));
   }
   channelName(id) { return validId(id) ? this.db.prepare('SELECT display_name FROM channels WHERE id=?').get(id)?.display_name : null; }
-  hasChannel(id) { return validId(id) && !!this.db.prepare('SELECT 1 FROM channels WHERE id=?').get(id); }
+  channelExists(id) { return validId(id) && !!this.db.prepare('SELECT 1 FROM channels WHERE id=?').get(id); }
+  hasChannel(id) { return validId(id) && !!this.db.prepare('SELECT 1 FROM channels WHERE id=? AND connected=1').get(id); }
+  markChannelDisconnected(id) { if (validId(id)) this.db.prepare('UPDATE channels SET connected=0 WHERE id=?').run(id); }
   record(event, now = Date.now()) {
     if (!event || typeof event.id !== 'string' || !event.id || event.id.length > 256 || !validId(event.channel) || !this.hasChannel(event.channel)) throw new Error('Invalid event channel');
     if (!Number.isSafeInteger(now) || !Number.isFinite(Date.parse(event.at))) throw new Error('Invalid event time');
