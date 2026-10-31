@@ -28,5 +28,15 @@ Fresh playback, joint appearance, profile compositing, chest readability and
 exit cleanup were inspected. The deployed arm atlas byte-matches the verified
 local file. Both regression suites pass (97 overall, 29 shared-service).
 
-The separate `.blend` source-file export/transfer was blocked by automatic
-approval review. No `.blend` from that attempt was copied into this repository.
+`robot-current-motion-source.blend` is the isolated source archive, retained
+with explicit user approval: one `RA_CurrentRobot_Source` scene, 24 objects,
+18 meshes, nine animation actions and zero images. It includes no unrelated
+scenes or avatar portrait and requires no external textures. The transferred
+file checksum matches the Blender PC:
+
+`decb0a7568e2fbb775b4eb9e0fd44e8ba7b7cc619714beabeb601fa95248181b`
+
+Open it in Blender 5.1 and run the prepare helper before the render helper.
+Both helpers recognize the isolated source scene. The original working project
+on the Blender PC was not overwritten. The CRT head remains attributed to
+Jampre under CC BY 4.0 in the repository credits.

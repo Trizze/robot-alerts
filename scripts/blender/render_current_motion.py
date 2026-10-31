@@ -10,7 +10,7 @@ previous = namespace.get("ra_current_export")
 if previous and previous.get("running"):
     print("Render already running:", previous["done"], "/", previous["total"])
 else:
-    scene = bpy.data.scenes["RA_CurrentRobot_Motion"]
+    scene = bpy.data.scenes.get("RA_CurrentRobot_Motion") or bpy.data.scenes["RA_CurrentRobot_Source"]
     base = namespace["ra_current_base_materials"]
     group = namespace["ra_current_layer_group"]
     meshes = [obj for obj in scene.objects if obj.name in base]

@@ -4,7 +4,7 @@
 
 - LIVE: nine independent alert designs; Gaming/Default category controls removed. Revision `joints-20261031` replaces old spherical joints in hosted/local motion sheets using the approved joint-study geometry. All 1,936 layer frames rerendered at 1080p/60 fps in a separate scene; original meshes unchanged. Same camera/actions; projection samples within 0.001 px.
 - Fresh playback and profile/holdout compositing inspected; chest text contrast and complete exit fade checked. 97 overall / 29 shared-service tests pass. Both asset-first and versioned-loader uploads used the approved 134-file set. Public overlay 200, API 204; live arm atlas byte-matches the local render. Existing browser sources need one refresh.
-- Rebuild helpers and runtime atlases are committed. Raw PNG archives/proofs are local in `assets/robot/current-model-motion/`; Blender's separate scene is `RA_CurrentRobot_Motion`. Automatic review rejected the separate `.blend` source export/transfer and a draft transfer-policy description; neither was retried. Source-file copy remains pending explicit user approval. The deployed fix is unaffected.
+- Rebuild helpers and runtime atlases are committed. Raw PNG archives/proofs are local in `assets/robot/current-model-motion/`; Blender's separate scene is `RA_CurrentRobot_Motion`. Automatic review rejected the separate `.blend` source export/transfer and a draft transfer-policy description; neither was retried. The user subsequently approved the specific source-file copy; it is now retained as `assets/robot/current-model-motion/robot-current-motion-source.blend` (one scene, 24 objects, nine actions, zero images; checksum verified). The original working project was not overwritten.
 
 ## Streamer onboarding checkpoint (latest)
 

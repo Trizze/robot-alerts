@@ -4,7 +4,7 @@ import bpy
 ns = bpy.app.driver_namespace
 if ns.get("ra_current_export", {}).get("running"):
     raise RuntimeError("Do not change render setup while an export is running")
-scene = bpy.data.scenes.get("RA_CurrentRobot_Motion")
+scene = bpy.data.scenes.get("RA_CurrentRobot_Motion") or bpy.data.scenes.get("RA_CurrentRobot_Source")
 if scene is None:
     source = bpy.data.scenes["RA_Joint_Study"]
     original = bpy.data.scenes["RobotAlerts_CameraTests"]
