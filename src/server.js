@@ -38,6 +38,7 @@ const csrf = randomBytes(32).toString('hex');
 const peers = new Map();
 const feed = [];
 const broadcast = value => { const text = JSON.stringify(value); for (const peer of peers.keys()) if (peer.readyState === WebSocket.OPEN) peer.send(text); };
+const visibleViewers = () => { const viewers=store.list(); return demo ? viewers : viewers.filter(viewer=>allowedViewer(viewer.id)); };
 const log = (type, text) => { feed.unshift({ type, text: String(text).slice(0, 450), at: new Date().toISOString() }); feed.splice(40); broadcast({ kind: 'feed', feed }); };
 const queue = new AlertQueue(broadcast, channel => store.settings(channel));
 async function reply(channel, text, actorId) {
@@ -59,7 +60,7 @@ async function ingest(event) {
     const enrichment = profiles.enrich(event).then(() => {
       if (!event.viewer?.id || !store.viewer(event.viewer.id)) return [];
       const observed = store.apply({ ...event, id: `${event.id}:profile`, type: 'observation', bits: undefined, gifts: undefined });
-      if (viewerBroadcastDone) broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) });
+      if (viewerBroadcastDone) broadcast({ kind: 'viewers', viewers: visibleViewers() });
       broadcast({ kind: 'test-viewers', viewers: availableTestViewers() });
       if (queue.current?.viewer?.id === event.viewer.id) { queue.current.viewer = store.viewer(event.viewer.id); broadcast({ kind: 'profile', key: queue.current.key, viewer: queue.current.viewer }); }
 
@@ -70,19 +71,18 @@ async function ingest(event) {
   }
   if (event.type === 'chat') await commands.handle(event);
   else if (event.type !== 'observation') { enqueue(event, result.unlocked); log('event', `${event.viewer?.name || 'Anonymous'} · ${event.type}${event.bits ? ` · ${event.bits} bits` : ''}${event.gifts ? ` · ${event.gifts} gifts` : ''}`); }
-  const pending = store.db.prepare("SELECT * FROM announcements WHERE status='pending'").all();
-  for (const row of pending) { if (!demo && !allowedViewer(row.viewer)) continue; store.db.prepare("UPDATE announcements SET status='sent' WHERE id=?").run(row.id); log('unlock', row.message); if (!demo) await reply(row.channel, row.message, row.viewer); }
+  await store.flushAnnouncements({allow:row=>demo || allowedViewer(row.viewer),deliver:async row=>{ log('unlock',row.message); if (!demo) await reply(row.channel,row.message,row.viewer); }});
   viewerBroadcastDone = true;
-  broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) });
+  broadcast({ kind: 'viewers', viewers: visibleViewers() });
 }
 const demoWorkspace = new DemoWorkspace(demoStore, queue, channel, log, () => {
   broadcast({ kind: 'demo-viewers', viewers: demoStore.list() });
-  if (demo) broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) });
+  if (demo) broadcast({ kind: 'viewers', viewers: visibleViewers() });
 }, () => store.settings(channel));
 function availableTestViewers() { const real = chatProfiles(store.list()).filter(viewer => allowedViewer(viewer.id)); return real.length ? real : demo ? demoStore.list().filter(viewer => viewer.avatar && !/^\d+$/.test(viewer.id)) : []; }
 function makeTest(type, index = 0, sourceViewerId) { return testEvent(type, index, chatProfiles(store.list()).filter(viewer => allowedViewer(viewer.id)), { sourceViewerId, allowFixtures: demo }); }
 const replay = new DemoReplay(event => demoWorkspace.ingest(event).catch(() => log('error', 'Demo event failed.')), () => broadcast({ kind: 'replay', running: replay?.running || false }), makeTest);
-function state() { return { apiVersion: API_VERSION, serverTime: Date.now(), mode: demo ? 'demo' : 'live', liveReady: true, connections, channel, settings: store.settings(channel), viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)), demoViewers: demoStore.list(), testViewers: availableTestViewers(), testAccounts: reactionPolicy.ids, unlocks, registry, feed, running: replay.running, current: queue.current, queued: queue.pending.length, aiEnabled: false }; }
+function state() { return { apiVersion: API_VERSION, serverTime: Date.now(), mode: demo ? 'demo' : 'live', liveReady: true, connections, channel, settings: store.settings(channel), viewers: visibleViewers(), demoViewers: demoStore.list(), testViewers: availableTestViewers(), testAccounts: reactionPolicy.ids, unlocks, registry, feed, running: replay.running, current: queue.current, queued: queue.pending.length, aiEnabled: false }; }
 function allowedHost(value) { return value === `127.0.0.1:${port}` || value === `localhost:${port}`; }
 function allowedOrigin(value) { try { const url = new URL(value); return url.protocol === 'http:' && allowedHost(url.host); } catch { return false; } }
 function send(res, code, body, type = 'application/json') { res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(type === 'application/json' && !Buffer.isBuffer(body) ? JSON.stringify(body) : body); }
@@ -128,7 +128,7 @@ const server = http.createServer(async (req, res) => {
       if (url.pathname === '/api/demo/event') { if (!['sub', 'resub', 'gift', 'cheer', 'raid', 'follow', 'preview'].includes(input.type)) return send(res, 400, { error: 'Unknown test alert type.' }); if (input.animation && !['robot', 'meteor', 'parachute', 'run-button', 'custom'].includes(input.animation)) return send(res, 400, { error: 'Unknown test animation.' }); if (!demo && !availableTestViewers().length) return send(res, 409, { error: 'Send !robot in chat to cache a Twitch profile picture, then retry.' }); await demoWorkspace.ingest({ ...makeTest(input.type, Math.max(0, Math.min(3, Number(input.viewer) || 0)), input.sourceViewerId), animationOverride: input.animation === 'parachute' ? 'meteor' : input.animation }); return send(res, 200, { ok: true }); }
       if (url.pathname === '/api/demo/command') { const event = makeDemo('chat', Math.max(0, Math.min(3, Number(input.viewer) || 0))); event.message = String(input.message || '').slice(0, 300); await demoWorkspace.ingest(event); return send(res, 200, { ok: true }); }
       if (url.pathname === '/api/demo/reset') { replay.stop(); demoWorkspace.reset(); return send(res, 200, { ok: true }); }
-      if (url.pathname === '/api/viewer/delete') { if (typeof input.id !== 'string') throw new Error('A viewer ID is required.'); store.deleteViewer(input.id); if (profiles) await profiles.deleteCachedAvatar(input.id); else await deleteAvatarFiles(input.id); broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) }); return send(res, 200, { ok: true }); }
+      if (url.pathname === '/api/viewer/delete') { if (typeof input.id !== 'string') throw new Error('A viewer ID is required.'); store.deleteViewer(input.id); if (profiles) await profiles.deleteCachedAvatar(input.id); else await deleteAvatarFiles(input.id); broadcast({ kind: 'viewers', viewers: visibleViewers() }); return send(res, 200, { ok: true }); }
       return send(res, 404, { error: 'Unknown API route.' });
     }
     if (req.method !== 'GET') return send(res, 405, { error: 'Method not allowed.' });

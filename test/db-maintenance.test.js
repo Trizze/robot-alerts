@@ -24,3 +24,13 @@ test('receipt cleanup is indexed, scheduled separately and retains recent receip
   assert.ok(store.db.prepare("PRAGMA index_list('receipts')").all().some(row=>row.name==='receipts_created_at'));
  }finally{store.close();}
 });
+
+test('announcement flushing respects the viewer filter and delivers each pending row once', async () => {
+ const store=new Store(':memory:');try {
+  store.db.prepare("INSERT INTO announcements(id,channel,message,viewer) VALUES(?,?,?,?)").run('a','channel','allowed','1');
+  store.db.prepare("INSERT INTO announcements(id,channel,message,viewer) VALUES(?,?,?,?)").run('b','channel','blocked','2');
+  const delivered=[];await store.flushAnnouncements({allow:row=>row.viewer==='1',deliver:row=>delivered.push(row.message)});
+  await store.flushAnnouncements({allow:row=>row.viewer==='1',deliver:row=>delivered.push(row.message)});
+  assert.deepEqual(delivered,['allowed']);assert.equal(store.db.prepare('SELECT status FROM announcements WHERE id=?').get('b').status,'pending');
+ }finally{store.close();}
+});

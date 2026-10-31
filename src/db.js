@@ -33,7 +33,8 @@ export class Store {
       addObservation:'INSERT OR IGNORE INTO observations(viewer,channel) VALUES(?,?)',
       updateObservation:`UPDATE observations SET months=MAX(months,?),bits=bits+?,gifts=gifts+?,streak=MAX(streak,?),followed_at=COALESCE(?,followed_at) WHERE viewer=? AND channel=?`,
       follows:'SELECT followed_at FROM observations WHERE viewer=? AND followed_at IS NOT NULL', addOwned:'INSERT OR IGNORE INTO owned VALUES(?,?,?,?,?)',
-      updateLook:'UPDATE viewers SET look=? WHERE id=?', announce:'INSERT OR IGNORE INTO announcements(id,channel,message,viewer) VALUES(?,?,?,?)'
+      updateLook:'UPDATE viewers SET look=? WHERE id=?', announce:'INSERT OR IGNORE INTO announcements(id,channel,message,viewer) VALUES(?,?,?,?)',
+      pendingAnnouncements:"SELECT * FROM announcements WHERE status='pending'", markAnnouncementSent:"UPDATE announcements SET status='sent' WHERE id=? AND status='pending'"
     };
     this.sql=Object.fromEntries(Object.entries(statements).map(([name,sql])=>[name,this.db.prepare(sql)]));
     this.pruneReceipts();
@@ -90,6 +91,13 @@ export class Store {
       this.db.exec('COMMIT');
       return { unlocked, viewer: this.viewer(v.id) };
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
+  }
+  async flushAnnouncements({allow=()=>true,deliver}) {
+    for (const row of this.sql.pendingAnnouncements.all()) {
+      if (!allow(row)) continue;
+      if (!this.sql.markAnnouncementSent.run(row.id).changes) continue;
+      await deliver(row);
+    }
   }
   pruneReceipts(now=Date.now()) { return this.sql.pruneReceipt.run(new Date(now-30*86400000).toISOString()).changes; }
   close() { clearInterval(this.receiptTimer); this.db.close(); }

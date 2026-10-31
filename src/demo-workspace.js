@@ -19,10 +19,7 @@ export class DemoWorkspace {
     const result = this.store.apply(event); if (result.duplicate) return;
     if (event.type === 'chat') await this.commands.handle(event);
     else { this.enqueue(event, result.unlocked); this.log('demo-event', `[Demo] ${event.viewer.name} · ${event.type}`); }
-    for (const row of this.store.db.prepare("SELECT * FROM announcements WHERE status='pending'").all()) {
-      this.store.db.prepare("UPDATE announcements SET status='sent' WHERE id=?").run(row.id);
-      this.log('demo-unlock', `[Demo] ${row.message}`);
-    }
+    await this.store.flushAnnouncements({deliver:row=>this.log('demo-unlock', `[Demo] ${row.message}`)});
     this.changed();
   }
   reset() {
