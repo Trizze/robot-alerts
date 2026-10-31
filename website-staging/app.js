@@ -139,8 +139,70 @@ async function request(path, options = {}) {
   }
   return response.status === 204 ? null : response.json();
 }
+let toastTimer;
 function error(message) {
   status.textContent = message;
+  const toast = $("#feedback-toast");
+  toast.textContent = message;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.hidden = true;
+  }, 6500);
+}
+const pendingActions = new Map();
+function startAction(button, text) {
+  if (pendingActions.has(button)) return false;
+  pendingActions.set(button, button.textContent);
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  button.textContent = text;
+  return true;
+}
+function finishAction(button) {
+  if (!pendingActions.has(button)) return;
+  button.textContent = pendingActions.get(button);
+  pendingActions.delete(button);
+  button.disabled = false;
+  button.removeAttribute("aria-busy");
+}
+async function runAction(button, pending, success, work) {
+  if (!startAction(button, pending)) return;
+  error(pending);
+  try {
+    const result = await work();
+    finishAction(button);
+    if (result !== false)
+      error(typeof success === "function" ? success() : success);
+  } catch (failure) {
+    finishAction(button);
+    error(failure.message || "That action failed. Please try again.");
+  }
+}
+window.addEventListener("pageshow", () => {
+  for (const button of pendingActions.keys()) finishAction(button);
+});
+function confirmDataAction(title, description, action, wordRequired = false) {
+  const dialog = $("#confirm-dialog");
+  $("#confirm-title").textContent = title;
+  $("#confirm-description").textContent = description;
+  $("#confirm-delete").textContent = action;
+  $("#confirm-check").hidden = !wordRequired;
+  $("#confirm-word").value = "";
+  $("#confirm-delete").disabled = wordRequired;
+  $("#confirm-word").oninput = () => {
+    $("#confirm-delete").disabled =
+      wordRequired && $("#confirm-word").value !== "DELETE";
+  };
+  dialog.returnValue = "cancel";
+  dialog.showModal();
+  return new Promise((resolve) =>
+    dialog.addEventListener(
+      "close",
+      () => resolve(dialog.returnValue === "confirm"),
+      { once: true },
+    ),
+  );
 }
 function label(text, className) {
   const e = document.createElement("span");
@@ -248,6 +310,7 @@ try {
     camera.position.set(4, 2.5, 5);
     controls.target.set(0, 1.35, 0);
     controls.update();
+    error("View reset.");
   });
 } catch {
   $("#viewer-status").textContent =
@@ -414,9 +477,10 @@ async function renderChest(type = "none", value = "", animated = false) {
 }
 async function saveAppearance(changes) {
   if (!viewer) {
-    error("Previewing only. Sign in to save your appearance.");
-    return;
+    error("Preview applied. Sign in to save your appearance.");
+    return true;
   }
+  error("Saving appearance…");
   try {
     await request("/api/me/appearance", {
       method: "POST",
@@ -424,8 +488,10 @@ async function saveAppearance(changes) {
       body: JSON.stringify(changes),
     });
     error("Appearance saved.");
+    return true;
   } catch {
-    error("Could not save your appearance.");
+    error("Could not save your appearance. Please try again.");
+    return false;
   }
 }
 async function showAvatar(url) {
@@ -453,6 +519,7 @@ async function preview(pattern, { save = true } = {}) {
   renderInventory();
   if (!material) return;
   const requestId = ++imageRequest;
+  if (save) error("Loading pattern preview…");
   try {
     const map = await new THREE.TextureLoader().loadAsync(pattern.image);
     if (requestId !== imageRequest) {
@@ -556,6 +623,8 @@ function setViewer(data) {
   $("#login").hidden = Boolean(viewer);
   $("#logout").hidden = !viewer;
   $("#delete-viewer").hidden = !viewer;
+  $("#data-management").hidden = !viewer;
+  if (!viewer) $("#data-management").open = false;
   $("#disconnect").hidden = !channelStored;
   $("#account-status").textContent = viewer
     ? `Signed in as ${viewer.displayName}${channelStored && !channel ? " · Channel disconnected" : ""}`
@@ -592,37 +661,41 @@ $("#chest-kind").addEventListener("change", (e) => {
     saveAppearance({ chestType: "none", chestValue: "" });
   }
 });
-$("#chest-apply").addEventListener("click", async () => {
-  const type = $("#chest-kind").value;
-  if (type === "emoji") {
-    if (!selectedEmoji) error("Choose an emoji below.");
-    else if ((await renderChest("emoji", selectedEmoji)) !== false)
-      saveAppearance({ chestType: "emoji", chestValue: selectedEmoji });
-    return;
-  }
-  if (type === "none") {
-    if ((await renderChest()) !== false)
-      saveAppearance({ chestType: "none", chestValue: "" });
-    return;
-  }
-  const typed = $("#chest-value").value.trim();
-  const match =
-    findEmote(typed) ||
-    (/^(?:\d{1,32}|emotesv2_[A-Za-z0-9_-]{1,70})$/.test(typed)
-      ? { name: typed, id: typed, animated: false }
-      : null);
-  if (!match) {
-    error(
-      API_BASE
-        ? "Emote not found. Try a Twitch global emote name."
-        : "Emote not in the preview list. More will be available when the shared service is connected.",
-    );
-    return;
-  }
-  $("#chest-value").value = match.name;
-  if ((await renderChest("emote", match.id, match.animated)) !== false)
-    saveAppearance({ chestType: "emote", chestValue: match.id });
-});
+$("#chest-apply").addEventListener("click", () =>
+  runAction(
+    $("#chest-apply"),
+    "Applying…",
+    () =>
+      viewer ? "Appearance saved." : "Preview applied. Sign in to save it.",
+    async () => {
+      const type = $("#chest-kind").value;
+      if (type === "emoji") {
+        if (!selectedEmoji) throw new Error("Choose an emoji below first.");
+        if ((await renderChest("emoji", selectedEmoji)) === false) return false;
+        return saveAppearance({
+          chestType: "emoji",
+          chestValue: selectedEmoji,
+        });
+      }
+      if (type === "none") {
+        if ((await renderChest()) === false) return false;
+        return saveAppearance({ chestType: "none", chestValue: "" });
+      }
+      const typed = $("#chest-value").value.trim();
+      const match =
+        findEmote(typed) ||
+        (/^(?:\d{1,32}|emotesv2_[A-Za-z0-9_-]{1,70})$/.test(typed)
+          ? { name: typed, id: typed, animated: false }
+          : null);
+      if (!match)
+        throw new Error("Emote not found. Try a Twitch global emote name.");
+      $("#chest-value").value = match.name;
+      if ((await renderChest("emote", match.id, match.animated)) === false)
+        return false;
+      return saveAppearance({ chestType: "emote", chestValue: match.id });
+    },
+  ),
+);
 $("#chest-value").addEventListener("input", (e) => {
   if (e.isComposing) return;
   const field = e.currentTarget,
@@ -649,53 +722,64 @@ for (const b of document.querySelectorAll(".filter"))
       x.classList.toggle("active", x === b);
     renderInventory();
   });
-$("#login").addEventListener("click", () => {
+function openTwitch(button, role) {
+  if (!startAction(button, "Opening Twitch…")) return;
+  error("Opening Twitch for authorization…");
   try {
-    location.assign(service("/auth/start?role=viewer"));
-  } catch (e) {
-    error(e.message);
+    location.assign(service(`/auth/start?role=${role}`));
+  } catch (failure) {
+    finishAction(button);
+    error(failure.message);
   }
-});
-$("#connect-streamer").addEventListener("click", () => {
-  try {
-    location.assign(service("/auth/start?role=streamer"));
-  } catch (e) {
-    error(e.message);
-  }
-});
-$("#logout").addEventListener("click", async () => {
-  try {
+}
+$("#login").addEventListener("click", () => openTwitch($("#login"), "viewer"));
+$("#connect-streamer").addEventListener("click", () =>
+  openTwitch($("#connect-streamer"), "streamer"),
+);
+$("#logout").addEventListener("click", () =>
+  runAction($("#logout"), "Signing out…", "Signed out.", async () => {
     await request("/api/session", { method: "DELETE" });
     setViewer(null);
-    error("Signed out.");
-  } catch (e) {
-    error(e.message);
-  }
-});
+  }),
+);
 $("#delete-viewer").addEventListener("click", async () => {
   if (
-    !confirm(
-      "Delete your viewer data and earned points? This cannot be undone.",
-    )
+    !(await confirmDataAction(
+      "Are you sure you want to delete your data?",
+      "This permanently removes your viewer profile, earned points, patterns and appearance settings across participating channels, and signs you out. A connected streamer channel stays connected; disconnect it separately.",
+      "Delete my data permanently",
+      true,
+    ))
   )
     return;
-  try {
-    await request("/api/me", { method: "DELETE" });
-    setViewer(null);
-    error("Your viewer data was deleted.");
-  } catch (e) {
-    error(e.message);
-  }
+  await runAction(
+    $("#delete-viewer"),
+    "Deleting data…",
+    "Your viewer data was deleted. You are signed out.",
+    async () => {
+      await request("/api/me", { method: "DELETE" });
+      setViewer(null);
+    },
+  );
 });
 $("#disconnect").addEventListener("click", async () => {
-  if (!confirm("Disconnect your channel and remove its point records?")) return;
-  try {
-    await request("/api/channel", { method: "DELETE" });
-    setViewer(null);
-    error("Your channel was disconnected.");
-  } catch (e) {
-    error(e.message);
-  }
+  if (
+    !(await confirmDataAction(
+      "Disconnect your channel?",
+      "This removes your channel connection and its point records. Viewers’ totals will be recalculated. You can reconnect your channel later.",
+      "Disconnect channel",
+    ))
+  )
+    return;
+  await runAction(
+    $("#disconnect"),
+    "Disconnecting…",
+    "Your channel was disconnected.",
+    async () => {
+      await request("/api/channel", { method: "DELETE" });
+      await loadAccount();
+    },
+  );
 });
 async function loadAccount() {
   $("#account-status").textContent = "Checking sign-in…";
