@@ -523,3 +523,50 @@ test("health endpoint reports database availability without requiring a session"
     503,
   );
 });
+
+test("viewer account deletion invalidates both session roles through the API", async (t) => {
+  const store = new SharedStore(":memory:", {
+    encryptionKey: randomBytes(32),
+    patternSeed: randomBytes(32),
+    catalog: [],
+  });
+  store.upsertViewer("123", "Viewer");
+  store.saveChannel("123", "Channel", {
+    value: randomBytes(32).toString("hex"),
+  });
+  const viewer = store.createSession("123", "viewer"),
+    streamer = store.createSession("123", "streamer");
+  const server = createService({
+    store,
+    twitch: {},
+    webhookSecret: randomBytes(32).toString("hex"),
+    frontendUrl: "https://trizze.tv/robot/",
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(async () => {
+    await new Promise((resolve) => server.close(resolve));
+    store.close();
+  });
+  const base = `http://127.0.0.1:${server.address().port}`;
+  assert.equal(
+    (
+      await fetch(base + "/api/me", {
+        method: "DELETE",
+        headers: {
+          origin: "https://trizze.tv",
+          cookie: `__Host-robot_session=${viewer}`,
+        },
+      })
+    ).status,
+    204,
+  );
+  assert.equal(
+    (
+      await fetch(base + "/api/me", {
+        headers: { cookie: `__Host-robot_session=${streamer}` },
+      })
+    ).status,
+    401,
+  );
+  assert.equal(store.hasChannel("123"), true);
+});
