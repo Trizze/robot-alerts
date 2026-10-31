@@ -11,7 +11,7 @@ export class SharedStore {
   constructor(path, { encryptionKey, patternSeed, catalog }) {
     if (!Buffer.isBuffer(encryptionKey) || encryptionKey.length !== 32 || !Buffer.isBuffer(patternSeed) || patternSeed.length < 32) throw new Error('Encryption and pattern keys must be configured');
     if (!Array.isArray(catalog) || catalog.some(p => !p || !/^[a-z0-9_]+$/.test(p.id) || !Number.isInteger(p.tier) || p.tier < 1 || p.tier > 5) || new Set(catalog.map(p => p.id)).size !== catalog.length) throw new Error('Invalid pattern catalog');
-    this.key = encryptionKey; this.patternSeed = patternSeed; this.catalog = catalog;
+    this.key = encryptionKey; this.patternSeed = Buffer.from(patternSeed); this.catalog = catalog.map(item => Object.freeze({ ...item })); this.patternRankCache = new Map();
     this.counts = [1,2,3,4,5].map(tier => catalog.filter(p => p.tier === tier).length);
     this.db = new DatabaseSync(path);
     this.db.exec(`PRAGMA foreign_keys=ON; PRAGMA journal_mode=WAL;
@@ -72,11 +72,21 @@ export class SharedStore {
     // A keyed ordering is a stable, random-looking draw without storing another
     // personal-data table. Keep the catalog and seed stable after launch.
     const owned = [];
-    for (let tier = 1; tier <= 5; tier++) {
-      const ranked = this.catalog.filter(p => p.tier === tier).map(p => ({ ...p, rank:createHmac('sha256',this.patternSeed).update(id + ':' + tier + ':' + p.id).digest('hex') })).sort((a,b) => a.rank.localeCompare(b.rank));
-      owned.push(...ranked.slice(0,slots[tier-1]).map(({rank,...p}) => p));
+    if (slots.some(Boolean)) {
+      const ranked = this.rankedPatterns(id);
+      for (let tier = 1; tier <= 5; tier++) owned.push(...ranked[tier-1].slice(0,slots[tier-1]));
     }
     return { id:row.id, displayName:row.display_name, points:points/500, tier:unlockedPatternTier(points), selectedPattern:owned.some(p=>p.id===row.selected_pattern) ? row.selected_pattern : null, patternScale:row.pattern_scale, chestType:row.chest_type, chestValue:row.chest_value, owned };
+  }
+  rankedPatterns(id) {
+    const cached = this.patternRankCache.get(id);
+    if (cached) { this.patternRankCache.delete(id); this.patternRankCache.set(id,cached); return cached; }
+    const ranks = [1,2,3,4,5].map(tier => this.catalog.filter(p=>p.tier===tier)
+      .map(p=>({pattern:p,rank:createHmac('sha256',this.patternSeed).update(id+':'+tier+':'+p.id).digest('hex')}))
+      .sort((a,b)=>a.rank.localeCompare(b.rank)).map(item=>item.pattern));
+    this.patternRankCache.set(id,ranks);
+    if (this.patternRankCache.size > 256) this.patternRankCache.delete(this.patternRankCache.keys().next().value);
+    return ranks;
   }
   upsertViewer(id,name) {
     if (!validId(id) || typeof name !== 'string' || !name) throw new Error('Invalid viewer');
@@ -127,6 +137,7 @@ export class SharedStore {
   }
   deleteViewer(id) {
     if (!validId(id)) return;
+    this.patternRankCache.delete(id);
     this.db.exec('BEGIN IMMEDIATE');
     try { this.db.prepare('DELETE FROM viewers WHERE id=?').run(id); this.db.prepare('DELETE FROM sessions WHERE user_id=?').run(id); this.db.exec('COMMIT'); }
     catch (error) { this.db.exec('ROLLBACK'); throw error; }

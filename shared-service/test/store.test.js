@@ -48,3 +48,10 @@ test('viewer deletion ends both viewer and streamer sessions but does not discon
  s.deleteViewer('1');assert.equal(s.session(viewer),null);assert.equal(s.session(streamer),null);assert.equal(s.session(other).id,'2');assert.equal(s.hasChannel('1'),true);
  }finally{s.close();}
 });
+test('pattern ranking cache is bounded, stable and cleared on viewer deletion', () => {
+ const s=create();try {
+  const first=s.rankedPatterns('1');assert.equal(s.rankedPatterns('1'),first);
+  for(let i=2;i<=260;i++)s.rankedPatterns(String(i));assert.equal(s.patternRankCache.size,256);assert.equal(s.patternRankCache.has('1'),false);
+  const again=s.rankedPatterns('1');assert.deepEqual(again,first);s.deleteViewer('1');assert.equal(s.patternRankCache.has('1'),false);
+ }finally{s.close();}
+});
