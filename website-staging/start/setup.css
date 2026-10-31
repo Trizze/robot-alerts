@@ -132,17 +132,12 @@
 .setup-actions button.primary {
   margin: 0;
 }
-.theme-options {
-  display: flex;
-  gap: 10px;
-  margin: 22px 0;
-}
-.theme-options [aria-pressed="true"],
 .design-options [aria-pressed="true"] {
   border-color: var(--purple);
   background: #3b3050;
 }
 .design-options {
+  margin-top: 22px;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 10px;

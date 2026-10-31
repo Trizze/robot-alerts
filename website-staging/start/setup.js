@@ -125,8 +125,6 @@ $("#test-design").onclick = () =>
     feedback("Design saved and test sent to your OBS source.");
   });
 function preview() {
-  for (const b of document.querySelectorAll("[data-theme]"))
-    b.setAttribute("aria-pressed", String(settings.theme === b.dataset.theme));
   for (const b of document.querySelectorAll("[data-preset]"))
     b.setAttribute(
       "aria-pressed",
@@ -164,13 +162,6 @@ for (const id of CARD_PRESET_ORDER) {
   };
   $("#design-options").append(b);
 }
-for (const b of document.querySelectorAll("[data-theme]"))
-  b.onclick = () => {
-    settings.theme = b.dataset.theme;
-    settings.preset = settings.theme === "gaming" ? "02" : "03";
-    preview();
-    feedback("Theme preview updated. Save design to apply it.");
-  };
 $("#save-design").onclick = () =>
   action($("#save-design"), "Saving design…", async () => {
     await save();
