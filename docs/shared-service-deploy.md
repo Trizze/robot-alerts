@@ -96,3 +96,9 @@ SQLite with the service stopped. Roll back by stopping/removing the new
 container and running `robot-alerts:previous` with the same options, volume and
 env file. Restore the DB only if needed; never remove the data directory or
 change either key.
+
+Current release (2026-10-31): onboarding is deployed; `robot-alerts:onboarding`
+and `robot-alerts:release` name the new image. The stopped
+`robot-alerts-before-onboarding` container retains the previous configuration
+for rollback: stop/remove the new container, rename that retained container to
+`robot-alerts`, and start it. Keep the same data directory and keys.
