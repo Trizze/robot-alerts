@@ -50,9 +50,10 @@ server.listen(port, "0.0.0.0", () =>
   console.log(`Robot Alerts service listening on port ${port}`),
 );
 for (const signal of ["SIGINT", "SIGTERM"])
-  process.on(signal, () =>
+  process.on(signal, () => {
+    server.closeAllConnections();
     server.close(() => {
       store.close();
       process.exit(0);
-    }),
-  );
+    });
+  });

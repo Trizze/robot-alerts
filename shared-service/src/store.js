@@ -1,3 +1,4 @@
+import { channelSettings, DEFAULT_SETTINGS } from "./channel-settings.js";
 import { DatabaseSync } from "node:sqlite";
 import {
   createHash,
@@ -84,6 +85,23 @@ export class SharedStore {
       this.db.exec(
         "ALTER TABLE channels ADD COLUMN connected INTEGER NOT NULL DEFAULT 1",
       );
+    if (!channelColumns.has("overlay_settings"))
+      this.db.exec("ALTER TABLE channels ADD COLUMN overlay_settings TEXT");
+  }
+  overlaySettings(id) {
+    if (!this.channelExists(id)) return null;
+    const value = this.db
+      .prepare("SELECT overlay_settings FROM channels WHERE id=?")
+      .get(id)?.overlay_settings;
+    return value ? channelSettings(JSON.parse(value)) : { ...DEFAULT_SETTINGS };
+  }
+  saveOverlaySettings(id, input) {
+    if (!this.hasChannel(id)) throw new Error("Channel not connected");
+    const value = channelSettings(input);
+    this.db
+      .prepare("UPDATE channels SET overlay_settings=? WHERE id=?")
+      .run(JSON.stringify(value), id);
+    return value;
   }
   saveChannel(id, displayName, credentials) {
     if (

@@ -1,3 +1,4 @@
+import { OverlayHub } from "./overlay-hub.js";
 import { createServer } from "node:http";
 import { randomBytes, timingSafeEqual } from "node:crypto";
 import { parseWebhook } from "./eventsub.js";
@@ -37,6 +38,8 @@ export function createService({
   maxOAuthStates = 10000,
   clock = Date.now,
 }) {
+  const hub = new OverlayHub();
+  const testCooldown = new Map();
   const frontend = new URL(frontendUrl),
     states = new Map(),
     refreshes = new Map();
@@ -49,6 +52,8 @@ export function createService({
   const timer = setInterval(
     () => {
       store.cleanup();
+      for (const [id, expiry] of testCooldown)
+        if (expiry <= clock()) testCooldown.delete(id);
       const now = clock();
       for (const [id, state] of states)
         if (state.expires <= now) states.delete(id);
@@ -103,6 +108,44 @@ export function createService({
     }
     return refreshes.get(channel);
   }
+  async function publishAlert(channel, event, demo = false) {
+    if (
+      !store.hasChannel(channel) ||
+      !["sub", "resub", "gift", "cheer"].includes(event.type)
+    )
+      return;
+    const saved = event.viewer?.id ? store.viewer(event.viewer.id) : null;
+    let avatar;
+    try {
+      if (!event.viewer?.id) throw new Error("Anonymous event");
+      const profile = await twitch.lookup(event.viewer.id);
+      const url = new URL(profile.profile_image_url);
+      if (url.protocol === "https:" && url.hostname === "static-cdn.jtvnw.net")
+        avatar = url.href.replace("300x300", "600x600");
+    } catch {}
+    if (!store.hasChannel(channel)) return;
+    const viewer = {
+      id: event.viewer?.id || "anonymous",
+      name: String(event.viewer?.name || "Anonymous supporter").slice(0, 80),
+      avatar,
+      selectedPattern: saved?.selectedPattern || null,
+      patternScale: saved?.patternScale || 1,
+    };
+    hub.send(channel, {
+      kind: "alert",
+      alert: {
+        key: randomBytes(12).toString("hex"),
+        type: event.type,
+        viewer,
+        months: event.months,
+        bits: event.bits,
+        gifts: event.gifts,
+        tier: event.tier,
+        demo,
+        settings: store.overlaySettings(channel),
+      },
+    });
+  }
   const server = createServer(async (req, res) => {
     res.setHeader("Cache-Control", "no-store");
     res.setHeader("Referrer-Policy", "no-referrer");
@@ -125,6 +168,15 @@ export function createService({
       res.end(JSON.stringify(data));
     };
     try {
+      const overlay = /^\/overlay\/(\d{1,32})\/events$/.exec(path.pathname);
+      if (req.method === "GET" && overlay) {
+        if (req.headers.origin && req.headers.origin !== frontend.origin)
+          return respond(403, { error: "Invalid origin" });
+        if (!store.hasChannel(overlay[1]))
+          return respond(404, { error: "Channel not connected" });
+        hub.connect(overlay[1], req, res, store.overlaySettings(overlay[1]));
+        return;
+      }
       if (req.method === "GET" && path.pathname === "/healthz") {
         store.health();
         res.writeHead(204).end();
@@ -142,7 +194,12 @@ export function createService({
             error: "Too many authorization attempts; try again later",
           });
         const state = randomBytes(32).toString("base64url");
-        states.set(state, { role, expires: now + 600000 });
+        states.set(state, {
+          role,
+          returnTo:
+            path.searchParams.get("returnTo") === "start" ? "start" : "picker",
+          expires: now + 600000,
+        });
         res.setHeader("Set-Cookie", cookie(STATE, state, 600));
         res
           .writeHead(302, { Location: twitch.authorizationUrl(state, role) })
@@ -188,7 +245,14 @@ export function createService({
           cookie(STATE, "", 0),
           cookie(SESSION, token, 30 * 86400),
         ]);
-        res.writeHead(303, { Location: frontend.href }).end();
+        res
+          .writeHead(303, {
+            Location:
+              entry.returnTo === "start"
+                ? new URL("start/", frontend).href
+                : frontend.href,
+          })
+          .end();
         return;
       }
       if (req.method === "POST" && path.pathname === "/eventsub") {
@@ -208,6 +272,7 @@ export function createService({
             return;
           }
           store.markChannelDisconnected(channel);
+          hub.disconnect(channel);
           res.writeHead(204).end();
           return;
         }
@@ -222,6 +287,7 @@ export function createService({
           return;
         }
         if (parsed.event) {
+          const visualEvent = { ...parsed.event };
           if (parsed.event.type === "resub") {
             // The resub message has no gift flag; consult the current subscription.
             let credentials = store.channelCredentials(channel),
@@ -244,7 +310,9 @@ export function createService({
             if (!subscription || subscription.is_gift !== false)
               parsed.event.type = "observation";
           }
-          store.record(parsed.event);
+          const receipt = store.record(parsed.event);
+          if (!receipt.duplicate)
+            void publishAlert(channel, visualEvent).catch(() => {});
         }
         res.writeHead(204).end();
         return;
@@ -259,6 +327,54 @@ export function createService({
       )
         return respond(403, { error: "Invalid origin" });
       if (!session) return respond(401, { error: "Sign in required" });
+      if (
+        path.pathname === "/api/channel/settings" ||
+        path.pathname === "/api/channel/test"
+      ) {
+        if (session.role !== "streamer" || !store.hasChannel(session.id))
+          return respond(403, { error: "Connect your own channel first" });
+        if (path.pathname.endsWith("/settings") && req.method === "GET")
+          return respond(200, {
+            channelId: session.id,
+            settings: store.overlaySettings(session.id),
+          });
+        if (path.pathname.endsWith("/settings") && req.method === "POST") {
+          let value;
+          try {
+            value = store.saveOverlaySettings(
+              session.id,
+              JSON.parse((await body(req)).toString("utf8")),
+            );
+          } catch {
+            return respond(400, { error: "Invalid channel settings" });
+          }
+          hub.send(session.id, { kind: "settings", settings: value });
+          return respond(200, { settings: value });
+        }
+        if (path.pathname.endsWith("/test") && req.method === "POST") {
+          if (!hub.channels.get(session.id)?.size)
+            return respond(409, { error: "Connect an overlay before testing" });
+          const now = clock();
+          if ((testCooldown.get(session.id) || 0) > now)
+            return respond(429, { error: "Please wait before testing again" });
+          for (const [id, expiry] of testCooldown)
+            if (expiry <= now) testCooldown.delete(id);
+          if (testCooldown.size >= 10000)
+            return respond(429, { error: "Please try later" });
+          testCooldown.set(session.id, now + 10000);
+          await publishAlert(
+            session.id,
+            {
+              type: "cheer",
+              bits: 500,
+              viewer: { id: session.id, name: store.channelName(session.id) },
+            },
+            true,
+          );
+          return respond(200, { sent: true });
+        }
+        return respond(405, { error: "Method not allowed" });
+      }
       if (path.pathname === "/api/me" && req.method === "GET") {
         const viewer = store.viewer(session.id);
         try {
@@ -274,6 +390,7 @@ export function createService({
         return respond(200, {
           viewer,
           channel: store.hasChannel(session.id),
+          streamer: session.role === "streamer",
           channelStored:
             session.role === "streamer" && store.channelExists(session.id),
         });
@@ -324,6 +441,8 @@ export function createService({
       ) {
         const credentials = store.channelCredentials(session.id);
         store.deleteChannel(session.id);
+        hub.disconnect(session.id);
+        testCooldown.delete(session.id);
         store.deleteSession(jar[SESSION]);
         res.setHeader("Set-Cookie", cookie(SESSION, "", 0));
         if (credentials)
@@ -338,6 +457,9 @@ export function createService({
       else res.end();
     }
   });
-  server.on("close", () => clearInterval(timer));
+  server.on("close", () => {
+    clearInterval(timer);
+    hub.close();
+  });
   return server;
 }
