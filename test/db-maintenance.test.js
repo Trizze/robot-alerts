@@ -13,3 +13,14 @@ test('viewer list aggregates multiple channels without multiplying metrics or un
   const row=store.viewer('123'),list=store.list();assert.equal(list.length,1);assert.deepEqual(list[0],row);assert.equal(row.metrics.bits,1200);assert.equal(new Set(row.owned).size,row.owned.length);
  }finally{store.close();}
 });
+
+test('receipt cleanup is indexed, scheduled separately and retains recent receipts', () => {
+ const store=new Store(':memory:');try {
+  const now=Date.now(),old=new Date(now-31*86400000).toISOString(),recent=new Date(now-86400000).toISOString();
+  store.db.prepare('INSERT INTO receipts VALUES(?,?)').run('old',old);store.db.prepare('INSERT INTO receipts VALUES(?,?)').run('recent',recent);
+  store.apply({id:'next',channel:'a',at:new Date().toISOString(),type:'observation',viewer:null});
+  assert.ok(store.db.prepare('SELECT 1 FROM receipts WHERE id=?').get('old'));
+  assert.equal(store.pruneReceipts(now),1);assert.equal(store.db.prepare('SELECT 1 FROM receipts WHERE id=?').get('old'),undefined);assert.ok(store.db.prepare('SELECT 1 FROM receipts WHERE id=?').get('recent'));
+  assert.ok(store.db.prepare("PRAGMA index_list('receipts')").all().some(row=>row.name==='receipts_created_at'));
+ }finally{store.close();}
+});

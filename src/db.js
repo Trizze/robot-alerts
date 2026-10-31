@@ -12,6 +12,7 @@ export class Store {
       CREATE TABLE IF NOT EXISTS observations(viewer TEXT REFERENCES viewers(id) ON DELETE CASCADE, channel TEXT, months INTEGER DEFAULT 0, bits INTEGER DEFAULT 0, gifts INTEGER DEFAULT 0, streak INTEGER DEFAULT 0, followed_at TEXT, first_message TEXT, first_message_at TEXT, PRIMARY KEY(viewer,channel));
       CREATE TABLE IF NOT EXISTS owned(viewer TEXT REFERENCES viewers(id) ON DELETE CASCADE, part TEXT, earned_at TEXT, channel TEXT, evidence TEXT, PRIMARY KEY(viewer,part));
       CREATE TABLE IF NOT EXISTS receipts(id TEXT PRIMARY KEY, created_at TEXT NOT NULL);
+      CREATE INDEX IF NOT EXISTS receipts_created_at ON receipts(created_at);
       CREATE TABLE IF NOT EXISTS settings(channel TEXT PRIMARY KEY, value TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS announcements(id TEXT PRIMARY KEY, channel TEXT, message TEXT, status TEXT DEFAULT 'pending');
       CREATE TABLE IF NOT EXISTS migrations(version INTEGER PRIMARY KEY);
@@ -27,7 +28,7 @@ export class Store {
       viewer:aggregate('SELECT rowid AS ordinal,* FROM viewers WHERE id=?'), list:aggregate('SELECT rowid AS ordinal,* FROM viewers ORDER BY rowid DESC LIMIT 60'), explicit:'SELECT explicit FROM viewers WHERE id=?',
       setLook:'UPDATE viewers SET look=?, explicit=? WHERE id=?', updateProfile:'UPDATE viewers SET avatar=COALESCE(?,avatar), color=COALESCE(?,color), palette=COALESCE(?,palette) WHERE id=?',
       deleteViewer:'DELETE FROM viewers WHERE id=?', receipt:'SELECT 1 FROM receipts WHERE id=?', addReceipt:'INSERT INTO receipts VALUES(?,?)',
-      pruneReceipt:"DELETE FROM receipts WHERE created_at < datetime('now','-30 days')",
+      pruneReceipt:'DELETE FROM receipts WHERE created_at < ?',
       upsertViewer:`INSERT INTO viewers(id,name,color,avatar,look) VALUES(?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET name=excluded.name,color=COALESCE(excluded.color,viewers.color),avatar=COALESCE(excluded.avatar,viewers.avatar)`,
       addObservation:'INSERT OR IGNORE INTO observations(viewer,channel) VALUES(?,?)',
       updateObservation:`UPDATE observations SET months=MAX(months,?),bits=bits+?,gifts=gifts+?,streak=MAX(streak,?),followed_at=COALESCE(?,followed_at) WHERE viewer=? AND channel=?`,
@@ -35,6 +36,8 @@ export class Store {
       updateLook:'UPDATE viewers SET look=? WHERE id=?', announce:'INSERT OR IGNORE INTO announcements(id,channel,message,viewer) VALUES(?,?,?,?)'
     };
     this.sql=Object.fromEntries(Object.entries(statements).map(([name,sql])=>[name,this.db.prepare(sql)]));
+    this.pruneReceipts();
+    this.receiptTimer=setInterval(()=>this.pruneReceipts(),3600000);this.receiptTimer.unref();
   }
   settings(channel = 'demo') { const row = this.sql.settings.get(channel); return row ? validateSettings(JSON.parse(row.value)) : structuredClone(baseSettings); }
   saveSettings(channel, value) { const settings = validateSettings(value); this.sql.saveSettings.run(channel, JSON.stringify(settings)); return settings; }
@@ -67,7 +70,6 @@ export class Store {
     try {
       if (this.sql.receipt.get(event.id)) { this.db.exec('ROLLBACK'); return { duplicate: true }; }
       this.sql.addReceipt.run(event.id, new Date().toISOString());
-      this.sql.pruneReceipt.run();
       if (!event.viewer?.id) { this.db.exec('COMMIT'); return { unlocked: [], viewer: null }; }
       const v = event.viewer;
       this.sql.upsertViewer.run(v.id, v.name.slice(0, 80), v.color || null, v.avatar || null, JSON.stringify(defaults));
@@ -89,5 +91,6 @@ export class Store {
       return { unlocked, viewer: this.viewer(v.id) };
     } catch (error) { this.db.exec('ROLLBACK'); throw error; }
   }
-  close() { this.db.close(); }
+  pruneReceipts(now=Date.now()) { return this.sql.pruneReceipt.run(new Date(now-30*86400000).toISOString()).changes; }
+  close() { clearInterval(this.receiptTimer); this.db.close(); }
 }
