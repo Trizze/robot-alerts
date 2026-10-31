@@ -5,7 +5,7 @@ import {
   motionFrame,
   drawRobot,
   avatarFor,
-} from "./sprite-renderer.js";
+} from "./sprite-renderer.js?v=joints-20261031";
 const RUN_SECONDS = 54 / 30,
   OUT_SECONDS = 37 / 30,
   DOOR_LEAD = 1.15,

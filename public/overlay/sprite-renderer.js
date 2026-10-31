@@ -1,5 +1,6 @@
 import { createPixelText } from "./layer-proof/pixel-text.js";
 const base = "/overlay/static-motion-60/";
+const assetVersion = "joints-20261031";
 const allowedAvatar =
   /^\/(?:avatars\/\d+\.(?:png|jpg|webp)|assets\/avatars\/[a-zA-Z0-9_-]+\.svg)$/;
 const avatars = new Map(),
@@ -11,14 +12,16 @@ scratch.height = 720;
 const mask = scratch.getContext("2d");
 function image(src) {
   const picture = new Image();
-  picture.src = src;
+  picture.src = `${src}?v=${assetVersion}`;
   return picture.decode().then(() => picture);
 }
 export const motionReady = (async () => {
-  const response = await fetch(base + "manifest-sheets.json");
+  const response = await fetch(base + `manifest-sheets.json?v=${assetVersion}`);
   if (!response.ok) throw new Error("Robot motion assets unavailable");
   const rig = await response.json(),
     images = {};
+  if (rig.assetVersion !== assetVersion)
+    throw new Error("Robot motion revision unavailable; refresh this source.");
   [images.door, images.dust, images.doorFront] = await Promise.all([
     image("/overlay/door/opening.png"),
     image("/overlay/door/dust.png"),
@@ -119,7 +122,16 @@ function textFor(alert, viewer) {
       ? viewer.color
       : "#b5a0ff",
     key = text + color;
-  if (!textImages.has(key)) textImages.set(key, createPixelText(text, color));
+  if (!textImages.has(key)) {
+    const surface = createPixelText(text, color),
+      context = surface.getContext("2d");
+    context.globalCompositeOperation = "destination-over";
+    context.fillStyle = "#0c1420";
+    context.fillRect(0, 0, surface.width, surface.height);
+    if (textImages.size >= 64)
+      textImages.delete(textImages.keys().next().value);
+    textImages.set(key, surface);
+  }
   return textImages.get(key);
 }
 export function drawRobot(ctx, atlas, clip, index, viewer, alert) {

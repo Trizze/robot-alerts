@@ -1,5 +1,5 @@
 import { API_BASE } from "../config.js?v=shared-service-1";
-import { SpriteScene } from "./sprite-scene.js";
+import { SpriteScene } from "./sprite-scene.js?v=joints-20261031";
 import { createAlertCard } from "../shared/alert-card.js";
 const stage = document.querySelector("#stage"),
   status = document.querySelector("#connection");
@@ -44,7 +44,7 @@ function next() {
     status.textContent =
       "Robot animation could not load. Refresh this browser source.";
   });
-  timer = setTimeout(next, 11000);
+  timer = setTimeout(next, 11200);
 }
 if (!/^\d{1,32}$/.test(channel || "")) {
   status.textContent = "Set up your source at trizze.tv/robot/start/.";
