@@ -1,8 +1,9 @@
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
+import { deleteAvatarFiles } from '../avatar-files.js';
 
 export class Profiles {
-  constructor(api, store, channel) { this.api = api; this.store = store; this.channel = channel; this.cache = new Map(); this.pending = new Map(); }
+  constructor(api, store, channel) { this.api = api; this.store = store; this.channel = channel; this.cache = new Map(); this.pending = new Map(); this.avatarPending = new Map(); this.deleting = new Set(); this.generations = new Map(); }
   async enrich(event) {
     if (!event.viewer?.id) return;
     const id = event.viewer.id;
@@ -31,6 +32,18 @@ export class Profiles {
     }
   }
   async avatar(id, src) {
+    if (this.deleting.has(id)) return null;
+    const task = this.downloadAvatar(id,src);
+    if (!this.avatarPending.has(id)) this.avatarPending.set(id,new Set());
+    this.avatarPending.get(id).add(task);
+    try { return await task; } finally { const pending=this.avatarPending.get(id); pending?.delete(task); if (!pending?.size) this.avatarPending.delete(id); }
+  }
+  async deleteCachedAvatar(id) {
+    this.deleting.add(id); this.generations.set(id,(this.generations.get(id) || 0)+1);
+    try { await Promise.allSettled([...(this.avatarPending.get(id) || []),...(this.pending.has(id) ? [this.pending.get(id)] : [])]); await deleteAvatarFiles(id); this.cache.delete(id); }
+    finally { this.deleting.delete(id); }
+  }
+  async downloadAvatar(id, src) {
     if (!/^\d+$/.test(id)) return null;
     try {
       const url = new URL(src);
@@ -50,12 +63,12 @@ export class Profiles {
     const cached=this.store.viewer(viewer.id);if(cached?.avatar)return cached;
     this.crowdQueue ||= [];this.crowdActive ||= 0;
     if(this.crowdQueue.length>=128)return viewer;
-    return new Promise(resolve=>{this.crowdQueue.push({viewer,resolve,isValid});this.runCrowdQueue();});
+    return new Promise(resolve=>{this.crowdQueue.push({viewer,resolve,isValid,generation:this.generations.get(viewer.id) || 0});this.runCrowdQueue();});
   }
   runCrowdQueue(){
     while(this.crowdActive<4&&this.crowdQueue.length){
-      const {viewer,resolve,isValid}=this.crowdQueue.shift();if(!isValid()){resolve(viewer);continue;}this.crowdActive++;
-      this.api.request('broadcaster','users',{query:{id:viewer.id}}).then(async result=>{const user=result.data?.[0],avatar=await this.avatar(viewer.id,user?.profile_image_url);resolve({...viewer,avatar});}).catch(()=>resolve(viewer)).finally(()=>{this.crowdActive--;this.runCrowdQueue();});
+      const {viewer,resolve,isValid,generation}=this.crowdQueue.shift();if(!isValid() || generation!==(this.generations.get(viewer.id) || 0)){resolve(viewer);continue;}this.crowdActive++;
+      this.api.request('broadcaster','users',{query:{id:viewer.id}}).then(async result=>{if(generation!==(this.generations.get(viewer.id) || 0)){resolve(viewer);return;}const user=result.data?.[0],avatar=await this.avatar(viewer.id,user?.profile_image_url);resolve({...viewer,avatar});}).catch(()=>resolve(viewer)).finally(()=>{this.crowdActive--;this.runCrowdQueue();});
     }
   }
 }

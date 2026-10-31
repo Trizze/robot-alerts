@@ -20,6 +20,15 @@ export class Store {
   }
   settings(channel = 'demo') { const row = this.db.prepare('SELECT value FROM settings WHERE channel=?').get(channel); return row ? validateSettings(JSON.parse(row.value)) : structuredClone(baseSettings); }
   saveSettings(channel, value) { const settings = validateSettings(value); this.db.prepare('INSERT OR REPLACE INTO settings VALUES(?,?)').run(channel, JSON.stringify(settings)); return settings; }
+  mediaReferences() {
+    const result = new Set();
+    function collect(value) {
+      if (typeof value === 'string' && /^\/media\/[a-f0-9-]{36}\.(png|jpg|gif|webp|mp4|webm)$/.test(value)) result.add(value);
+      else if (value && typeof value === 'object') for (const child of Object.values(value)) collect(child);
+    }
+    for (const row of this.db.prepare('SELECT value FROM settings').all()) collect(JSON.parse(row.value));
+    return [...result];
+  }
   viewer(id) {
     const row = this.db.prepare('SELECT * FROM viewers WHERE id=?').get(id);
     if (!row) return null;

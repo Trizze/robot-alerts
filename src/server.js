@@ -1,4 +1,5 @@
-import { saveMedia, getMedia } from './media.js';
+import { saveMedia, getMedia, cleanupMedia } from './media.js';
+import { deleteAvatarFiles } from './avatar-files.js';
 import { readJsonBody } from './http-body.js';
 import { handleRaidChat } from './raid-chat.js';
 import http from 'node:http';
@@ -55,7 +56,7 @@ async function ingest(event) {
   if (profiles && (event.type !== 'chat' || !result.viewer?.avatar || /^!robot(?:\s|$)/i.test(event.message))) {
     let timeout;
     const enrichment = profiles.enrich(event).then(() => {
-      if (!event.viewer?.id) return [];
+      if (!event.viewer?.id || !store.viewer(event.viewer.id)) return [];
       const observed = store.apply({ ...event, id: `${event.id}:profile`, type: 'observation', bits: undefined, gifts: undefined });
       broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) });
       broadcast({ kind: 'test-viewers', viewers: availableTestViewers() });
@@ -109,6 +110,7 @@ const server = http.createServer(async (req, res) => {
         const themeOnly = url.pathname.endsWith('/theme');
         if (themeOnly && !['default', 'gaming'].includes(input.theme)) throw new Error('Unknown theme.');
         const settings = store.saveSettings(channel, themeOnly ? { ...store.settings(channel), theme: input.theme } : input);
+        await cleanupMedia([...store.mediaReferences(),...(demoStore === store ? [] : demoStore.mediaReferences())]);
         queue.updateTheme(settings.theme); broadcast({ kind: 'settings', settings }); return send(res, 200, settings);
       }
       if (url.pathname === '/api/preview/viewer') {
@@ -124,7 +126,7 @@ const server = http.createServer(async (req, res) => {
       if (url.pathname === '/api/demo/event') { if (!['sub', 'resub', 'gift', 'cheer', 'raid', 'follow', 'preview'].includes(input.type)) return send(res, 400, { error: 'Unknown test alert type.' }); if (input.animation && !['robot', 'meteor', 'parachute', 'run-button', 'custom'].includes(input.animation)) return send(res, 400, { error: 'Unknown test animation.' }); if (!demo && !availableTestViewers().length) return send(res, 409, { error: 'Send !robot in chat to cache a Twitch profile picture, then retry.' }); await demoWorkspace.ingest({ ...makeTest(input.type, Math.max(0, Math.min(3, Number(input.viewer) || 0)), input.sourceViewerId), animationOverride: input.animation === 'parachute' ? 'meteor' : input.animation }); return send(res, 200, { ok: true }); }
       if (url.pathname === '/api/demo/command') { const event = makeDemo('chat', Math.max(0, Math.min(3, Number(input.viewer) || 0))); event.message = String(input.message || '').slice(0, 300); await demoWorkspace.ingest(event); return send(res, 200, { ok: true }); }
       if (url.pathname === '/api/demo/reset') { replay.stop(); demoWorkspace.reset(); return send(res, 200, { ok: true }); }
-      if (url.pathname === '/api/viewer/delete') { if (typeof input.id !== 'string') throw new Error('A viewer ID is required.'); store.deleteViewer(input.id); broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) }); return send(res, 200, { ok: true }); }
+      if (url.pathname === '/api/viewer/delete') { if (typeof input.id !== 'string') throw new Error('A viewer ID is required.'); store.deleteViewer(input.id); if (profiles) await profiles.deleteCachedAvatar(input.id); else await deleteAvatarFiles(input.id); broadcast({ kind: 'viewers', viewers: demo ? store.list() : store.list().filter(viewer => allowedViewer(viewer.id)) }); return send(res, 200, { ok: true }); }
       return send(res, 404, { error: 'Unknown API route.' });
     }
     if (req.method !== 'GET') return send(res, 405, { error: 'Method not allowed.' });

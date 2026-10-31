@@ -1,4 +1,5 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, readdir, stat, unlink } from 'node:fs/promises';
+import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
 const signatures = [
   ['png','image/png',b=>b.subarray(0,8).equals(Buffer.from('89504e470d0a1a0a','hex'))],
@@ -20,4 +21,16 @@ export async function getMedia(name){
   if(!/^[a-f0-9-]{36}\.(png|jpg|gif|webp|mp4|webm)$/.test(name))return null;
   const type=signatures.find(([ext])=>name.endsWith(`.${ext}`))?.[1];
   try{return {bytes:await readFile(`data/media/${name}`),type};}catch{return null;}
+}
+
+// Only old, unreferenced uploads are removed; the grace period protects uploads
+// that are still being configured in another open settings tab.
+export async function cleanupMedia(references, { directory='data/media', now=Date.now(), graceMs=86400000 } = {}) {
+  const keep=new Set(references); let files;
+  try { files=await readdir(directory,{withFileTypes:true}); } catch(error) { if(error.code==='ENOENT') return; throw error; }
+  for(const file of files) {
+    if(!file.isFile() || !/^[a-f0-9-]{36}\.(png|jpg|gif|webp|mp4|webm)$/.test(file.name) || keep.has(`/media/${file.name}`)) continue;
+    const path=join(directory,file.name);
+    try { const info=await stat(path); if(now-info.mtimeMs>=graceMs) await unlink(path); } catch(error) { if(error.code!=='ENOENT') throw error; }
+  }
 }
