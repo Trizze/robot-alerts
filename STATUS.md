@@ -2,6 +2,8 @@
 
 ## Current shared-service update (supersedes older unresolved scope notes below)
 
+- Cross-channel milestone, local checkpoint: `shared-service/test/cross-channel.test.js` verifies signed events from two channels (15 + 10 points), retry deduplication, no gift-recipient award, one shared unlock/selection, no stored chat text, and recalculation after channel deletion. All 70 tests pass. This is a synthetic local proof; no real Twitch event or hosted service has been verified yet. Next checkpoint: deploy the service through the user's hosting setup and verify two channel authorizations and viewer login.
+
 - Private GitHub repository: `Trizze/robot-alerts`, default branch `master`; runnable app, source assets and licenses are committed. Large intermediate render archives remain local. A clean staged copy passed the tests and served demo Settings and overlay.
 - Global emote upkeep: the unhosted shared service caches Twitch's global list for one hour; the website rechecks hourly when connected. An operator-run `npm run emotes:refresh` can write a public static snapshot without printing credentials, for later publishing via the approved deploy workflow. It has only mock tests; no credentials were accessed by Codex. `npm test`: 69 pass. The live site has not yet received this snapshot-refresh update.
 
