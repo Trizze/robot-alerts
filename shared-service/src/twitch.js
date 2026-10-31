@@ -2,7 +2,7 @@
 export function twitchClient({ clientId, clientSecret, callback, webhookSecret, fetcher = fetch }) {
   let appToken;
   async function json(url, options = {}) {
-    const response = await fetcher(url, options);
+    const response = await fetcher(url, {...options, signal:AbortSignal.timeout(8000), redirect:'error'});
     if (!response.ok) { const error = new Error('Twitch request failed'); error.status = response.status; throw error; }
     return response.status === 204 ? null : response.json();
   }
@@ -42,7 +42,7 @@ export function twitchClient({ clientId, clientSecret, callback, webhookSecret, 
       return result.data.find(item => item.user_id === viewer) || null;
     },
     async revoke(value) {
-      const response = await fetcher('https://id.twitch.tv/oauth2/revoke',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:clientId,token:value})});
+      const response = await fetcher('https://id.twitch.tv/oauth2/revoke',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:new URLSearchParams({client_id:clientId,token:value}),signal:AbortSignal.timeout(8000),redirect:'error'});
       return response.ok;
     }
   };
