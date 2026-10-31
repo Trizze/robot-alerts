@@ -1,4 +1,5 @@
 import { saveMedia, getMedia } from './media.js';
+import { readJsonBody } from './http-body.js';
 import { handleRaidChat } from './raid-chat.js';
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
@@ -82,10 +83,6 @@ function state() { return { apiVersion: API_VERSION, serverTime: Date.now(), mod
 function allowedHost(value) { return value === `127.0.0.1:${port}` || value === `localhost:${port}`; }
 function allowedOrigin(value) { try { const url = new URL(value); return url.protocol === 'http:' && allowedHost(url.host); } catch { return false; } }
 function send(res, code, body, type = 'application/json') { res.writeHead(code, { 'Content-Type': type, 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' }); res.end(type === 'application/json' && !Buffer.isBuffer(body) ? JSON.stringify(body) : body); }
-async function body(req) {
-  let data = ''; for await (const chunk of req) { data += chunk; if (Buffer.byteLength(data) > 32768) throw new Error('Request too large.'); }
-  return JSON.parse(data || '{}');
-}
 const mime = { '.json': 'application/json', '.webm': 'video/webm', '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.webp': 'image/webp' };
 const publicRoot = fileURLToPath(new URL('../public/', import.meta.url));
 const server = http.createServer(async (req, res) => {
@@ -107,7 +104,7 @@ const server = http.createServer(async (req, res) => {
     }
     if (req.method === 'POST' && url.pathname.startsWith('/api/')) {
       if (!allowedOrigin(req.headers.origin) || req.headers['x-robot-csrf'] !== csrf || !req.headers['content-type']?.startsWith('application/json')) return send(res, 403, { error: 'Open the local settings page to make changes.' });
-      const input = await body(req);
+      const input = await readJsonBody(req);
       if (url.pathname === '/api/settings' || url.pathname === '/api/settings/theme') {
         const themeOnly = url.pathname.endsWith('/theme');
         if (themeOnly && !['default', 'gaming'].includes(input.theme)) throw new Error('Unknown theme.');
