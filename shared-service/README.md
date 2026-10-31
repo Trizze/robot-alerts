@@ -11,3 +11,7 @@ The shared webhook requires Twitch broadcaster authorization for `channel:read:s
 Run tests with `node --test shared-service/test/*.test.js`. Build from the repository root with `docker build -f shared-service/Dockerfile .`; do not publish without a security and live integration review. No production keys are provided or required for the tests.
 
 The website retrieves global Twitch emote names and animation metadata from the service using the app credential. While the backend is offline, the static snapshot (a small sample until the operator refreshes and publishes it) is used; a previously known emote ID remains accepted. Channel-specific emote names are not yet searchable. The chest preview decodes animated GIF frames in browsers supporting ImageDecoder; browsers without it report that animation is unsupported.
+
+## Browser origin and request limits
+
+The frontend and service must share the same registrable domain and use HTTPS, for example `https://trizze.tv/robot/` and `https://alerts.trizze.tv`. Sessions use `SameSite=Lax; Secure` cookies. A frontend hosted on an unrelated site is not supported; CORS does not make these cookies cross-site. Protect the public `/auth/start` endpoint with reverse-proxy rate limiting as well as the service’s bounded, expiring in-memory state map.

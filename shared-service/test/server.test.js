@@ -65,3 +65,14 @@ test('global emote catalog exposes names, ids and animation metadata without a s
  const url=`http://127.0.0.1:${server.address().port}/api/emotes/global`;
  for(let i=0;i<2;i++){const r=await fetch(url,{headers:{origin:'https://trizze.tv'}});assert.equal(r.status,200);assert.deepEqual((await r.json()).emotes,[{name:'Dance',id:'emotesv2_123',animated:true},{name:'Kappa',id:'25',animated:false}]);} assert.equal(calls,1);
 });
+
+test('OAuth state entries are bounded and expired entries are pruned before insertion', async t => {
+ const store=new SharedStore(':memory:',{encryptionKey:randomBytes(32),patternSeed:randomBytes(32),catalog:[]});
+ let now=1000000;const twitch={authorizationUrl:()=> 'https://id.twitch.tv/oauth2/authorize'};
+ const server=createService({store,twitch,webhookSecret:randomBytes(32).toString('hex'),frontendUrl:'https://trizze.tv/robot/',maxOAuthStates:2,clock:()=>now});
+ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));t.after(async()=>{await new Promise(resolve=>server.close(resolve));store.close();});
+ const url=`http://127.0.0.1:${server.address().port}/auth/start?role=viewer`;
+ for(let i=0;i<2;i++){const r=await fetch(url,{redirect:'manual'});assert.equal(r.status,302);assert.match(r.headers.get('set-cookie'),/SameSite=Lax/);assert.match(r.headers.get('set-cookie'),/Secure/);}
+ assert.equal((await fetch(url,{redirect:'manual'})).status,429);now+=600001;
+ assert.equal((await fetch(url,{redirect:'manual'})).status,302);
+});

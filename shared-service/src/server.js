@@ -12,11 +12,12 @@ async function body(req) {
   for await (const chunk of req) { length += chunk.length; if (length > 65536) throw new Error('Request too large'); chunks.push(chunk); }
   return Buffer.concat(chunks);
 }
-export function createService({store, twitch, webhookSecret, frontendUrl}) {
+export function createService({store, twitch, webhookSecret, frontendUrl, maxOAuthStates = 10000, clock = Date.now}) {
   const frontend = new URL(frontendUrl), states = new Map(), refreshes = new Map();
   let emoteCache = {expires:0,items:[]};
   if (frontend.protocol !== 'https:') throw new Error('Frontend must use HTTPS');
-  const timer = setInterval(() => { store.cleanup(); const now = Date.now(); for (const [id, state] of states) if (state.expires <= now) states.delete(id); }, 60 * 60 * 1000); timer.unref();
+  if (!Number.isSafeInteger(maxOAuthStates) || maxOAuthStates < 1) throw new Error('Invalid OAuth state limit');
+  const timer = setInterval(() => { store.cleanup(); const now = clock(); for (const [id, state] of states) if (state.expires <= now) states.delete(id); }, 60 * 60 * 1000); timer.unref();
   store.cleanup();
   async function refreshChannel(channel, oldCredentials) {
     if (!refreshes.has(channel)) {
@@ -45,13 +46,16 @@ export function createService({store, twitch, webhookSecret, frontendUrl}) {
     try {
       if (req.method === 'GET' && path.pathname === '/auth/start') {
         const role = path.searchParams.get('role'); if (!['viewer','streamer'].includes(role)) return respond(400,{error:'Invalid role'});
-        const state = randomBytes(32).toString('base64url'); states.set(state,{role,expires:Date.now()+600000});
+        const now = clock();
+        for (const [id, entry] of states) if (entry.expires <= now) states.delete(id);
+        if (states.size >= maxOAuthStates) return respond(429,{error:'Too many authorization attempts; try again later'});
+        const state = randomBytes(32).toString('base64url'); states.set(state,{role,expires:now+600000});
         res.setHeader('Set-Cookie',cookie(STATE,state,600)); res.writeHead(302,{Location:twitch.authorizationUrl(state,role)}).end(); return;
       }
       if (req.method === 'GET' && path.pathname === '/auth/callback') {
         const state = path.searchParams.get('state'), entry = states.get(state); states.delete(state);
         res.setHeader('Set-Cookie',cookie(STATE,'',0));
-        if (!entry || entry.expires <= Date.now() || !same(state,jar[STATE]) || !path.searchParams.get('code')) return respond(400,{error:'Authorization failed'});
+        if (!entry || entry.expires <= clock() || !same(state,jar[STATE]) || !path.searchParams.get('code')) return respond(400,{error:'Authorization failed'});
         const credential = await twitch.exchange(path.searchParams.get('code')); const user = await twitch.user(credential.access_token);
         if (!user || !/^\d+$/.test(user.id) || !user.display_name) return respond(400,{error:'Invalid Twitch user'});
         store.upsertViewer(user.id,user.display_name);
