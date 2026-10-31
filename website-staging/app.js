@@ -702,7 +702,6 @@ try {
   error("The pattern catalog could not be loaded.");
 }
 await loadEmotes();
-if (API_BASE) setInterval(loadEmotes, 60 * 60 * 1000);
 try {
   const data = await request("/api/me");
   setViewer(data);
