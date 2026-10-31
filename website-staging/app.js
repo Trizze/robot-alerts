@@ -734,7 +734,7 @@ function openTwitch(button, role) {
 }
 $("#login").addEventListener("click", () => openTwitch($("#login"), "viewer"));
 $("#connect-streamer").addEventListener("click", () =>
-  openTwitch($("#connect-streamer"), "streamer"),
+  location.assign(new URL("./start/", location.href)),
 );
 $("#logout").addEventListener("click", () =>
   runAction($("#logout"), "Signing out…", "Signed out.", async () => {

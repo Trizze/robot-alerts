@@ -1,0 +1,225 @@
+.setup {
+  max-width: 1080px;
+  padding-top: 55px;
+  padding-bottom: 70px;
+}
+.setup h1 {
+  font-size: clamp(38px, 6vw, 64px);
+}
+.setup-lead,
+.setup-panel p {
+  color: var(--muted);
+  line-height: 1.7;
+}
+.setup-steps {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin: 38px 0 25px;
+}
+.setup-steps button {
+  text-align: left;
+  border: 1px solid var(--line);
+  background: #1b1c29;
+  color: var(--muted);
+  border-radius: 10px;
+  padding: 15px;
+  font-weight: 800;
+}
+.setup-steps span {
+  display: block;
+  font-size: 12px;
+  margin-top: 8px;
+}
+.setup-steps [aria-current="step"] {
+  border-color: var(--purple);
+  color: var(--purple);
+  background: #30283e;
+}
+.setup-steps button:disabled {
+  cursor: default;
+}
+.setup-panel {
+  background: #181b28;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 32px;
+}
+.setup-panel h2 {
+  font-size: 30px;
+  letter-spacing: -1px;
+  margin: 12px 0;
+}
+.setup-panel p {
+  font-size: 14px;
+  max-width: 780px;
+}
+.setup-panel button.primary {
+  margin-top: 18px;
+}
+.setup-note {
+  font-size: 12px !important;
+  color: #a5a1b5 !important;
+}
+.resolution-options {
+  border: 0;
+  padding: 0;
+  margin: 25px 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.resolution-options legend {
+  font-size: 13px;
+  margin-bottom: 12px;
+}
+.resolution-options label {
+  border: 1px solid #555063;
+  border-radius: 10px;
+  padding: 16px;
+  font-weight: 750;
+}
+.resolution-options label:has(:checked) {
+  background: #352b49;
+  border-color: var(--purple);
+}
+.resolution-options input {
+  accent-color: var(--purple);
+  margin-right: 9px;
+}
+.resolution-options small {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin: 8px 0 0 23px;
+}
+.source-label {
+  font-size: 13px;
+}
+.source-row {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
+.source-row input {
+  flex: 1;
+  min-width: 0;
+  padding: 13px;
+  background: #10121c;
+  color: var(--text);
+  border: 1px solid #50485f;
+  border-radius: 8px;
+  font:
+    12px ui-monospace,
+    monospace;
+}
+.obs-steps {
+  padding-left: 23px;
+  line-height: 2.2;
+  color: var(--muted);
+  font-size: 14px;
+}
+.obs-steps strong {
+  color: var(--text);
+}
+.setup-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-top: 20px;
+}
+.setup-actions button.primary {
+  margin: 0;
+}
+.theme-options {
+  display: flex;
+  gap: 10px;
+  margin: 22px 0;
+}
+.theme-options [aria-pressed="true"],
+.design-options [aria-pressed="true"] {
+  border-color: var(--purple);
+  background: #3b3050;
+}
+.design-options {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.design-options button {
+  text-align: left;
+  background: #222331;
+  border: 1px solid #484154;
+  color: var(--text);
+  padding: 13px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.design-options i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 9px;
+}
+.design-preview {
+  width: 100%;
+  overflow: hidden;
+  margin: 25px 0 15px;
+  background: #262737;
+  border-radius: 10px;
+  padding: 15px;
+}
+.design-preview .alert-card {
+  width: 790px;
+  height: 230px;
+  animation: none;
+}
+.design-preview .name-typed {
+  animation: none !important;
+  max-width: none !important;
+  opacity: 1;
+}
+.setup-feedback {
+  min-height: 24px;
+  font-size: 14px;
+  color: var(--lime);
+  padding: 10px 0;
+}
+.back-picker {
+  font-size: 13px;
+  color: var(--muted);
+}
+@media (max-width: 600px) {
+  .setup {
+    padding-top: 30px;
+  }
+  .setup-steps {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 7px;
+  }
+  .setup-panel {
+    padding: 22px 18px;
+  }
+  .setup-panel h2 {
+    font-size: 25px;
+  }
+  .resolution-options {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .resolution-options label {
+    padding: 12px;
+  }
+  .resolution-options small {
+    display: inline;
+    margin-left: 12px;
+  }
+  .source-row {
+    flex-direction: column;
+  }
+  .design-options {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

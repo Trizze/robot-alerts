@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Robot Alerts · Stream overlay</title>
+    <link rel="stylesheet" href="../shared/baseline.css" />
+    <link rel="stylesheet" href="./baseline.css" />
+    <link rel="stylesheet" href="./scenes.css" />
+    <link rel="stylesheet" href="../shared/alert-card.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        background: transparent;
+        overflow: hidden;
+      }
+      #stage {
+        position: relative;
+        transform-origin: 0 0;
+      }
+      #connection {
+        position: fixed;
+        bottom: 10px;
+        left: 10px;
+        color: #eee;
+        background: #221d30;
+        padding: 8px 12px;
+        border-radius: 6px;
+        font: 13px system-ui;
+      }
+      #connection[hidden] {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <main id="stage"></main>
+    <div id="connection" role="status">Connecting Robot Alerts…</div>
+    <script type="module" src="./hosted.js?v=1"></script>
+  </body>
+</html>
