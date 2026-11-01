@@ -636,18 +636,12 @@
         }
       }
     </style>
+    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=pages-1" />
+    <link rel="icon" href="/robot/brand/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
     <div class="wrap">
-      <header class="nav">
-        <a class="brand" href="../" aria-label="Robot Alerts home"
-          ><span class="mark" aria-hidden="true">R</span>ROBOT ALERTS</a
-        >
-        <nav class="navlinks" aria-label="Main">
-          <a href="#demo">See it in action</a
-          ><a href="../">Open robot picker ↗</a>
-        </nav>
-      </header>
+      <header data-site-header></header>
       <main>
         <section class="hero" aria-labelledby="hero-title">
           <div>
@@ -655,17 +649,16 @@
               <span class="dot"></span>Made for Twitch communities
             </div>
             <h1 id="hero-title">
-              Your viewers.<br />Their robots.<br /><span>Every stream.</span>
+              Level up.<br />Your own robot.<br /><span>Across streams.</span>
             </h1>
             <p class="lead">
-              Turn a moment of support into a little character with a story. A
-              CRT face, an earned look, and a robot that follows its viewer
-              across participating channels.
+              Craft your own robot that appears every time you trigger an alert
+              on screen, unlock cool patterns and show them off during streams!
             </p>
             <div class="actions">
               <a class="button primary" href="#demo"
                 >Watch the demo <span aria-hidden="true">↓</span></a
-              ><a class="button" href="../"
+              ><a class="button" href="/robot/"
                 >Meet your robot <span aria-hidden="true">↗</span></a
               >
             </div>
@@ -673,7 +666,7 @@
           <div class="hero-art">
             <div class="robot-stage">
               <img
-                src="03-marble.jpg"
+                src="/robot/examples/16-hero-robot.png"
                 alt="Chunky CRT robot wearing a marble pattern"
                 fetchpriority="high"
                 width="1024"
@@ -708,12 +701,17 @@
               controls
               playsinline
               preload="metadata"
-              poster="15-alerts-current-poster.jpg"
+              poster="/robot/examples/16-patterns-emotes-poster.jpg"
               aria-label="Robot Alerts overlay demo: cheer and resub"
             >
-              <source src="15-alerts-current.mp4" type="video/mp4" />
+              <source
+                src="/robot/examples/16-patterns-emotes.mp4"
+                type="video/mp4"
+              />
               Your browser cannot play this video.
-              <a href="15-alerts-current.mp4">Download the demo.</a>
+              <a href="/robot/examples/16-patterns-emotes.mp4"
+                >Download the demo.</a
+              >
             </video>
             <div class="video-caption">
               <b>Actual overlay · cheer + resub</b
@@ -741,10 +739,10 @@
             </article>
             <article class="step">
               <span class="num">03 / TAKE IT WITH YOU</span>
-              <h3>Your next channel. Same you.</h3>
+              <h3>Multiple channels, same you.</h3>
               <p>
-                Points and your selected pattern belong to your Twitch identity,
-                across channels connected to Robot Alerts.
+                Points and your robot design stick with you even across streams
+                that are connected to Robot Alerts.
               </p>
             </article>
           </div>
@@ -766,7 +764,7 @@
           <div class="patterns">
             <figure class="pattern">
               <img
-                src="04-rusty-metal.jpg"
+                src="/robot/examples/04-rusty-metal.jpg"
                 alt="Robot with a weathered metal pattern"
                 loading="lazy"
                 width="1024"
@@ -778,7 +776,7 @@
             </figure>
             <figure class="pattern">
               <img
-                src="05-denim.jpg"
+                src="/robot/examples/05-denim.jpg"
                 alt="Robot wearing a denim pattern"
                 loading="lazy"
                 width="1024"
@@ -790,7 +788,7 @@
             </figure>
             <figure class="pattern">
               <img
-                src="06-fabric.jpg"
+                src="/robot/examples/06-fabric.jpg"
                 alt="Robot wearing a decorative fabric pattern"
                 loading="lazy"
                 width="1024"
@@ -802,7 +800,7 @@
             </figure>
             <figure class="pattern">
               <img
-                src="03-marble.jpg"
+                src="/robot/examples/16-hero-robot.png"
                 alt="Robot with a marble pattern"
                 loading="lazy"
                 width="1024"
@@ -842,7 +840,7 @@
             <div class="channel">
               <small>CHANNEL A</small
               ><img
-                src="05-denim.jpg"
+                src="/robot/examples/05-denim.jpg"
                 alt="Denim robot in channel A"
                 loading="lazy"
                 width="1024"
@@ -853,7 +851,7 @@
             <div class="channel">
               <small>CHANNEL B</small
               ><img
-                src="05-denim.jpg"
+                src="/robot/examples/05-denim.jpg"
                 alt="The same denim robot in channel B"
                 loading="lazy"
                 width="1024"
@@ -886,7 +884,7 @@
           <div class="archive">
             <figure class="wide">
               <img
-                src="11-tier-1-catalog.jpg"
+                src="/robot/examples/11-tier-1-catalog.jpg"
                 alt="Tier one pattern collection"
                 loading="lazy"
               />
@@ -894,7 +892,7 @@
             </figure>
             <figure class="wide">
               <img
-                src="12-tier-3-catalog.jpg"
+                src="/robot/examples/12-tier-3-catalog.jpg"
                 alt="Tier three pattern collection"
                 loading="lazy"
               />
@@ -902,7 +900,7 @@
             </figure>
             <figure class="wide">
               <img
-                src="13-tier-5-catalog.jpg"
+                src="/robot/examples/13-tier-5-catalog.jpg"
                 alt="Tier five pattern collection"
                 loading="lazy"
               />
@@ -910,7 +908,7 @@
             </figure>
             <figure>
               <img
-                src="07-space-explorer-front.jpg"
+                src="/robot/examples/07-space-explorer-front.jpg"
                 alt="Earlier Space Explorer outfit study"
                 loading="lazy"
               />
@@ -918,7 +916,7 @@
             </figure>
             <figure>
               <img
-                src="08-space-explorer-angle.jpg"
+                src="/robot/examples/08-space-explorer-angle.jpg"
                 alt="Earlier Space Explorer outfit study from an angle"
                 loading="lazy"
               />
@@ -927,13 +925,11 @@
           </div>
         </details>
         <section class="closing">
-          <div class="eyebrow" style="justify-content: center">
-            Your community, built one robot at a time
-          </div>
+          <div class="eyebrow" style="justify-content: center"></div>
           <h2>Meet your next<br />on-stream alter ego.</h2>
           <p>Spin the model, explore the patterns, and find your look.</p>
           <div class="actions">
-            <a class="button primary" href="../"
+            <a class="button primary" href="/robot/"
               >Open the robot picker <span aria-hidden="true">↗</span></a
             ><a class="button" href="#demo">Watch the demo again</a>
           </div>
@@ -942,10 +938,11 @@
       <footer>
         <span>ROBOT ALERTS · A project by Trizze</span
         ><span
-          ><a href="../credits.html">Credits &amp; licenses</a> ·
-          <a href="../">Robot picker</a></span
+          ><a href="/robot/credits.html">Credits &amp; licenses</a> ·
+          <a href="/robot/">Robot picker</a></span
         >
       </footer>
     </div>
+    <script type="module" src="/robot/shared/site-nav.js?v=pages-1"></script>
   </body>
 </html>
