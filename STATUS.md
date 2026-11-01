@@ -1,5 +1,9 @@
 # Status — 2026-11-01
 
+## Current chat setup
+
+- Owner requested and enabled Trizze’s per-channel announcements; confirmed through the live source. Old Trizze announcement backlog cleared; no chat messages sent. TrizzeBot service authorization is absent (checked metadata only, no tokens read). One-time owner action remains: dashboard → Service owner setup → Authorize TrizzeBot account, authorizing as TrizzeBot. Streamer Connect/Disconnect remains independent.
+
 ## Latest release — streamer bot opt-in and landing polish
 
 - `robot-alerts:chat-1` is live, healthy, same private env/database and limits. Prior stopped container: `robot-alerts-before-chat-20261101`. Data counts unchanged across upgrade: two viewers, two channels, one award, one session. Owner's new app configuration was retained without inspecting it.
