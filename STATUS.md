@@ -8,9 +8,10 @@
 - 114 overall tests pass (`npm test`), including 40 service tests (`node --test shared-service/test/*.test.js`). Browser checks: `node scripts/qa/serve-pages.cjs`, then `node scripts/qa/compact-pages.cjs`, `node scripts/qa/site-pages.cjs`, `node scripts/qa/account-emotes.cjs`, `node scripts/qa/viewer-idle.cjs`. Desktop 1366×768 and phone 390×844 fit their viewport; long inventories/panels scroll internally. Fresh demo playback, rotation, settings autosaves, guarded deletion and all 307 active global emotes pass. Screenshots/video sent to PC.
 - Same cold-browser 2-second measurement: picker transfer fell from 14,892,618 to 939,809 bytes (~94%); pitch from 2,675,983 to 997,042 (~63%). First contentful paint measured 192 ms picker / 172 ms pitch / 156 ms dashboard on this connection (not a universal latency guarantee). Inventory thumbnails total 185 KB instead of nearly 15 MB of full textures. Shell/account loads before heavy 3D modules; picker/pitch stop GPU rendering while static. Public pitch poster is 24 KB; video preloads only when opened. Local app restarted with the two authorized viewer IDs and silent command/legacy-part replies.
 
+- Backend `robot-alerts:fast-1` is live (also release). Stopped previous container `robot-alerts-before-fast-20261101` is retained. Row counts survived unchanged: two viewers, two channels, one ledger award and ten sessions. Same DB/private env, loopback port 8100, 192 MiB / 0.5 CPU / log limits; measured idle memory about 14 MiB. No secrets read.
+
 ## Half done
 
-- Backend `robot-alerts:fast-1` is live (also release). Stopped previous container `robot-alerts-before-fast-20261101` is retained. Row counts survived unchanged: two viewers, two channels, one ledger award and ten sessions. Same DB/private env, loopback port 8100, 192 MiB / 0.5 CPU / log limits; measured idle memory about 14 MiB. No secrets read.
 - Hosted bot credentials need the owner's one-time TrizzeBot OAuth after deployment. Only the configured operator may connect it. Hosted live-chat raid crowds, custom-media uploads, Blender effect clips/action camera and real OBS/paid-event progression verification remain unfinished.
 
 ## Decisions and reasoning
