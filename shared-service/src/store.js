@@ -59,6 +59,7 @@ export class SharedStore {
       CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires_at);
       CREATE TABLE IF NOT EXISTS pattern_seen(viewer_id TEXT NOT NULL REFERENCES viewers(id) ON DELETE CASCADE, pattern_id TEXT NOT NULL, PRIMARY KEY(viewer_id,pattern_id));
       INSERT OR IGNORE INTO pattern_seen SELECT id,selected_pattern FROM viewers WHERE selected_pattern IS NOT NULL;
+      CREATE TABLE IF NOT EXISTS bot_setup(id INTEGER PRIMARY KEY CHECK(id=1),hash TEXT NOT NULL,expires_at INTEGER NOT NULL,status TEXT NOT NULL CHECK(status IN ('pending','processing','complete','failed')));
       CREATE TABLE IF NOT EXISTS bot_credentials(id INTEGER PRIMARY KEY CHECK(id=1),twitch_id TEXT NOT NULL,display_name TEXT NOT NULL,credential BLOB NOT NULL,nonce BLOB NOT NULL,tag BLOB NOT NULL);
       CREATE TABLE IF NOT EXISTS unlock_notices(event_id TEXT PRIMARY KEY,channel_id TEXT NOT NULL REFERENCES channels(id) ON DELETE CASCADE,viewer_id TEXT NOT NULL REFERENCES viewers(id) ON DELETE CASCADE,pattern_count INTEGER NOT NULL,tier INTEGER NOT NULL,event_type TEXT NOT NULL,quantity INTEGER NOT NULL,created_at INTEGER NOT NULL,state TEXT NOT NULL DEFAULT 'pending');
       CREATE TABLE IF NOT EXISTS anonymous_gifts(channel_id TEXT PRIMARY KEY REFERENCES channels(id) ON DELETE CASCADE,total INTEGER NOT NULL DEFAULT 0);`);
@@ -576,6 +577,7 @@ export class SharedStore {
         "DELETE FROM unlock_notices WHERE created_at<=? OR state='failed'",
       )
       .run(now - SEVEN_DAYS);
+    this.db.prepare("DELETE FROM bot_setup WHERE expires_at<=?").run(now);
     this.db.prepare("DELETE FROM receipts WHERE expires_at<=?").run(now);
     this.db.prepare("DELETE FROM sessions WHERE expires_at<=?").run(now);
   }

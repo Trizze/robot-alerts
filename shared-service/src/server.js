@@ -1,3 +1,4 @@
+import { claimBotSetup, finishBotSetup, failBotSetup } from "./bot-setup.js";
 import { unlockDispatcher } from "./unlock-notices.js";
 import { channelSettings } from "./channel-settings.js";
 import { directoryCache } from "./directory-cache.js";
@@ -40,7 +41,6 @@ export function createService({
   frontendUrl,
   maxOAuthStates = 10000,
   anonymousScope = "channel",
-  operatorId = "",
   botLogin = "TrizzeBot",
   clock = Date.now,
 }) {
@@ -235,11 +235,10 @@ export function createService({
         const role = path.searchParams.get("role");
         if (!["viewer", "streamer", "bot"].includes(role))
           return respond(400, { error: "Invalid role" });
-        if (
-          role === "bot" &&
-          (!session || session.id !== operatorId || session.role !== "streamer")
-        )
-          return respond(403, { error: "Operator sign-in required" });
+        if (role === "bot")
+          return respond(410, {
+            error: "Use npm run setup:bot in the owner's terminal",
+          });
         const now = clock();
         for (const [id, entry] of states)
           if (entry.expires <= now) states.delete(id);
@@ -250,7 +249,6 @@ export function createService({
         const state = randomBytes(32).toString("base64url");
         states.set(state, {
           role,
-          operator: role === "bot" ? session.id : null,
           returnTo: ["start", "dashboard"].includes(
             path.searchParams.get("returnTo"),
           )
@@ -265,6 +263,53 @@ export function createService({
         return;
       }
       if (req.method === "GET" && path.pathname === "/auth/callback") {
+        const terminalSetup = claimBotSetup(
+          store,
+          path.searchParams.get("state"),
+          clock(),
+        );
+        if (terminalSetup) {
+          try {
+            if (
+              !path.searchParams.get("code") ||
+              path.searchParams.has("error")
+            )
+              throw Error("Authorization denied");
+            const credentials = await twitch.exchange(
+              path.searchParams.get("code"),
+            );
+            const bot = await twitch.user(credentials.access_token);
+            if (
+              !bot ||
+              !/^\d{1,32}$/.test(bot.id || "") ||
+              typeof bot.display_name !== "string" ||
+              String(bot.login || "").toLowerCase() !==
+                botLogin.toLowerCase() ||
+              !Array.isArray(credentials.scope) ||
+              !credentials.scope.includes("user:write:chat")
+            ) {
+              failBotSetup(store, terminalSetup);
+              return respond(403, {
+                error:
+                  "Authorize this link as TrizzeBot with chat permission, then restart terminal setup",
+              });
+            }
+            finishBotSetup(store, terminalSetup, bot, credentials, clock());
+            void notifyUnlocks();
+            res
+              .writeHead(303, {
+                Location: new URL("bot-ready/", frontend).href,
+              })
+              .end();
+          } catch {
+            failBotSetup(store, terminalSetup);
+            return respond(400, {
+              error:
+                "Bot authorization failed or expired; restart npm run setup:bot",
+            });
+          }
+          return;
+        }
         const state = path.searchParams.get("state"),
           entry = states.get(state);
         states.delete(state);
@@ -280,29 +325,6 @@ export function createService({
         const user = await twitch.user(credential.access_token);
         if (!user || !/^\d+$/.test(user.id) || !user.display_name)
           return respond(400, { error: "Invalid Twitch user" });
-        if (entry.role === "bot") {
-          const activeOperator = store.session(jar[SESSION]);
-          if (
-            !session ||
-            session.id !== operatorId ||
-            entry.operator !== operatorId ||
-            activeOperator?.id !== operatorId ||
-            activeOperator?.role !== "streamer" ||
-            String(user.login || user.display_name).toLowerCase() !==
-              botLogin.toLowerCase() ||
-            !credential.scope?.includes("user:write:chat")
-          )
-            return respond(403, {
-              error:
-                "Authorize the configured bot account with chat permission",
-            });
-          store.saveBot(user.id, user.display_name, credential);
-          void notifyUnlocks();
-          res
-            .writeHead(303, { Location: new URL("dashboard/", frontend).href })
-            .end();
-          return;
-        }
         store.upsertViewer(user.id, user.display_name);
         if (entry.role === "streamer") {
           const previous = store.channelCredentials(user.id),
@@ -426,20 +448,6 @@ export function createService({
       )
         return respond(403, { error: "Invalid origin" });
       if (!session) return respond(401, { error: "Sign in required" });
-      if (path.pathname === "/api/bot") {
-        if (session.id !== operatorId || session.role !== "streamer")
-          return respond(403, { error: "Operator sign-in required" });
-        if (req.method === "GET") return respond(200, store.botStatus());
-        if (req.method === "DELETE") {
-          const old = store.botCredentials();
-          store.deleteBot();
-          if (old)
-            void twitch.revoke(old.credentials.access_token).catch(() => {});
-          res.writeHead(204).end();
-          return;
-        }
-        return respond(405, { error: "Method not allowed" });
-      }
       if (
         path.pathname === "/api/channel/settings" ||
         path.pathname === "/api/channel/test" ||
@@ -467,13 +475,11 @@ export function createService({
           return respond(200, {
             channelId: session.id,
             displayName: store.channelName(session.id),
-            canManageBot: session.id === operatorId,
             channelBot: {
               enabled: store.overlaySettings(session.id).chatAnnouncements,
               available: store.botStatus().connected,
               name: botLogin,
             },
-            bot: session.id === operatorId ? store.botStatus() : undefined,
             followAllowed: Boolean(
               store
                 .channelCredentials(session.id)

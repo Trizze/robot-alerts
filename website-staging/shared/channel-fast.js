@@ -318,25 +318,6 @@ try {
       ).then(botState);
     botState();
     box.append(button, note);
-    if (value.canManageBot) {
-      const details = document.createElement("details"),
-        summary = document.createElement("summary");
-      details.className = "operator-bot";
-      summary.textContent = "Service owner setup";
-      const text = document.createElement("p");
-      text.textContent =
-        "One-time bot account authorization for the service. Streamers use Connect TrizzeBot above.";
-      const authorize = document.createElement("button");
-      authorize.id = "authorize-service-bot";
-      authorize.className = "quiet";
-      authorize.textContent = value.bot?.connected
-        ? "Reauthorize TrizzeBot account"
-        : "Authorize TrizzeBot account";
-      authorize.onclick = () =>
-        location.assign(new URL("auth/start?role=bot", base));
-      details.append(summary, text, authorize);
-      box.append(details);
-    }
   }
   if (!followAllowed) {
     const b = document.createElement("button");

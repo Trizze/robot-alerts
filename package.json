@@ -13,7 +13,8 @@
     "demo": "node scripts/start.js --demo",
     "test": "node --test",
     "emotes:refresh": "node --env-file-if-exists=.env scripts/refresh-global-emotes.js",
-    "setup:hosted-app": "python3 scripts/switch-twitch-app.py"
+    "setup:hosted-app": "python3 scripts/switch-twitch-app.py",
+    "setup:bot": "python3 scripts/setup-hosted-bot.py"
   },
   "dependencies": {
     "gsap": "3.13.0",

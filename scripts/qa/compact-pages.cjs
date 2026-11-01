@@ -49,7 +49,7 @@ const {
             available: true,
             name: "TrizzeBot",
           },
-          canManageBot: false,
+          canManageBot: true,
           settings: {
             preset: "02",
             resolution: "1080p",
@@ -153,6 +153,10 @@ const {
         "Disconnect TrizzeBot",
     );
     assert.equal(await p.locator("#authorize-service-bot").count(), 0);
+    assert.equal(
+      await p.getByText("Service owner setup", { exact: true }).count(),
+      0,
+    );
     await p.locator("#connect-channel-bot").click();
     await p.waitForFunction(
       () =>
