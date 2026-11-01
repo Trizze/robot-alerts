@@ -238,7 +238,7 @@ finally { db.close(); }\n'''
         if line.startswith(('Robot Alerts app switched.', 'Points, patterns,', 'Old logins and', 'Previous stopped container')):
             print(line)
     print('Next: https://trizze.tv/robot/start/ — reconnect trizze and itsTrizze.')
-    print('Then: https://trizze.tv/robot/dashboard/ — Service owner setup > Authorize TrizzeBot account.')
+    print('Then run npm run setup:bot in this terminal and open its Twitch link as TrizzeBot.')
     print('Each streamer uses Connect TrizzeBot to enable announcements in their own channel.')
 
 

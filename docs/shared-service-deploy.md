@@ -151,3 +151,11 @@ Owner still authorizes TrizzeBot once through the operator dashboard (switch to 
 Current image `robot-alerts:chat-1`, previous stopped container `robot-alerts-before-chat-20261101`. Same private env and volume, no credential migration or reads during deployment; existing rows preserved. `chatAnnouncements` defaults false and is controlled by the streamer's dedicated Connect/Disconnect button, independently from operator-only bot OAuth. Old design saves preserve it. Rollback to fast-1 would resume its global bot behavior, so do not roll back if per-channel opt-out must remain enforced.
 
 The static frontend is deployed with `?v=chat-1` on updated modules/CSS and v3 brand asset filenames. Dry previews shown for the exact staged contents: 244 Robot files and one robots pitch file. No remote deletes, no unrelated sites changed.
+
+## Terminal bot release — 2026-11-02
+
+Current image `robot-alerts:terminal-bot-1`; previous stopped container `robot-alerts-before-terminal-bot-20261102`. Same private env, database, loopback 8100, 192 MiB / 0.5 CPU and log limits. Adds only the singleton hashed/expiring bot setup record. No credential migration or key changes.
+
+Run `npm run setup:bot` on marvin as the owner. Its CLI is in the service image and uses the existing admin gate. Open the printed Twitch link as TrizzeBot in any browser/private window; no website owner session, new redirect URL, Caddy route, tunnel, or firewall change. Press Enter in the terminal to confirm. Never run the owner command through the AI terminal. Old web bot launch is disabled and public owner controls removed; keep per-streamer Connect/Disconnect.
+
+126 overall / 48 shared-service tests pass. Static dry run: 245 files, then robot-deploy uploaded exactly that set. No other site changed. Trizze's announcement opt-in remained true across the upgrade.

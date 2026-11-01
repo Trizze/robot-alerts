@@ -50,7 +50,7 @@ if __name__ == '__main__':
     try:
         main()
     except (KeyboardInterrupt, EOFError):
-        print('\nStopped. The setup link expires automatically; existing bot authorization is unchanged.')
+        print('\nStopped waiting. Completed browser authorization remains valid; an unused link expires automatically.')
     except Exception as error:
         print(str(error) if isinstance(error, RuntimeError) else 'Setup failed; no credential values displayed.', file=sys.stderr)
         sys.exit(1)

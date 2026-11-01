@@ -44,6 +44,12 @@ These reproduce the machine rules supplied by the user and add project scope. Th
 - Credentials travel only through SSH stdin to the named owner server and POST bodies to Twitch authentication, never command arguments, URLs, logs or static deploys. Keep file mode 0600. Do not touch other projects, local `.env`, deploy credentials or SSH configuration.
 - Reset old Twitch authorizations/sessions without deleting channel rows, ledger, viewers, patterns, seen markers or appearance/settings. Recreate only Robot Alerts with the current image and existing resource limits. The owner reauthorizes each streamer and bot afterward.
 
+## Authorized owner-run bot setup
+- The owner explicitly requested moving one-time TrizzeBot authorization out of the website and into `npm run setup:bot` on marvin.
+- Only the owner runs its interactive command. It uses the existing unlocked universe-admin SSH gate to issue a ten-minute, single-use OAuth state and prints a Twitch authorization link privately in the owner's terminal. Never inspect its output or any resulting token values.
+- The server callback accepts only a CLI-issued, hashed, unexpired state plus the configured bot account and chat scope. No Robot Alerts website session is required or created. Secrets remain in environment variables/encrypted storage and never in URLs; the authorization URL contains only the public client ID and normal OAuth CSRF state.
+- Keep streamer Connect/Disconnect controls separate and channel-scoped. No owner setup controls or owner bot-OAuth launch route on the public website.
+
 ## Project workflow
 - Read `docs/hackathon-brief.md` first; keep innovation, impact, implementation and design in mind for every decision.
 - Read the deep dive and robot-related research as background. The research's preference for other products does not change the user's Robot Alerts decision.
