@@ -238,7 +238,8 @@ finally { db.close(); }\n'''
         if line.startswith(('Robot Alerts app switched.', 'Points, patterns,', 'Old logins and', 'Previous stopped container')):
             print(line)
     print('Next: https://trizze.tv/robot/start/ — reconnect trizze and itsTrizze.')
-    print('Then: https://trizze.tv/robot/dashboard/ — connect TrizzeBot using the bot account.')
+    print('Then: https://trizze.tv/robot/dashboard/ — Service owner setup > Authorize TrizzeBot account.')
+    print('Each streamer uses Connect TrizzeBot to enable announcements in their own channel.')
 
 
 if __name__ == '__main__':

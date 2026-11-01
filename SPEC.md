@@ -2,6 +2,12 @@
 
 Updated 2026-10-31. This is the requested direction, not a claim that the new renderer or Blender motion set is implemented. Existing application behavior remains in place until the new path is proven end to end.
 
+## Channel bot and landing-page refinement — 2026-11-01
+
+Connect TrizzeBot is a per-streamer opt-in to unlock announcements in that streamer's channel. The service owner's one-time bot OAuth is separate, collapsed under Service owner setup. Default announcements off; points accrue regardless, connect never replays old unlocks or posts a welcome, and disconnect blocks future sends including token-refresh retries. Only the dedicated channel-bot endpoint changes this preference; ordinary design saves preserve it.
+
+The brand uses a transparent CRT header icon, a dark rounded favicon and a soft lavender wordmark. Links have no underlines and use color, hover/focus or button shapes. The landing robot preview is shorter and balanced against the copy. Its demo opens in a large viewport-bounded player and uses a closer center crop enlarged from the existing 16:9 footage (960×540 crop from 1280×720, encoded back to 1280×720); the two original full-frame demos are retained.
+
 ## Current implementation and decisions — 2026-11-01
 
 The shared hosted service and static picker supersede the earlier local-only plan below. Use the approved default model with one whole-robot pattern. The CRT displays profile pictures only, including cheers and resubs; no SUB/amount/month text. Nine uncategorized card presets plus no panel are configurable per channel. The viewer-selected chest emoji/emote is separate from CRT content.

@@ -145,3 +145,9 @@ Activated `robot-alerts:fast-1` (also `release`) after owner unlocked universe-a
 Static snapshots: robot-site `36b9646`, robots-site `426f2fe`. Both are live. Public browser tests passed for desktop/mobile bounds, consistent header, locked/NEW inventory, automatic event/design saves, all 307 globals, account refresh, typed deletion, picture-only CRT, no-panel live switching, pitch rotation/video and zero idle GPU draws. Account writes and test events in browser QA were intercepted; no real points/chat were created.
 
 Owner still authorizes TrizzeBot once through the operator dashboard (switch to the bot Twitch account), and reconnects a streamer only to grant optional follow permission. Real paid-event and OBS checks remain the final integration proof.
+
+## Channel bot and landing polish — 2026-11-01
+
+Current image `robot-alerts:chat-1`, previous stopped container `robot-alerts-before-chat-20261101`. Same private env and volume, no credential migration or reads during deployment; existing rows preserved. `chatAnnouncements` defaults false and is controlled by the streamer's dedicated Connect/Disconnect button, independently from operator-only bot OAuth. Old design saves preserve it. Rollback to fast-1 would resume its global bot behavior, so do not roll back if per-channel opt-out must remain enforced.
+
+The static frontend is deployed with `?v=chat-1` on updated modules/CSS and v3 brand asset filenames. Dry previews shown for the exact staged contents: 244 Robot files and one robots pitch file. No remote deletes, no unrelated sites changed.

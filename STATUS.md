@@ -1,5 +1,12 @@
 # Status — 2026-11-01
 
+## Latest release — streamer bot opt-in and landing polish
+
+- `robot-alerts:chat-1` is live, healthy, same private env/database and limits. Prior stopped container: `robot-alerts-before-chat-20261101`. Data counts unchanged across upgrade: two viewers, two channels, one award, one session. Owner's new app configuration was retained without inspecting it.
+- Every streamer can Connect/Disconnect TrizzeBot for their own chat; one-time bot OAuth is under collapsed operator-only Service owner setup. Off by default; progress continues while off. Connect does not send a welcome/backlog. Stale design saves cannot undo the preference; disconnect prevents refresh retries. No whispers.
+- Landing page: transparent CRT header logo, dark favicon, lavender wordmark, no underlined links, styled CTA buttons, shorter balanced hero viewer and much larger demo dialog with closer video framing. Public files: `18-demo-closeup.mp4`, `18-demo-poster.webp`, v3 logo/favicon. Prior media retained.
+- 120 overall / 42 shared-service tests pass, including per-channel ownership, origin checks, silent progress and disable-during-refresh. Local desktop/mobile renders and fresh demo playback inspected; real-browser button tests intercept writes and send no chat. Robot dry run: 244 files; pitch dry run: one file. Both published using only the provided scripts.
+
 ## What works now
 
 - Shared OAuth, encrypted channel credentials, hashed 30-day sessions, seven-day webhook dedupe, gift-summary-only points, global viewer patterns and per-frame pattern/chest rendering are live. Trizze and itsTrizze verified Get Started and Send test to OBS. Trizze retains the labeled Tier 5 grant (1,000 points); no real paid-event verification yet.
@@ -8,11 +15,11 @@
 - 114 overall tests pass (`npm test`), including 40 service tests (`node --test shared-service/test/*.test.js`). Browser checks: `node scripts/qa/serve-pages.cjs`, then `node scripts/qa/compact-pages.cjs`, `node scripts/qa/site-pages.cjs`, `node scripts/qa/account-emotes.cjs`, `node scripts/qa/viewer-idle.cjs`. Desktop 1366×768 and phone 390×844 fit their viewport; long inventories/panels scroll internally. Fresh demo playback, rotation, settings autosaves, guarded deletion and all 307 active global emotes pass. Screenshots/video sent to PC.
 - Same cold-browser 2-second measurement: picker transfer fell from 14,892,618 to 939,809 bytes (~94%); pitch from 2,675,983 to 997,042 (~63%). First contentful paint measured 192 ms picker / 172 ms pitch / 156 ms dashboard on this connection (not a universal latency guarantee). Inventory thumbnails total 185 KB instead of nearly 15 MB of full textures. Shell/account loads before heavy 3D modules; picker/pitch stop GPU rendering while static. Public pitch poster is 24 KB; video preloads only when opened. Local app restarted with the two authorized viewer IDs and silent command/legacy-part replies.
 
-- Backend `robot-alerts:fast-1` is live (also release). Stopped previous container `robot-alerts-before-fast-20261101` is retained. Row counts survived unchanged: two viewers, two channels, one ledger award and ten sessions. Same DB/private env, loopback port 8100, 192 MiB / 0.5 CPU / log limits; measured idle memory about 14 MiB. No secrets read.
+- Earlier compact backend checkpoint was fast-1; current service and rollback details are in Latest release above. The same database, private env and resource limits remain in use.
 
-## Owner-run Twitch app switch — ready, not executed
+## Owner-run Twitch app switch
 
-- `npm run setup:hosted-app` privately prompts for the new app Client ID/Secret on marvin and updates only the hosted service through the existing universe-admin gate. Instructions: `docs/switch-twitch-app.md`. Only the owner runs it; no real credentials were entered or inspected. It preserves both data/pattern keys and earned data, rotates the webhook secret to reject old-app deliveries, clears old auth/sessions, and recreates the same image/limits with rollback on failed startup. Streamers and TrizzeBot must reauthorize afterward. Four new preservation/recovery/input tests pass; 118 overall and 40 shared-service tests pass. No live app credentials have been changed.
+- `npm run setup:hosted-app` privately prompts for the new app Client ID/Secret on marvin and updates only the hosted service through the existing universe-admin gate. Instructions: `docs/switch-twitch-app.md`. Only the owner runs it; the agent never enters or inspects credentials. It preserves both data/pattern keys and earned data, rotates the webhook secret to reject old-app deliveries, clears old auth/sessions, and recreates the same image/limits with rollback on failed startup. Streamers and TrizzeBot must reauthorize afterward. Four new preservation/recovery/input tests pass; 118 overall and 40 shared-service tests pass. Owner subsequently reported a bot OAuth account/permission error; service recreation uses the owner’s current private env. Do not rerun app migration just to enable chat announcements.
 
 ## Half done
 
