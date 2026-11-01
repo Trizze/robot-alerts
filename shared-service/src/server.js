@@ -130,6 +130,8 @@ export function createService({
       avatar,
       selectedPattern: saved?.selectedPattern || null,
       patternScale: saved?.patternScale || 1,
+      chestType: saved?.chestType || "none",
+      chestValue: saved?.chestValue || "",
     };
     hub.send(channel, {
       kind: "alert",
@@ -317,6 +319,8 @@ export function createService({
         res.writeHead(204).end();
         return;
       }
+      if (path.pathname === "/api/streamers" && req.method === "GET")
+        return respond(200, { streamers: store.participatingChannels() });
       if (path.pathname === "/api/emotes/global" && req.method === "GET") {
         return respond(200, { emotes: await globalEmotes() });
       }

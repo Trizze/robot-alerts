@@ -167,7 +167,11 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
     viewer: { id: "456", name: "Supporter" },
   });
   store.selectPattern("456", "green_marble_pattern_tiles");
-  store.updateAppearance("456", { patternScale: 1.5 });
+  store.updateAppearance("456", {
+    patternScale: 1.5,
+    chestType: "emote",
+    chestValue: "304486301",
+  });
   assert.equal(
     (
       await fetch(base + "/api/channel/test", {
@@ -226,6 +230,8 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
   assert.equal(store.viewer("456").points, 11);
   assert.equal(alert.viewer.selectedPattern, "green_marble_pattern_tiles");
   assert.equal(alert.viewer.patternScale, 1.5);
+  assert.equal(alert.viewer.chestType, "emote");
+  assert.equal(alert.viewer.chestValue, "304486301");
   assert.equal(
     (
       await fetch(base + "/api/channel/settings", {

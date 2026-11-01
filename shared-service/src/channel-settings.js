@@ -1,4 +1,15 @@
-export const PRESETS = ["02", "03", "04", "05", "07", "08", "09", "01", "10"];
+export const PRESETS = [
+  "02",
+  "03",
+  "04",
+  "05",
+  "07",
+  "08",
+  "09",
+  "01",
+  "10",
+  "none",
+];
 export const DEFAULT_SETTINGS = Object.freeze({
   resolution: "1080p",
   preset: "03",

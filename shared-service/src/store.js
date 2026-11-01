@@ -146,6 +146,13 @@ export class SharedStore {
           ?.display_name
       : null;
   }
+  participatingChannels() {
+    return this.db
+      .prepare(
+        "SELECT id, display_name AS displayName FROM channels WHERE connected=1 ORDER BY display_name COLLATE NOCASE, id",
+      )
+      .all();
+  }
   channelExists(id) {
     return (
       validId(id) &&
