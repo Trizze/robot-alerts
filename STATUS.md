@@ -1,4 +1,11 @@
-# Status — 2026-10-31
+# Status — 2026-11-01
+
+## Animated patterns checkpoint — 2026-11-01 (not published)
+
+- Hosted alerts now apply the viewer's saved whole-robot pattern and 50–200% size to the approved motion, including the CRT case and joints. Blender exports rest-position/normal/lighting maps on owned copies; the overlay uses PNGs plus a 2D WebGL raster pass, no Three.js or 3D model. Face and chest remain clear. Local fallback renderer is unchanged.
+- All 242 poses align with production camera bounds. Fresh playback, loading, cleanup and three distortion-sensitive patterns checked; size comparisons and motion review sent to PC. Runtime assets add about 15 MB; backend/runtime costs unchanged. Original Blender source meshes were not edited.
+- `npm test` and `node --test shared-service/test/*.test.js` pass (101 overall / 29 shared). Browser QA: `node scripts/qa/pattern-alerts.cjs` against a local static server; see the mapping README for existing tool paths and rebuild instructions. Runtime sheets/helpers are retained; raw ZIPs and review media stay local.
+- Next: approve the 150-file `robot-deploy` dry-run list (16 new pattern mapping files; list sent to PC; nothing uploaded), publish assets before the versioned loader, then refresh OBS and verify actual GPU playback. After that, prove one viewer's same selected pattern and point total across two connected channels with real events. Hosted follow/raid/chat delivery and chest emoji/emote synchronization remain unfinished.
 
 ## Robot render refresh (latest)
 
