@@ -16,6 +16,7 @@ export const DEFAULT_SETTINGS = Object.freeze({
   theme: "default",
   events: ["sub", "resub", "gift", "cheer"],
   games: [],
+  chatAnnouncements: false,
 });
 export function channelSettings(input) {
   if (
@@ -33,6 +34,7 @@ export function channelSettings(input) {
   )
     throw new Error("Invalid channel settings");
   if (
+    typeof value.chatAnnouncements !== "boolean" ||
     !Array.isArray(value.events) ||
     value.events.length > 6 ||
     new Set(value.events).size !== value.events.length ||

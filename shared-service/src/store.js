@@ -232,7 +232,7 @@ export class SharedStore {
         const after = this.viewer(event.viewer.id);
         const known = new Set(before?.owned.map((p) => p.id) || []);
         const count = after.owned.filter((p) => !known.has(p.id)).length;
-        if (count)
+        if (count && this.overlaySettings(event.channel).chatAnnouncements)
           this.db
             .prepare(
               "INSERT OR IGNORE INTO unlock_notices(event_id,channel_id,viewer_id,pattern_count,tier,event_type,quantity,created_at) VALUES(?,?,?,?,?,?,?,?)",
@@ -342,6 +342,11 @@ export class SharedStore {
   }
   deleteBot() {
     this.db.exec("DELETE FROM bot_credentials");
+  }
+  clearUnlockNotices(channel) {
+    this.db
+      .prepare("DELETE FROM unlock_notices WHERE channel_id=?")
+      .run(channel);
   }
   takeUnlockNotice(now = Date.now()) {
     const row = this.db

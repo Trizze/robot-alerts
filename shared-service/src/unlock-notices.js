@@ -35,6 +35,13 @@ export function unlockDispatcher(
         if (!bot) return;
         const row = store.takeUnlockNotice(clock());
         if (!row) return;
+        if (
+          !store.hasChannel(row.channel_id) ||
+          !store.overlaySettings(row.channel_id)?.chatAnnouncements
+        ) {
+          store.finishUnlockNotice(row.event_id, true);
+          continue;
+        }
         try {
           let result;
           try {
@@ -57,6 +64,11 @@ export function unlockDispatcher(
               throw Error("Bot disconnected during refresh");
             store.saveBot(bot.id, bot.name, { ...bot.credentials, ...next });
             bot = store.botCredentials();
+            if (
+              !store.hasChannel(row.channel_id) ||
+              !store.overlaySettings(row.channel_id)?.chatAnnouncements
+            )
+              throw Error("Channel disabled announcements during refresh");
             result = await twitch.sendChat(
               row.channel_id,
               bot.id,

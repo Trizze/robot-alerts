@@ -442,15 +442,37 @@ export function createService({
       }
       if (
         path.pathname === "/api/channel/settings" ||
-        path.pathname === "/api/channel/test"
+        path.pathname === "/api/channel/test" ||
+        path.pathname === "/api/channel/bot"
       ) {
         if (session.role !== "streamer" || !store.hasChannel(session.id))
           return respond(403, { error: "Connect your own channel first" });
+        if (path.pathname.endsWith("/bot")) {
+          if (!["POST", "DELETE"].includes(req.method))
+            return respond(405, { error: "Method not allowed" });
+          const enabled = req.method === "POST";
+          if (store.overlaySettings(session.id).chatAnnouncements !== enabled)
+            store.clearUnlockNotices(session.id);
+          store.saveOverlaySettings(session.id, {
+            ...store.overlaySettings(session.id),
+            chatAnnouncements: enabled,
+          });
+          return respond(200, {
+            enabled,
+            available: store.botStatus().connected,
+            name: botLogin,
+          });
+        }
         if (path.pathname.endsWith("/settings") && req.method === "GET")
           return respond(200, {
             channelId: session.id,
             displayName: store.channelName(session.id),
             canManageBot: session.id === operatorId,
+            channelBot: {
+              enabled: store.overlaySettings(session.id).chatAnnouncements,
+              available: store.botStatus().connected,
+              name: botLogin,
+            },
             bot: session.id === operatorId ? store.botStatus() : undefined,
             followAllowed: Boolean(
               store
@@ -462,9 +484,14 @@ export function createService({
         if (path.pathname.endsWith("/settings") && req.method === "POST") {
           let input;
           try {
-            input = channelSettings(
-              JSON.parse((await body(req)).toString("utf8")),
-            );
+            const raw = JSON.parse((await body(req)).toString("utf8"));
+            channelSettings(raw);
+            input = channelSettings({
+              ...store.overlaySettings(session.id),
+              ...raw,
+              chatAnnouncements: store.overlaySettings(session.id)
+                .chatAnnouncements,
+            });
           } catch {
             return respond(400, { error: "Invalid channel settings" });
           }

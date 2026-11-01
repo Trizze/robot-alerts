@@ -21,6 +21,7 @@ function create() {
     catalog,
   });
   s.saveChannel("123", "Streamer", { scope: ["moderator:read:followers"] });
+  s.saveOverlaySettings("123", { chatAnnouncements: true });
   return s;
 }
 const event = (extra = {}) => ({
@@ -331,4 +332,124 @@ test("event switches and self-reported categories are bounded and reject invalid
     { games: [" "] },
   ])
     assert.throws(() => channelSettings(input));
+});
+
+test("streamers connect the bot to only their channel without authorizing the bot account", async (t) => {
+  const s = create();
+  s.saveChannel("789", "Other", {});
+  s.saveOverlaySettings("123", { chatAnnouncements: false });
+  const owner = s.createSession("123", "streamer"),
+    other = s.createSession("789", "streamer"),
+    viewer = s.createSession("456", "viewer");
+  const server = createService({
+    store: s,
+    operatorId: "123",
+    botLogin: "TrizzeBot",
+    twitch: {},
+    webhookSecret: randomBytes(32).toString("hex"),
+    frontendUrl: "https://trizze.tv/robot/",
+  });
+  await new Promise((r) => server.listen(0, "127.0.0.1", r));
+  t.after(async () => {
+    server.closeAllConnections();
+    await new Promise((r) => server.close(r));
+    s.close();
+  });
+  const base = `http://127.0.0.1:${server.address().port}`,
+    headers = (session) => ({
+      cookie: `__Host-robot_session=${session}`,
+      origin: "https://trizze.tv",
+      "content-type": "application/json",
+    });
+  assert.equal(
+    (
+      await fetch(base + "/api/channel/bot", {
+        method: "POST",
+        headers: headers(viewer),
+      })
+    ).status,
+    403,
+  );
+  assert.equal(
+    (
+      await fetch(base + "/api/channel/bot", {
+        method: "POST",
+        headers: { cookie: headers(owner).cookie },
+      })
+    ).status,
+    403,
+  );
+  const connected = await fetch(base + "/api/channel/bot", {
+    method: "POST",
+    headers: headers(other),
+  });
+  assert.equal(connected.status, 200);
+  assert.deepEqual(await connected.json(), {
+    enabled: true,
+    available: false,
+    name: "TrizzeBot",
+  });
+  assert.equal(s.overlaySettings("789").chatAnnouncements, true);
+  assert.equal(s.overlaySettings("123").chatAnnouncements, false);
+  assert.equal(
+    s.botStatus().connected,
+    false,
+    "streamer opt-in does not mint or change service credentials",
+  );
+  // A stale UI saving a design must preserve the streamer's bot preference.
+  assert.equal(
+    (
+      await fetch(base + "/api/channel/settings", {
+        method: "POST",
+        headers: headers(other),
+        body: JSON.stringify({ preset: "02", chatAnnouncements: false }),
+      })
+    ).status,
+    200,
+  );
+  assert.equal(s.overlaySettings("789").chatAnnouncements, true);
+  await fetch(base + "/api/channel/bot", {
+    method: "DELETE",
+    headers: headers(other),
+  });
+  assert.equal(s.overlaySettings("789").chatAnnouncements, false);
+});
+
+test("unconnected channel still earns progress without chat, and disconnect during refresh prevents retry", async () => {
+  const s = create();
+  try {
+    s.saveOverlaySettings("123", { chatAnnouncements: false });
+    s.record(event({ gifts: 10 }));
+    assert.equal(s.viewer("456").points, 10);
+    assert.equal(s.takeUnlockNotice(), null);
+    s.saveOverlaySettings("123", { chatAnnouncements: true });
+    s.record(event({ gifts: 100 }));
+    s.saveBot("999", "TrizzeBot", {
+      access_token: randomBytes(24).toString("hex"),
+      refresh_token: randomBytes(24).toString("hex"),
+    });
+    let sends = 0;
+    const pump = unlockDispatcher(
+      s,
+      {
+        sendChat: async () => {
+          sends++;
+          throw Object.assign(Error("expired"), { status: 401 });
+        },
+        refresh: async () => {
+          s.saveOverlaySettings("123", { chatAnnouncements: false });
+          return {
+            access_token: randomBytes(24).toString("hex"),
+            refresh_token: randomBytes(24).toString("hex"),
+          };
+        },
+      },
+      { spacing: 0 },
+    );
+    await pump();
+    assert.equal(sends, 1, "no retry after streamer disconnects");
+    assert.equal(s.viewer("456").points, 110);
+  } finally {
+    s.close();
+  }
 });

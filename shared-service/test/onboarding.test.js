@@ -125,6 +125,7 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
     theme: "gaming",
     events: ["sub", "resub", "gift", "cheer"],
     games: [],
+    chatAnnouncements: false,
   };
   assert.equal(
     (
