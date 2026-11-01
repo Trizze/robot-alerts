@@ -107,7 +107,12 @@ $("#setup-login").onclick = () => {
   b.disabled = true;
   b.textContent = "Opening Twitch…";
   feedback("Opening Twitch to connect your channel…");
-  location.assign(new URL("auth/start?role=streamer&returnTo=start", base));
+  location.assign(
+    new URL(
+      `auth/start?role=streamer&returnTo=${isDashboard ? "dashboard" : "start"}`,
+      base,
+    ),
+  );
 };
 $("#copy-source").onclick = () =>
   action($("#copy-source"), "Copying…", async () => {
@@ -293,7 +298,9 @@ try {
             credentials: "include",
           });
           if (!r.ok) throw Error();
-          button.textContent = "Bot disconnected";
+          value.bot.connected = false;
+          button.textContent = "Connect TrizzeBot";
+          feedback("Bot disconnected.");
         } catch {
           feedback("Could not disconnect bot. Try again.");
         } finally {

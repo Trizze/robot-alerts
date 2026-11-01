@@ -191,7 +191,10 @@ function label(text, className) {
   return e;
 }
 
-let renderer, camera, controls;
+let renderer,
+  camera,
+  controls,
+  invalidate = () => {};
 async function startViewer() {
   [THREE, { GLTFLoader }, { OrbitControls }] = await Promise.all([
     import("three"),
@@ -272,10 +275,22 @@ async function startViewer() {
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
+      invalidate();
     };
     new ResizeObserver(resize).observe(canvas);
     resize();
-    renderer.setAnimationLoop(() => {
+    let frames = 0,
+      scheduled = false;
+    invalidate = (extra = 2) => {
+      frames = Math.max(frames, extra);
+      if (!scheduled && !document.hidden) {
+        scheduled = true;
+        requestAnimationFrame(draw);
+      }
+    };
+    function draw() {
+      scheduled = false;
+      if (document.hidden) return;
       if (chestAnimation) {
         const animation = chestAnimation;
         let time = (performance.now() - animation.started) % animation.total;
@@ -300,7 +315,12 @@ async function startViewer() {
       }
       controls.update();
       renderer.render(scene, camera);
-    });
+      if (chestAnimation || frames-- > 0) invalidate(0);
+    }
+    controls.addEventListener("change", () => invalidate(12));
+    canvas.addEventListener("pointerdown", () => invalidate(15));
+    document.addEventListener("visibilitychange", () => invalidate());
+    invalidate();
     $("#reset-view").addEventListener("click", () => {
       camera.position.set(4, 2.5, 5);
       controls.target.set(0, 1.35, 0);
@@ -483,6 +503,7 @@ async function renderChest(type = "none", value = "", animated = false) {
   chestMaterial.color.set(0xffffff);
   chestMaterial.needsUpdate = true;
   if (old) old.dispose();
+  invalidate();
   return true;
 }
 async function saveAppearance(changes) {
@@ -520,6 +541,7 @@ async function showAvatar(url) {
     screenMaterial.color.set(0xffffff);
     screenMaterial.needsUpdate = true;
     if (old) old.dispose();
+    invalidate();
   } catch {
     /* The rest of the preview still works if Twitch's image is unavailable. */
   }
@@ -551,6 +573,7 @@ async function preview(pattern, { save = true } = {}) {
     material.color.set(0xffffff);
     material.needsUpdate = true;
     if (old) old.dispose();
+    invalidate();
     if (!save) return;
     if (!viewer || !owned().has(pattern.id)) {
       return;
@@ -623,6 +646,7 @@ function setViewer(data) {
     Math.round((viewer?.patternScale ?? 1) * 100),
   );
   patternScale.value = Number($("#pattern-scale").value) / 100;
+  invalidate();
   $("#pattern-scale-value").textContent = `${$("#pattern-scale").value}%`;
   const type = viewer?.chestType || "none",
     value = viewer?.chestValue || "",
@@ -666,6 +690,7 @@ function setViewer(data) {
 }
 $("#pattern-scale").addEventListener("input", (e) => {
   patternScale.value = Number(e.target.value) / 100;
+  invalidate();
   $("#pattern-scale-value").textContent = `${e.target.value}%`;
   clearTimeout(saveTimer);
   saveTimer = setTimeout(
