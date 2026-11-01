@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Privacy · RobotAlerts</title>
+    <link rel="stylesheet" href="/robot/style.css?v=pages-1" />
+    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=pages-1" />
+    <link rel="icon" href="/robot/brand/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <header data-site-header></header>
+    <main class="page-main">
+      <h1>Privacy</h1>
+      <section class="privacy" id="privacy">
+        <div>
+          <span class="label">YOUR DATA</span>
+          <h2>Small footprint.</h2>
+        </div>
+        <div>
+          <p>
+            Robot Alerts stores your Twitch user ID, display name, selected
+            pattern, pattern size and chest display choice. It also keeps
+            point-award records containing your Twitch ID, the participating
+            channel ID, event type, points and time. Event IDs are kept for
+            seven days to prevent duplicates. Session records contain a hash and
+            an expiry of up to 30 days. Streamer credentials are encrypted and
+            removed when the channel disconnects. Connected channel names are
+            shown in the public Streamers directory. Streamer accounts also
+            store overlay resolution, theme and alert-box design preferences.
+          </p>
+          <p>
+            The service does not store email addresses, IP addresses, chat
+            messages or browser details. You can manage deletion below after
+            signing in. Streamers can also disconnect their channel and remove
+            its point records.
+          </p>
+          <details id="data-management" class="data-management" hidden>
+            <summary>Manage account data</summary>
+            <p>
+              Deletion is permanent. Review what will be removed before
+              confirming.
+            </p>
+            <div class="privacy-actions">
+              <button
+                id="delete-viewer"
+                class="quiet danger-link"
+                type="button"
+                hidden
+              >
+                Delete my viewer data…</button
+              ><button id="disconnect" class="quiet" type="button" hidden>
+                Disconnect my channel…
+              </button>
+            </div>
+          </details>
+        </div>
+      </section>
+      <dialog
+        id="confirm-dialog"
+        aria-labelledby="confirm-title"
+        aria-describedby="confirm-description"
+      >
+        <form method="dialog">
+          <span class="label danger-label">ACCOUNT DATA</span>
+          <h2 id="confirm-title"></h2>
+          <p id="confirm-description"></p>
+          <label class="confirm-check" id="confirm-check"
+            >Type <strong>DELETE</strong> to confirm<input
+              id="confirm-word"
+              autocomplete="off"
+              spellcheck="false"
+              aria-label="Type DELETE to confirm"
+          /></label>
+          <div class="dialog-actions">
+            <button class="quiet" value="cancel" autofocus>Keep my data</button
+            ><button
+              id="confirm-delete"
+              class="danger-button"
+              value="confirm"
+              disabled
+            >
+              Delete my data permanently
+            </button>
+          </div>
+        </form>
+      </dialog>
+    </main>
+    <footer>
+      <span>RobotAlerts</span><a href="/robot/credits.html">Credits</a>
+    </footer>
+    <script type="module" src="/robot/shared/site-nav.js?v=pages-1"></script>
+    <script type="module" src="./privacy.js?v=pages-1"></script>
+  </body>
+</html>

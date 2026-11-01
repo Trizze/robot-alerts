@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Streamer Dashboard · RobotAlerts</title>
+    <link rel="stylesheet" href="../style.css?v=pages-1" />
+    <link rel="stylesheet" href="../shared/alert-card.css" />
+    <link rel="stylesheet" href="../start/setup.css?v=designs-2" />
+    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=pages-1" />
+    <link rel="icon" href="/robot/brand/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <header data-site-header></header>
+    <main class="setup">
+      <div class="eyebrow">YOUR COMMUNITY, ON SCREEN</div>
+      <h1>Streamer <em>Dashboard.</em></h1>
+      <p class="setup-lead">Manage your browser source and alert design.</p>
+      <p id="dashboard-status" class="setup-lead" role="status">
+        Checking channel connection…
+      </p>
+      <section class="setup-panel" id="step-1">
+        <span class="label">TWITCH CONNECTION</span>
+        <h2>Connect your Twitch channel.</h2>
+        <p>
+          Authorize the channel you stream on. Robot Alerts uses subscription
+          and bits events to show alerts and award viewer points.
+        </p>
+        <p id="channel-status" role="status">Checking your connection…</p>
+        <button id="setup-login" class="primary" type="button">
+          Log in with Twitch ↗
+        </button>
+        <p class="setup-note">
+          Already signed in as a viewer? Connect again as a streamer to enable
+          your channel.
+        </p>
+      </section>
+      <section class="setup-panel" id="step-2" hidden>
+        <span class="label">YOUR OBS SOURCE</span>
+        <h2>Your browser alert source.</h2>
+        <p>
+          Choose the resolution of your OBS canvas. All three use the same
+          animation and framing.
+        </p>
+        <fieldset class="resolution-options">
+          <legend>Canvas resolution</legend>
+          <label
+            ><input type="radio" name="resolution" value="720p" />720p
+            <small>1280 × 720</small></label
+          ><label
+            ><input type="radio" name="resolution" value="1080p" checked />1080p
+            <small>1920 × 1080</small></label
+          ><label
+            ><input type="radio" name="resolution" value="1440p" />1440p
+            <small>2560 × 1440</small></label
+          >
+        </fieldset>
+        <label class="source-label" for="source-url"
+          >Your channel’s source URL</label
+        >
+        <div class="source-row">
+          <input id="source-url" readonly /><button
+            class="quiet"
+            id="copy-source"
+            type="button"
+          >
+            Copy URL
+          </button>
+        </div>
+        <p class="setup-note">
+          This is a public, read-only display URL. It contains no credentials
+          and cannot change your channel settings.
+        </p>
+        <button id="to-obs" class="primary" type="button">
+          Save & continue →
+        </button>
+      </section>
+      <section class="setup-panel" id="step-3" hidden>
+        <span class="label">OBS INSTRUCTIONS</span>
+        <h2>Add it to OBS.</h2>
+        <ol class="obs-steps">
+          <li>
+            In <strong>Sources</strong>, click <strong>+ → Browser</strong>.
+          </li>
+          <li>
+            Name it <strong>Robot Alerts</strong> and paste the URL you copied.
+          </li>
+          <li>
+            Set Width to <strong id="obs-width">1920</strong> and Height to
+            <strong id="obs-height">1080</strong>.
+          </li>
+          <li>
+            Leave <strong>Local file</strong> off. Keep the transparent
+            background, then click <strong>OK</strong>.
+          </li>
+          <li>Place this source above your gameplay or camera sources.</li>
+        </ol>
+        <p class="setup-note">
+          The source is transparent between alerts. Changing the resolution here
+          won’t change OBS properties automatically.
+        </p>
+        <div class="setup-actions">
+          <button id="test-source" class="quiet" type="button">
+            Send a test alert</button
+          ><button id="to-theme" class="primary" type="button">
+            Choose my design →
+          </button>
+        </div>
+        <p id="test-status" role="status"></p>
+      </section>
+      <section class="setup-panel" id="step-4" hidden>
+        <span class="label">ALERT DESIGN</span>
+        <h2>Pick your alert-box design.</h2>
+        <p>
+          Change the box around the alert. Your viewers’ robot looks stay the
+          same.
+        </p>
+        <div
+          id="design-options"
+          class="design-options"
+          role="group"
+          aria-label="Alert box styles"
+        ></div>
+        <div
+          class="design-preview"
+          id="design-preview"
+          aria-label="Alert box preview"
+        >
+          <div id="preview-card" class="card-custom-preview"></div>
+        </div>
+        <p class="setup-note">
+          Your viewers’ selected patterns and pattern sizes follow their robots
+          into these alerts, across connected channels.
+        </p>
+        <div class="setup-actions">
+          <button id="test-design" class="quiet" type="button">
+            Send test to OBS
+          </button>
+        </div>
+        <p id="setup-done" role="status"></p>
+      </section>
+      <p
+        id="setup-feedback"
+        class="setup-feedback"
+        role="status"
+        aria-live="polite"
+      ></p>
+      <a class="back-picker" href="../">← Back to the robot picker</a>
+    </main>
+    <script
+      type="module"
+      src="/robot/shared/channel-controls.js?v=pages-1"
+    ></script>
+    <script type="module" src="/robot/shared/site-nav.js?v=pages-1"></script>
+  </body>
+</html>

@@ -844,3 +844,108 @@ dialog p {
 [data-emote-more] {
   margin-top: 10px;
 }
+
+.robot-size-controls {
+  padding: 20px 26px 24px;
+  border-top: 1px solid var(--line);
+}
+.locked-preview {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 3;
+  pointer-events: none;
+  white-space: nowrap;
+  padding: 7px 12px;
+  border-radius: 8px;
+  background: #14111ee8;
+  color: #dfcbff;
+  border: 1px solid #b69bea66;
+  font-size: 11px;
+  font-weight: 850;
+  letter-spacing: 1.6px;
+  box-shadow: 0 6px 24px #0004;
+}
+.progress-card {
+  flex-wrap: wrap;
+}
+.tier-progress {
+  width: 100%;
+  margin-top: 16px;
+}
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 12px;
+  margin-bottom: 10px;
+}
+#tier-progress {
+  width: 100%;
+  height: 8px;
+  display: block;
+  border: 0;
+  border-radius: 20px;
+  overflow: hidden;
+  background: #ffffff12;
+  accent-color: var(--purple);
+}
+#tier-progress::-webkit-progress-bar {
+  background: #ffffff12;
+}
+#tier-progress::-webkit-progress-value {
+  background: linear-gradient(90deg, #9674e8, #d0b8ff);
+  border-radius: 20px;
+}
+#tier-progress::-moz-progress-bar {
+  background: #bc9aff;
+  border-radius: 20px;
+}
+.filters {
+  align-items: center;
+  flex-wrap: wrap;
+}
+.filters #pattern-count {
+  margin-left: auto;
+  text-align: right;
+  white-space: nowrap;
+}
+.pattern {
+  position: relative;
+}
+.pattern-lock {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 9px;
+  background: #13141be8;
+  font-size: 15px;
+}
+.progress-dialog {
+  width: min(620px, calc(100vw - 32px));
+  border: 1px solid var(--line);
+  border-radius: 22px;
+  background: var(--panel);
+  color: var(--text);
+  padding: 28px;
+  max-height: 85vh;
+  overflow: auto;
+}
+.progress-dialog::backdrop {
+  background: #080710bd;
+  backdrop-filter: blur(5px);
+}
+.progress-dialog p {
+  color: var(--muted);
+  line-height: 1.75;
+}
+.progress-dialog h2 {
+  margin-top: 0;
+}

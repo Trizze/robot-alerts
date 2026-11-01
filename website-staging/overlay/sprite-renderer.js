@@ -1,3 +1,4 @@
+import { chestFrame } from "./chest-surface.js?v=pages-1";
 import { drawPattern } from "./pattern-loader.js?v=patterns-1";
 import { createPixelText } from "./layer-proof/pixel-text.js";
 const base = new URL("./static-motion-60/", import.meta.url).href;
@@ -136,7 +137,7 @@ function textFor(alert, viewer) {
   }
   return textImages.get(key);
 }
-export function drawRobot(ctx, atlas, clip, index, viewer, alert) {
+export function drawRobot(ctx, atlas, clip, index, viewer, alert, seconds = 0) {
   const frame = atlas.rig.clips[clip]?.frames[index];
   if (!frame) return;
   if (scratch.height !== atlas.rig.height) scratch.height = atlas.rig.height;
@@ -202,7 +203,13 @@ export function drawRobot(ctx, atlas, clip, index, viewer, alert) {
       mask.setTransform(1, 0, 0, 1, 0, 0);
       mask.globalCompositeOperation = "source-over";
       mask.clearRect(0, 0, atlas.rig.width, atlas.rig.height);
-      projected(textFor(alert, viewer), frame.chestDisplay.corners, false);
+      projected(
+        viewer?._chestSurface
+          ? chestFrame(viewer._chestSurface, seconds)
+          : textFor(alert, viewer),
+        frame.chestDisplay.corners,
+        Boolean(viewer?._chestSurface),
+      );
       mask.globalCompositeOperation = "destination-in";
       paint(mask, "display_mask");
       mask.globalCompositeOperation = "source-over";

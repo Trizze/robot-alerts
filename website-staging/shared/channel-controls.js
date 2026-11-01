@@ -51,7 +51,15 @@ async function action(button, text, work) {
     button.removeAttribute("aria-busy");
   }
 }
+const isDashboard = location.pathname.includes("/dashboard/");
 function step(n) {
+  if (isDashboard) {
+    for (let i = 1; i <= 4; i++)
+      $(`#step-${i}`).hidden = !connected
+        ? i !== 1
+        : i === 1 || (i === 3 && n !== 3);
+    return;
+  }
   for (let i = 1; i <= 4; i++) {
     $(`#step-${i}`).hidden = i !== n;
     const b = $(`[data-step="${i}"]`);
@@ -130,6 +138,12 @@ function preview() {
       "aria-pressed",
       String(settings.preset === b.dataset.preset),
     );
+  if (settings.preset === "none") {
+    $("#preview-card").replaceChildren();
+    $("#design-preview").hidden = true;
+    return;
+  }
+  $("#design-preview").hidden = false;
   const card = createAlertCard({
     type: "cheer",
     bits: 500,
@@ -148,27 +162,51 @@ function fitPreview() {
   wrap.style.height = `${230 * scale + 30}px`;
 }
 new ResizeObserver(fitPreview).observe($("#design-preview"));
-for (const id of CARD_PRESET_ORDER) {
+for (const id of [...CARD_PRESET_ORDER, "none"]) {
   const b = document.createElement("button"),
     swatch = document.createElement("i");
   b.type = "button";
   b.dataset.preset = id;
-  swatch.style.background = CARD_PRESETS[id].colors.accent;
-  b.append(swatch, document.createTextNode(CARD_PRESETS[id].name));
+  swatch.style.background =
+    id === "none" ? "#777" : CARD_PRESETS[id].colors.accent;
+  b.append(
+    swatch,
+    document.createTextNode(
+      id === "none" ? "No alert box" : CARD_PRESETS[id].name,
+    ),
+  );
   b.onclick = () => {
     settings.preset = id;
     preview();
-    feedback("Preview updated. Save design to apply it to your channel.");
+    scheduleDesignSave();
   };
   $("#design-options").append(b);
 }
-$("#save-design").onclick = () =>
-  action($("#save-design"), "Saving design…", async () => {
-    await save();
-    feedback("Design saved. Your existing OBS source updates automatically.");
-    $("#setup-done").textContent =
-      "You’re ready. Keep your browser source in OBS, and Robot Alerts will handle incoming events.";
-  });
+let saveChain = Promise.resolve(),
+  saveRevision = 0;
+function scheduleDesignSave() {
+  const revision = ++saveRevision,
+    snapshot = { ...settings };
+  feedback(
+    connected ? "Saving design…" : "Connect your channel to save this design.",
+  );
+  if (!connected) return;
+  saveChain = saveChain
+    .catch(() => {})
+    .then(async () => {
+      await api("api/channel/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(snapshot),
+      });
+      if (revision === saveRevision)
+        feedback("Design saved. Your OBS source updates automatically.");
+    })
+    .catch(() => {
+      if (revision === saveRevision)
+        feedback("Could not save design. Choose it again to retry.");
+    });
+}
 preview();
 try {
   const me = await api("api/me?profile=0");
@@ -184,12 +222,18 @@ try {
     $(`[name="resolution"][value="${settings.resolution}"]`).checked = true;
     source();
     preview();
-    step(2);
+    if ($("#dashboard-status"))
+      $("#dashboard-status").textContent =
+        `Connected as ${me.viewer.displayName}.`;
+    step(isDashboard ? 4 : 2);
   } else {
     $("#channel-status").textContent =
       `Signed in as ${me.viewer.displayName}. Connect your streamer channel to continue.`;
   }
 } catch {
+  if ($("#dashboard-status"))
+    $("#dashboard-status").textContent =
+      "Connect your Twitch channel to manage it here.";
   $("#channel-status").textContent =
     "Log in with the Twitch account you stream from.";
 }

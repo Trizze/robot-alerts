@@ -1,5 +1,5 @@
 import { API_BASE } from "../config.js?v=shared-service-1";
-import { SpriteScene } from "./sprite-scene.js?v=patterns-1";
+import { SpriteScene } from "./sprite-scene.js?v=pages-1";
 import { createAlertCard } from "../shared/alert-card.js";
 const stage = document.querySelector("#stage"),
   status = document.querySelector("#connection");
@@ -32,8 +32,8 @@ function next() {
     settings: {
       ...settings,
       scale: 1,
-      showAlertBox: true,
-      card: { preset: settings.preset },
+      showAlertBox: settings.preset !== "none",
+      card: { preset: settings.preset === "none" ? "03" : settings.preset },
     },
   };
   current = new SpriteScene(stage, createAlertCard(alert), alert, next, () => {
@@ -65,7 +65,10 @@ if (!/^\d{1,32}$/.test(channel || "")) {
           current.alert.settings = {
             ...current.alert.settings,
             theme: settings.theme,
-            card: { preset: settings.preset },
+            showAlertBox: settings.preset !== "none",
+            card: {
+              preset: settings.preset === "none" ? "03" : settings.preset,
+            },
           };
           current.panel.replaceChildren(createAlertCard(current.alert));
           current.root.classList.toggle("gaming", settings.theme === "gaming");

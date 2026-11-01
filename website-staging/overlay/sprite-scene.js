@@ -1,3 +1,4 @@
+import { prepareChest } from "./chest-surface.js?v=pages-1";
 import { preparePattern } from "./pattern-loader.js?v=patterns-1";
 import { placeAlertPanel } from "../shared/alert-layout.js";
 import { RaidStream } from "../shared/raid-stream.js";
@@ -6,7 +7,7 @@ import {
   motionFrame,
   drawRobot,
   avatarFor,
-} from "./sprite-renderer.js?v=patterns-1";
+} from "./sprite-renderer.js?v=pages-1";
 const RUN_SECONDS = 54 / 30,
   OUT_SECONDS = 37 / 30,
   DOOR_LEAD = 1.15,
@@ -73,11 +74,19 @@ export class SpriteScene {
         this.join({ viewer, at: 0.2 + i * 0.95, sequence: i });
     avatarFor(alert.viewer);
     for (const viewer of alert.participants || []) avatarFor(viewer);
-    Promise.all([motionReady, preparePattern(alert.viewer)])
-      .then(([atlas, pattern]) => {
+    Promise.all([
+      motionReady,
+      preparePattern(alert.viewer),
+      prepareChest(alert.viewer).catch(() => null),
+    ])
+      .then(([atlas, pattern, chest]) => {
         if (this.stopped) return;
         this.atlas = atlas;
-        this.alert.viewer = { ...this.alert.viewer, _patternSurface: pattern };
+        this.alert.viewer = {
+          ...this.alert.viewer,
+          _patternSurface: pattern,
+          _chestSurface: chest,
+        };
         this.started = performance.now();
         this.root.dataset.ready = "true";
         this.tick();
@@ -106,7 +115,7 @@ export class SpriteScene {
     this.ctx.save();
     this.ctx.translate(x, y + ((1080 - this.atlas.rig.height) * scale) / 2);
     this.ctx.scale(scale, scale);
-    drawRobot(this.ctx, this.atlas, ...pose, viewer, this.alert);
+    drawRobot(this.ctx, this.atlas, ...pose, viewer, this.alert, age);
     this.ctx.restore();
   }
   drawDoor(time, closeAt) {

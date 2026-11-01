@@ -1,3 +1,5 @@
+import { tierProgress } from "./shared/tier-progress.js";
+import { progressInfo } from "./shared/progress-info.js";
 import { createEmotePicker } from "./emote-picker.js?v=emotes-session-1";
 import * as THREE from "three";
 import { GLTFLoader } from "./vendor/loaders/GLTFLoader.js";
@@ -183,28 +185,6 @@ async function runAction(button, pending, success, work) {
 window.addEventListener("pageshow", () => {
   for (const button of pendingActions.keys()) finishAction(button);
 });
-function confirmDataAction(title, description, action, wordRequired = false) {
-  const dialog = $("#confirm-dialog");
-  $("#confirm-title").textContent = title;
-  $("#confirm-description").textContent = description;
-  $("#confirm-delete").textContent = action;
-  $("#confirm-check").hidden = !wordRequired;
-  $("#confirm-word").value = "";
-  $("#confirm-delete").disabled = wordRequired;
-  $("#confirm-word").oninput = () => {
-    $("#confirm-delete").disabled =
-      wordRequired && $("#confirm-word").value !== "DELETE";
-  };
-  dialog.returnValue = "cancel";
-  dialog.showModal();
-  return new Promise((resolve) =>
-    dialog.addEventListener(
-      "close",
-      () => resolve(dialog.returnValue === "confirm"),
-      { once: true },
-    ),
-  );
-}
 function label(text, className) {
   const e = document.createElement("span");
   e.className = className;
@@ -297,12 +277,17 @@ try {
       )
         time -= animation.durations[index++];
       if (index !== animation.lastFrame) {
-        animation.ctx.fillStyle = "#dfe2eb";
+        animation.ctx.fillStyle = "#242833";
         animation.ctx.fillRect(0, 0, 512, 512);
         animation.ctx.drawImage(animation.frames[index], 48, 48, 416, 416);
         animation.texture.needsUpdate = true;
         animation.lastFrame = index;
       }
+    }
+    if (!$("#locked-preview").hidden) {
+      const point = new THREE.Vector3(0, 2.83, 0).project(camera);
+      $("#locked-preview").style.transform =
+        `translate(${((point.x + 1) * canvas.clientWidth) / 2}px,${((1 - point.y) * canvas.clientHeight) / 2}px) translate(-50%,-100%)`;
     }
     controls.update();
     renderer.render(scene, camera);
@@ -310,6 +295,11 @@ try {
   $("#reset-view").addEventListener("click", () => {
     camera.position.set(4, 2.5, 5);
     controls.target.set(0, 1.35, 0);
+    if (!$("#locked-preview").hidden) {
+      const point = new THREE.Vector3(0, 2.83, 0).project(camera);
+      $("#locked-preview").style.transform =
+        `translate(${((point.x + 1) * canvas.clientWidth) / 2}px,${((1 - point.y) * canvas.clientHeight) / 2}px) translate(-50%,-100%)`;
+    }
     controls.update();
     error("View reset.");
   });
@@ -443,7 +433,7 @@ async function renderChest(type = "none", value = "", animated = false) {
   }
   let animation;
   if (type === "emote" && value) {
-    ctx.fillStyle = "#dfe2eb";
+    ctx.fillStyle = "#242833";
     ctx.fillRect(0, 0, 512, 512);
     if (!/^[A-Za-z0-9_-]{1,80}$/.test(value)) {
       error("That Twitch emote is invalid.");
@@ -530,7 +520,13 @@ async function preview(pattern, { save = true } = {}) {
   renderInventory();
   if (!material) return;
   const requestId = ++imageRequest;
-  if (save) error("Loading pattern preview…");
+  $("#locked-preview").hidden = owned().has(pattern.id);
+  if (!owned().has(pattern.id)) {
+    clearTimeout(toastTimer);
+    $("#feedback-toast").hidden = true;
+    $("#action-status").textContent = "";
+  }
+  if (save && owned().has(pattern.id)) error("Loading pattern preview…");
   try {
     const map = await new THREE.TextureLoader().loadAsync(pattern.image);
     if (requestId !== imageRequest) {
@@ -548,11 +544,6 @@ async function preview(pattern, { save = true } = {}) {
     if (old) old.dispose();
     if (!save) return;
     if (!viewer || !owned().has(pattern.id)) {
-      error(
-        viewer
-          ? "Previewing a locked pattern."
-          : "Previewing. Sign in to use an earned pattern.",
-      );
       return;
     }
     await request("/api/me/pattern", {
@@ -589,6 +580,11 @@ function renderInventory() {
     img.src = pattern.image;
     img.alt = "";
     img.loading = "lazy";
+    if (!have.has(pattern.id)) {
+      const lock = label("🔒", "pattern-lock");
+      lock.setAttribute("aria-hidden", "true");
+      b.append(lock);
+    }
     b.append(
       img,
       label(pattern.name, "pattern-name"),
@@ -634,10 +630,6 @@ function setViewer(data) {
     channelStored = Boolean(data?.channelStored || data?.channel);
   $("#login").hidden = Boolean(viewer);
   $("#logout").hidden = !viewer;
-  $("#delete-viewer").hidden = !viewer;
-  $("#data-management").hidden = !viewer;
-  if (!viewer) $("#data-management").open = false;
-  $("#disconnect").hidden = !channelStored;
   $("#account-status").textContent = viewer
     ? `Signed in as ${viewer.displayName}${channelStored && !channel ? " · Channel disconnected" : ""}`
     : "Not signed in";
@@ -649,6 +641,14 @@ function setViewer(data) {
     label("POINTS", "small-label"),
   );
   $("#tier").textContent = `TIER ${viewer?.tier ?? "—"}`;
+  const progress = tierProgress(viewer?.points || 0);
+  $("#tier-progress").value = viewer ? progress.value : 0;
+  $("#next-tier").textContent = viewer
+    ? progress.to
+      ? `${viewer.points} / ${progress.to} points · Tier ${progress.tier + 1}`
+      : "Tier 5 · Highest tier"
+    : "Sign in to see progress";
+  $("#locked-preview").hidden = !previewId || owned().has(previewId);
   renderInventory();
   if (viewer?.selectedPattern) {
     const p = catalog.find((x) => x.id === viewer.selectedPattern);
@@ -746,54 +746,12 @@ function openTwitch(button, role) {
   }
 }
 $("#login").addEventListener("click", () => openTwitch($("#login"), "viewer"));
-$("#connect-streamer").addEventListener("click", () =>
-  location.assign(new URL("./start/", location.href)),
-);
 $("#logout").addEventListener("click", () =>
   runAction($("#logout"), "Signing out…", "Signed out.", async () => {
     await request("/api/session", { method: "DELETE" });
     setViewer(null);
   }),
 );
-$("#delete-viewer").addEventListener("click", async () => {
-  if (
-    !(await confirmDataAction(
-      "Are you sure you want to delete your data?",
-      "This permanently removes your viewer profile, earned points, patterns and appearance settings across participating channels, and signs you out. A connected streamer channel stays connected; disconnect it separately.",
-      "Delete my data permanently",
-      true,
-    ))
-  )
-    return;
-  await runAction(
-    $("#delete-viewer"),
-    "Deleting data…",
-    "Your viewer data was deleted. You are signed out.",
-    async () => {
-      await request("/api/me", { method: "DELETE" });
-      setViewer(null);
-    },
-  );
-});
-$("#disconnect").addEventListener("click", async () => {
-  if (
-    !(await confirmDataAction(
-      "Disconnect your channel?",
-      "This removes your channel connection and its point records. Viewers’ totals will be recalculated. You can reconnect your channel later.",
-      "Disconnect channel",
-    ))
-  )
-    return;
-  await runAction(
-    $("#disconnect"),
-    "Disconnecting…",
-    "Your channel was disconnected.",
-    async () => {
-      await request("/api/channel", { method: "DELETE" });
-      await loadAccount();
-    },
-  );
-});
 async function loadProfile(id) {
   try {
     const data = await request("/api/me");
@@ -824,12 +782,18 @@ async function loadAccount() {
   }
 }
 $("#account-retry").addEventListener("click", loadAccount);
+const progressDialog = progressInfo();
+$("#progress-info").onclick = () => progressDialog.showModal();
 const accountReady = loadAccount();
 try {
   const r = await fetch("./patterns/catalog.json");
   if (!r.ok) throw Error();
   catalog = (await r.json()).patterns;
   renderInventory();
+  if (viewer?.selectedPattern) {
+    const selected = catalog.find((p) => p.id === viewer.selectedPattern);
+    if (selected) preview(selected, { save: false });
+  }
 } catch {
   error("The pattern catalog could not be loaded.");
 }

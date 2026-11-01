@@ -73,7 +73,7 @@ const assert = require("node:assert/strict");
         characterData: true,
       });
     });
-    const base = process.env.ROBOT_PREVIEW_URL || "http://127.0.0.1:3901";
+    const base = process.env.ROBOT_PREVIEW_URL || "http://127.0.0.1:3902/robot";
     await page.goto(base + "/");
     await page.waitForFunction(() =>
       document

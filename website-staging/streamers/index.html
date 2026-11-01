@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Streamers · RobotAlerts</title>
+    <link rel="stylesheet" href="/robot/style.css?v=pages-1" />
+    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=pages-1" />
+    <link rel="icon" href="/robot/brand/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <header data-site-header></header>
+    <main class="page-main">
+      <h1>Streamers</h1>
+      <p>
+        Earn progress in any of these connected channels. Your points and robot
+        design follow you between them.
+      </p>
+      <label for="streamer-search">Find a streamer</label
+      ><input
+        id="streamer-search"
+        type="search"
+        class="emote-search"
+        placeholder="Search streamers…"
+      />
+      <p id="directory-status" role="status">Loading streamers…</p>
+      <div id="streamer-list" class="streamer-list"></div>
+    </main>
+    <footer>
+      <span>RobotAlerts</span><a href="/robot/credits.html">Credits</a>
+    </footer>
+    <script type="module" src="/robot/shared/site-nav.js?v=pages-1"></script>
+    <script type="module" src="./streamers.js?v=pages-1"></script>
+  </body>
+</html>

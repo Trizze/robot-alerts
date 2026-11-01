@@ -4,15 +4,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Get started · Robot Alerts</title>
-    <link rel="stylesheet" href="../style.css?v=onboarding-1" />
+    <link rel="stylesheet" href="../style.css?v=pages-1" />
     <link rel="stylesheet" href="../shared/alert-card.css" />
     <link rel="stylesheet" href="./setup.css?v=designs-2" />
+    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=pages-1" />
+    <link rel="icon" href="/robot/brand/favicon.svg" type="image/svg+xml" />
   </head>
   <body>
-    <header class="topbar">
-      <a class="brand" href="../">▦ ROBOT ALERTS</a
-      ><a href="../examples/">See it in action ↗</a>
-    </header>
+    <header data-site-header></header>
     <main class="setup">
       <div class="eyebrow">YOUR COMMUNITY, ON SCREEN</div>
       <h1>Let’s get you <em>set up.</em></h1>
@@ -140,9 +139,7 @@
           into these alerts, across connected channels.
         </p>
         <div class="setup-actions">
-          <button id="save-design" class="primary" type="button">
-            Save design</button
-          ><button id="test-design" class="quiet" type="button">
+          <button id="test-design" class="quiet" type="button">
             Send test to OBS
           </button>
         </div>
@@ -156,6 +153,10 @@
       ></p>
       <a class="back-picker" href="../">← Back to the robot picker</a>
     </main>
-    <script type="module" src="./setup.js?v=emotes-session-1"></script>
+    <script
+      type="module"
+      src="/robot/shared/channel-controls.js?v=pages-1"
+    ></script>
+    <script type="module" src="/robot/shared/site-nav.js?v=pages-1"></script>
   </body>
 </html>

@@ -40,12 +40,12 @@ const assert = require("node:assert/strict");
     };
   });
   await page.goto(
-    (process.env.ROBOT_PREVIEW_URL || "http://127.0.0.1:3901") +
+    (process.env.ROBOT_PREVIEW_URL || "http://127.0.0.1:3902/robot") +
       "/overlay/?channel=123",
   );
   await page.addStyleTag({ content: "body{background:#24272c!important}" });
   await page.evaluate(async () => {
-    const m = await import("./sprite-renderer.js?v=patterns-1");
+    const m = await import("./sprite-renderer.js?v=pages-1");
     await m.motionReady;
     const avatar = m.avatarFor({
       avatar: "https://static-cdn.jtvnw.net/pattern-demo.svg",
@@ -113,7 +113,7 @@ const assert = require("node:assert/strict");
   // Compare sizes and ensure baseline/profile/chest are preserved in the same final pose.
   await page.evaluate(async () => {
     const { motionReady, drawRobot, avatarFor } = await import(
-      "./sprite-renderer.js?v=patterns-1"
+      "./sprite-renderer.js?v=pages-1"
     );
     const { preparePattern } = await import("./pattern-loader.js?v=patterns-1");
     const atlas = await motionReady,
