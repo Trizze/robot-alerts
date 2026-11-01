@@ -8,7 +8,7 @@
       content="Your robot, your earned patterns, across participating Twitch channels."
     />
     <title>Robot Alerts · Your robot</title>
-    <link rel="stylesheet" href="./style.css?v=actions-3" />
+    <link rel="stylesheet" href="./style.css?v=emotes-session-1" />
     <script type="importmap">
       { "imports": { "three": "./vendor/three.module.js" } }
     </script>
@@ -37,9 +37,11 @@
           </p>
         </div>
         <div class="account">
-          <span id="account-status" role="status">Not signed in</span
-          ><button id="login" class="primary" type="button">
+          <span id="account-status" role="status">Checking sign-in…</span
+          ><button id="login" class="primary" type="button" hidden>
             Sign in with Twitch <span aria-hidden="true">↗</span></button
+          ><button id="account-retry" class="quiet" type="button" hidden>
+            Retry sign-in check</button
           ><button id="logout" class="quiet" type="button" hidden>
             Sign out
           </button>
@@ -107,6 +109,35 @@
             <p id="emote-hint" class="scale-hint" hidden>
               Type a Twitch emote name. Capitalization is fixed as you type.
             </p>
+            <section
+              id="emote-picker"
+              class="emote-picker"
+              aria-label="Choose a Twitch emote"
+              hidden
+            >
+              <input
+                type="search"
+                class="emote-search"
+                data-emote-search
+                placeholder="Search Twitch emotes…"
+                aria-label="Search Twitch emotes"
+              />
+              <div class="emote-options">
+                <label
+                  ><input type="checkbox" data-emote-animated /> Animated
+                  only</label
+                ><span data-emote-count aria-live="polite"></span>
+              </div>
+              <div
+                class="emote-grid"
+                data-emote-grid
+                role="group"
+                aria-label="Twitch emotes"
+              ></div>
+              <button type="button" class="quiet" data-emote-more hidden>
+                Show more emotes
+              </button>
+            </section>
             <div
               id="emoji-picker"
               class="emoji-picker"
@@ -266,6 +297,6 @@
         </div>
       </form>
     </dialog>
-    <script type="module" src="./app.js?v=onboarding-1"></script>
+    <script type="module" src="./app.js?v=emotes-session-1"></script>
   </body>
 </html>

@@ -1,3 +1,4 @@
+import { createEmotePicker } from "./emote-picker.js?v=emotes-session-1";
 import * as THREE from "three";
 import { GLTFLoader } from "./vendor/loaders/GLTFLoader.js";
 import { OrbitControls } from "./vendor/controls/OrbitControls.js";
@@ -317,11 +318,17 @@ try {
     "Your browser could not start the 3D preview.";
 }
 
+const emotePicker = createEmotePicker($("#emote-picker"), (emote) => {
+  $("#chest-value").value = emote.name;
+  $("#chest-apply").click();
+});
+emotePicker.update(emotes);
 function setChestControls(type) {
   $("#chest-kind").value = type;
   $("#chest-value").hidden = type !== "emote";
   $("#emote-hint").hidden = type !== "emote";
   $("#emoji-picker").hidden = type !== "emoji";
+  $("#emote-picker").hidden = type !== "emote";
 }
 function renderEmojiPicker() {
   const grid = $("#emoji-picker");
@@ -344,6 +351,10 @@ function renderEmojiPicker() {
   }
 }
 function refreshEmoteSuggestions() {
+  emotePicker.update(
+    emotes,
+    viewer?.chestType === "emote" ? viewer.chestValue : "",
+  );
   const list = $("#emote-suggestions");
   list.replaceChildren();
   for (const emote of emotes) {
@@ -606,6 +617,7 @@ function setViewer(data) {
     emote = emotes.find((item) => item.id === value);
   selectedEmoji = type === "emoji" ? value : "";
   renderEmojiPicker();
+  emotePicker.update(emotes, type === "emote" ? value : "");
   setChestControls(type);
   $("#chest-value").value = emote?.name || (type === "emote" ? value : "");
   renderChest(type, value, Boolean(emote?.animated));
@@ -690,6 +702,7 @@ $("#chest-apply").addEventListener("click", () =>
       if (!match)
         throw new Error("Emote not found. Try a Twitch global emote name.");
       $("#chest-value").value = match.name;
+      emotePicker.update(emotes, match.id);
       if ((await renderChest("emote", match.id, match.animated)) === false)
         return false;
       return saveAppearance({ chestType: "emote", chestValue: match.id });
@@ -781,17 +794,36 @@ $("#disconnect").addEventListener("click", async () => {
     },
   );
 });
-async function loadAccount() {
-  $("#account-status").textContent = "Checking sign-in…";
+async function loadProfile(id) {
   try {
     const data = await request("/api/me");
-    setViewer(data);
-  } catch (failure) {
-    setViewer(null);
-    if (failure.status !== 401)
-      error("Could not check your sign-in. Please refresh and try again.");
+    if (viewer?.id === id && data.viewer?.avatarUrl) {
+      viewer.avatarUrl = data.viewer.avatarUrl;
+      showAvatar(viewer.avatarUrl);
+    }
+  } catch {
+    /* An optional profile image must never change sign-in state. */
   }
 }
+async function loadAccount() {
+  $("#account-status").textContent = "Checking sign-in…";
+  $("#account-retry").hidden = true;
+  try {
+    const data = await request("/api/me?profile=0");
+    setViewer(data);
+    if (viewer && !viewer.avatarUrl) void loadProfile(viewer.id);
+  } catch (failure) {
+    if (failure.status === 401) setViewer(null);
+    else {
+      $("#account-status").textContent = "Could not check sign-in.";
+      $("#account-retry").hidden = false;
+      error(
+        "Could not check your sign-in. Your session has not been cleared. Try again.",
+      );
+    }
+  }
+}
+$("#account-retry").addEventListener("click", loadAccount);
 const accountReady = loadAccount();
 try {
   const r = await fetch("./patterns/catalog.json");

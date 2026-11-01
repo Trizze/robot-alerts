@@ -171,7 +171,7 @@ $("#save-design").onclick = () =>
   });
 preview();
 try {
-  const me = await api("api/me");
+  const me = await api("api/me?profile=0");
   if (me.channel && me.streamer) {
     const value = await api("api/channel/settings");
     connected = true;
