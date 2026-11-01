@@ -1,5 +1,9 @@
 # Rules for Codex in Robot Alerts
 
+## Static deployment authorization — 2026-11-01
+
+- The owner authorizes Robot Alerts static updates through `robot-deploy go` without repeated approval questions. Run and show the dry run first, then proceed. Use only `/home/marvin/robot-site` and the existing deployment script; all secret, transport and other-site restrictions remain in force.
+
 These reproduce the machine rules supplied by the user and add project scope. The user's explicit decisions take precedence over research suggestions.
 
 ## Secrets
