@@ -17,7 +17,7 @@ transfer the image to Hetzner.
    commands, chat, repo or image. Back up the SQLite file and both independent
    32-byte base64 keys together. Losing the encryption key makes streamer
    credentials unreadable. Streamer OAuth requests `channel:read:subscriptions`
-   and `bits:read`.
+   `bits:read`, and `moderator:read:followers` for follow alerts.
 
 ## Build, transfer and run
 
@@ -131,3 +131,11 @@ Static sources/deployments: `~/robot-site` → `/robot/` through `robot-deploy`;
 The owner authorizes subsequent uploads without repeated permission questions.
 Both scripts upload only; existing legacy entry points remain for cached pages.
 No PHP, credentials or backend files belong in either static directory.
+
+## Compact-site release preparation — 2026-11-01
+
+Image tag: `robot-alerts:fast-1`. Database additions are additive: seen-pattern markers, anonymous gift aggregates, encrypted singleton bot authorization and structured unlock notices. Existing points, channel credentials and sessions remain intact. No new paid service, dependency, polling loop or resource increase.
+
+Keep the existing run command and add non-secret configuration: `--env OPERATOR_TWITCH_ID=14824099 --env TWITCH_BOT_LOGIN=TrizzeBot --env ANONYMOUS_ROBOT_SCOPE=channel`. The owner then connects TrizzeBot through their dashboard OAuth button; never transfer/read tokens. Existing channels reconnect only when they want the additional follower permission.
+
+Deploy the service before the `fast-1` static page entry points. Retain the old stopped container for rollback, with the same live database and private env file. The old settings validator ignores the new event/category fields, and cannot enforce new event switches; roll back static entry points together with the backend. Never restore an older database over subsequent awards.

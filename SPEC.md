@@ -2,6 +2,16 @@
 
 Updated 2026-10-31. This is the requested direction, not a claim that the new renderer or Blender motion set is implemented. Existing application behavior remains in place until the new path is proven end to end.
 
+## Current implementation and decisions — 2026-11-01
+
+The shared hosted service and static picker supersede the earlier local-only plan below. Use the approved default model with one whole-robot pattern. The CRT displays profile pictures only, including cheers and resubs; no SUB/amount/month text. Nine uncategorized card presets plus no panel are configurable per channel. The viewer-selected chest emoji/emote is separate from CRT content.
+
+Pages share five navigation links (no Get Started header tab), fixed header alignment and a compact viewport shell. Lists/panels scroll internally when content exceeds the screen. The robot picker places size and chest controls beneath the viewer and uses full-height inventory on the right. Pattern cards use small WebP thumbnails, owned-first ordering, descending tiers in All, and NEW markers until first equipped. The pitch has an interactive black-pattern robot and uses the official Twitch default avatar in every example/logo/demo; the demo runs at its full OBS-relative framing above the supplied background. Heavy viewer modules load after the page shell/account request. Horizontal shimmer skeletons indicate loading.
+
+Each channel can enable sub, resub, gift, cheer, follow and raid visuals independently; funding data is still processed for global progression if its visual is off. Follow requires explicit additional broadcaster permission. The public directory shows verified live channels first, public pictures and self-reported usual categories (falling back to current/last Twitch category, not fabricated history). Live metadata is request-cached, never polled.
+
+Anonymous gift-summary events count only once toward a per-channel anonymous robot pool by default (global mode is configurable). A new randomly ordered catalog skin is selected every ten subs, without attributing points to recipients or inventing the hidden donor. Pattern/tier unlocks produce one combined chat notice per award, with all pattern unlocks in that notice and the picker link. No ordinary event or command replies. Hosted bot authorization is operator-only, encrypted, minimum-scope OAuth; delivery is event-driven.
+
 ## Product and priorities
 
 Each viewer has a CRT-headed robot identified by Twitch user ID. Its profile picture appears on the monitor, its Twitch name color colors the chest display, and earned parts can personalize it. Chat commands remain the primary customization interface; nothing is bought. The same look and inventory are shared across channels connected to one instance. Sharing across independent self-hosted installs remains unresolved.
@@ -30,9 +40,9 @@ Chest values apply to the default robot; patterns must not cover the display.
 
 | Event | CRT content | Default torso chest display |
 | --- | --- | --- |
-| New sub | Viewer face with SUB burst | Tier: T1, T2, T3 or PRIME |
-| Resub | Viewer face with month count | Months, e.g. `12 MO` |
-| Cheer | Bits amount | Bits, e.g. `500` |
+| New sub | Viewer face | Tier: T1, T2, T3 or PRIME |
+| Resub | Viewer face | Months, e.g. `12 MO` |
+| Cheer | Viewer face | Bits, e.g. `500` |
 | Gift sub | Gifter's face with gifted viewer's face beside it, when the identity is available | Gift count, e.g. `x5` |
 | New follower | Viewer face | `Hi!` |
 | Raid | Raiding channel's robot | Raid viewer count |

@@ -80,3 +80,6 @@
 - **PopNemo** — Twitch global emote catalog — [Twitch API](https://dev.twitch.tv/docs/api/reference/#get-global-emotes), [official CDN](https://static-cdn.jtvnw.net/emoticons/v2/emotesv2_5d523adb8bbb4786821cd7091e47da21/default/dark/3.0) — supplied through Twitch developer services, subject to [Twitch terms](https://www.twitch.tv/p/en/legal/developer-agreement/), not the project code license — displayed unmodified on the chest and in the product demo.
 
 - **GlitchCat** — Twitch global emote catalog — [Twitch API](https://dev.twitch.tv/docs/api/reference/#get-global-emotes), [official CDN](https://static-cdn.jtvnw.net/emoticons/v2/304486301/default/dark/3.0) — supplied through Twitch developer services, subject to [Twitch terms](https://www.twitch.tv/p/en/legal/developer-agreement/), not the project code license — displayed unmodified on the chest and in the product demo.
+
+- **Twitch default profile image** — Twitch — [official CDN](https://static-cdn.jtvnw.net/user-default-pictures-uv/ebb84563-db81-4b9c-8940-64ed33ccfc7b-profile_image-600x600.png) — Twitch developer services terms; unmodified profile image, resized/compressed for neutral product examples, demo and CRT logo.
+- **Demo background** — supplied by project owner as `background for robot alerts.png`; cropped to the full overlay viewport and compressed for the product demo.
