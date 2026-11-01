@@ -117,9 +117,9 @@ Rollback uses the retained previous container/image with the same persistent
 volume and private env file; do not restore an older database over new awards.
 
 
-## Site pages release — 2026-11-01
+## Previous site-pages release — 2026-11-01
 
-Current backend: `robot-alerts:pages-1` (also `release`); retained previous
+At that checkpoint: `robot-alerts:pages-1`; retained previous
 container: `robot-alerts-before-pages-20261101`. Same persistent database,
 private env, loopback binding and resource/log limits. Before rolling back to
 the previous validator, switch any No alert box choice to a named design;
@@ -132,10 +132,16 @@ The owner authorizes subsequent uploads without repeated permission questions.
 Both scripts upload only; existing legacy entry points remain for cached pages.
 No PHP, credentials or backend files belong in either static directory.
 
-## Compact-site release preparation — 2026-11-01
+## Compact-site release LIVE — 2026-11-01
 
 Image tag: `robot-alerts:fast-1`. Database additions are additive: seen-pattern markers, anonymous gift aggregates, encrypted singleton bot authorization and structured unlock notices. Existing points, channel credentials and sessions remain intact. No new paid service, dependency, polling loop or resource increase.
 
 Keep the existing run command and add non-secret configuration: `--env OPERATOR_TWITCH_ID=14824099 --env TWITCH_BOT_LOGIN=TrizzeBot --env ANONYMOUS_ROBOT_SCOPE=channel`. The owner then connects TrizzeBot through their dashboard OAuth button; never transfer/read tokens. Existing channels reconnect only when they want the additional follower permission.
 
-Deploy the service before the `fast-1` static page entry points. Retain the old stopped container for rollback, with the same live database and private env file. The old settings validator ignores the new event/category fields, and cannot enforce new event switches; roll back static entry points together with the backend. Never restore an older database over subsequent awards.
+Deploy the service before the `fast-1` static page entry points. Retain the old stopped container for rollback, with the same live database and private env file. The old settings validator rejects the new event/category fields, and cannot enforce new event switches; roll back static entry points together with the backend. Never restore an older database over subsequent awards.
+
+Activated `robot-alerts:fast-1` (also `release`) after owner unlocked universe-admin. Previous stopped container: `robot-alerts-before-fast-20261101`. Health 204; all public page checks 200. Existing viewer/channel/ledger/session counts survived unchanged; no credentials were inspected. Container idle memory measured ~14 MiB.
+
+Static snapshots: robot-site `36b9646`, robots-site `426f2fe`. Both are live. Public browser tests passed for desktop/mobile bounds, consistent header, locked/NEW inventory, automatic event/design saves, all 307 globals, account refresh, typed deletion, picture-only CRT, no-panel live switching, pitch rotation/video and zero idle GPU draws. Account writes and test events in browser QA were intercepted; no real points/chat were created.
+
+Owner still authorizes TrizzeBot once through the operator dashboard (switch to the bot Twitch account), and reconnects a streamer only to grant optional follow permission. Real paid-event and OBS checks remain the final integration proof.
