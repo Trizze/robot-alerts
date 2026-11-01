@@ -377,16 +377,17 @@ export function createService({
       }
       if (path.pathname === "/api/me" && req.method === "GET") {
         const viewer = store.viewer(session.id);
-        try {
-          const profile = await twitch.lookup(session.id);
-          const avatar = new URL(profile.profile_image_url);
-          if (
-            avatar.protocol === "https:" &&
-            (avatar.hostname === "static-cdn.jtvnw.net" ||
-              avatar.hostname.endsWith(".jtvnw.net"))
-          )
-            viewer.avatarUrl = avatar.href.replace("300x300", "600x600");
-        } catch {}
+        if (path.searchParams.get("profile") !== "0")
+          try {
+            const profile = await twitch.lookup(session.id);
+            const avatar = new URL(profile.profile_image_url);
+            if (
+              avatar.protocol === "https:" &&
+              (avatar.hostname === "static-cdn.jtvnw.net" ||
+                avatar.hostname.endsWith(".jtvnw.net"))
+            )
+              viewer.avatarUrl = avatar.href.replace("300x300", "600x600");
+          } catch {}
         return respond(200, {
           viewer,
           channel: store.hasChannel(session.id),
