@@ -155,14 +155,21 @@ const fs = require("node:fs"),
     });
     for (const [name, data] of Object.entries(outputs)) {
       if (name === "logo") {
-        const svg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256"><rect width="256" height="256" rx="46" fill="white"/><image x="6" y="6" width="244" height="244" href="data:image/png;base64,${data}"/></svg>`;
+        const head = `<image x="6" y="6" width="244" height="244" href="data:image/png;base64,${data}"/>`;
         for (const n of [
-          "crt-logo-v2.svg",
-          "favicon-v2.svg",
+          "crt-logo-v3.svg",
           "crt-logo.svg",
+          "favicon-v3.svg",
           "favicon.svg",
-        ])
-          fs.writeFileSync("website-staging/brand/" + n, svg);
+        ]) {
+          const background = n.startsWith("favicon")
+            ? '<rect width="256" height="256" rx="46" fill="#181a25"/>'
+            : "";
+          fs.writeFileSync(
+            "website-staging/brand/" + n,
+            `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256">${background}${head}</svg>`,
+          );
+        }
         continue;
       }
       fs.writeFileSync(

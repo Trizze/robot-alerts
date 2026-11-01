@@ -278,37 +278,65 @@ try {
   source();
   preview();
   eventControls();
-  if (value.canManageBot && $("#bot-controls")) {
+  if ($("#bot-controls")) {
     const box = $("#bot-controls");
     box.hidden = false;
+    let channelBot = value.channelBot || {
+      enabled: false,
+      available: false,
+      name: "TrizzeBot",
+    };
     const button = document.createElement("button");
+    button.id = "connect-channel-bot";
     button.className = "quiet";
     button.type = "button";
-    button.textContent = value.bot?.connected
-      ? `Disconnect ${value.bot.name}`
-      : "Connect TrizzeBot";
-    button.title =
-      "Only tier and pattern unlocks are announced. Authorize the TrizzeBot Twitch account.";
-    button.onclick = async () => {
-      if (value.bot?.connected) {
-        button.disabled = true;
-        try {
-          const r = await fetch(new URL("api/bot", base), {
-            method: "DELETE",
-            credentials: "include",
+    const note = document.createElement("p");
+    note.className = "bot-note";
+    function botState() {
+      button.textContent = channelBot.enabled
+        ? "Disconnect TrizzeBot"
+        : "Connect TrizzeBot";
+      button.setAttribute("aria-pressed", String(channelBot.enabled));
+      note.textContent = channelBot.enabled
+        ? channelBot.available
+          ? "Tier and pattern unlock announcements are on in your chat."
+          : "Enabled for your channel. Waiting for the bot service to be authorized."
+        : "Add tier and pattern unlock announcements to your chat.";
+    }
+    button.onclick = () =>
+      action(
+        button,
+        channelBot.enabled ? "Disconnecting…" : "Connecting…",
+        async () => {
+          channelBot = await api("api/channel/bot", {
+            method: channelBot.enabled ? "DELETE" : "POST",
           });
-          if (!r.ok) throw Error();
-          value.bot.connected = false;
-          button.textContent = "Connect TrizzeBot";
-          feedback("Bot disconnected.");
-        } catch {
-          feedback("Could not disconnect bot. Try again.");
-        } finally {
-          button.disabled = false;
-        }
-      } else location.assign(new URL("auth/start?role=bot", base));
-    };
-    box.append(button);
+          settings.chatAnnouncements = channelBot.enabled;
+          botState();
+          feedback(note.textContent);
+        },
+      ).then(botState);
+    botState();
+    box.append(button, note);
+    if (value.canManageBot) {
+      const details = document.createElement("details"),
+        summary = document.createElement("summary");
+      details.className = "operator-bot";
+      summary.textContent = "Service owner setup";
+      const text = document.createElement("p");
+      text.textContent =
+        "One-time bot account authorization for the service. Streamers use Connect TrizzeBot above.";
+      const authorize = document.createElement("button");
+      authorize.id = "authorize-service-bot";
+      authorize.className = "quiet";
+      authorize.textContent = value.bot?.connected
+        ? "Reauthorize TrizzeBot account"
+        : "Authorize TrizzeBot account";
+      authorize.onclick = () =>
+        location.assign(new URL("auth/start?role=bot", base));
+      details.append(summary, text, authorize);
+      box.append(details);
+    }
   }
   if (!followAllowed) {
     const b = document.createElement("button");

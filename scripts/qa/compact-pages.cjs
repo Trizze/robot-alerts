@@ -12,6 +12,7 @@ const {
     const p = await b.newPage({ viewport: { width: 1366, height: 768 } }),
       errors = [],
       writes = [];
+    let botEnabled = false;
     p.on("pageerror", (e) => errors.push(e.message));
     await p.route("**/robot/api/**", (r) => {
       const u = new URL(r.request().url());
@@ -43,6 +44,12 @@ const {
           channelId: "123",
           displayName: "Streamer",
           followAllowed: true,
+          channelBot: {
+            enabled: botEnabled,
+            available: true,
+            name: "TrizzeBot",
+          },
+          canManageBot: false,
           settings: {
             preset: "02",
             resolution: "1080p",
@@ -51,6 +58,10 @@ const {
             games: [],
           },
         };
+      }
+      if (u.pathname.endsWith("/api/channel/bot")) {
+        botEnabled = r.request().method() !== "DELETE";
+        d = { enabled: botEnabled, available: true, name: "TrizzeBot" };
       }
       if (u.pathname.includes("/streamers"))
         d = {
@@ -135,6 +146,19 @@ const {
     assert.equal(await p.locator("[data-emote-more]").isVisible(), false);
     await p.goto(base + "/robot/dashboard/");
     await p.waitForSelector("#event-options input");
+    await p.locator("#connect-channel-bot").click();
+    await p.waitForFunction(
+      () =>
+        document.querySelector("#connect-channel-bot").textContent ===
+        "Disconnect TrizzeBot",
+    );
+    assert.equal(await p.locator("#authorize-service-bot").count(), 0);
+    await p.locator("#connect-channel-bot").click();
+    await p.waitForFunction(
+      () =>
+        document.querySelector("#connect-channel-bot").textContent ===
+        "Connect TrizzeBot",
+    );
     await p.locator('#event-options input[value="raid"]').check();
     await p.waitForTimeout(500);
     assert.ok(writes.some((x) => x.events.includes("raid")));
@@ -156,6 +180,10 @@ const {
     await p.waitForTimeout(300);
     assert.notDeepEqual(a, await c.screenshot(), "pitch robot must rotate");
     await p.locator("#watch-demo").click();
+    assert.ok(
+      (await p.locator("#demo-dialog").boundingBox()).width > 1000,
+      "demo should open at cinema size on desktop",
+    );
     await p.waitForFunction(
       () => document.querySelector("#demo-dialog video").currentTime > 4,
       { timeout: 15000 },

@@ -16,7 +16,7 @@ for (const header of document.querySelectorAll("[data-site-header]")) {
   brand.className = "brand";
   brand.href = "/robots/";
   const image = document.createElement("img");
-  image.src = "/robot/brand/crt-logo-v2.svg";
+  image.src = "/robot/brand/crt-logo-v3.svg";
   image.alt = "";
   image.width = 40;
   image.height = 40;
