@@ -1,3 +1,4 @@
+import { drawPattern } from "./pattern-loader.js?v=patterns-1";
 import { createPixelText } from "./layer-proof/pixel-text.js";
 const base = new URL("./static-motion-60/", import.meta.url).href;
 const assetVersion = "joints-20261031";
@@ -157,6 +158,9 @@ export function drawRobot(ctx, atlas, clip, index, viewer, alert) {
         sheet[3],
       );
   };
+  for (const layer of atlas.rig.layers)
+    if (!["screen", "display_mask"].includes(layer)) paint(ctx, layer);
+  drawPattern(ctx, viewer?._patternSurface, clip, index);
   for (const layer of atlas.rig.layers) {
     if (layer === "display_mask") continue;
     if (layer === "screen") {
@@ -191,7 +195,6 @@ export function drawRobot(ctx, atlas, clip, index, viewer, alert) {
       );
       continue;
     }
-    paint(ctx, layer);
     if (layer === "chest" && frame.chestDisplay.visible) {
       const box = frame.layers.display_mask,
         alpha = img("display_mask");

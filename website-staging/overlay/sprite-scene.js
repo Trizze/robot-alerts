@@ -1,3 +1,4 @@
+import { preparePattern } from "./pattern-loader.js?v=patterns-1";
 import { placeAlertPanel } from "../shared/alert-layout.js";
 import { RaidStream } from "../shared/raid-stream.js";
 import {
@@ -5,7 +6,7 @@ import {
   motionFrame,
   drawRobot,
   avatarFor,
-} from "./sprite-renderer.js?v=joints-20261031";
+} from "./sprite-renderer.js?v=patterns-1";
 const RUN_SECONDS = 54 / 30,
   OUT_SECONDS = 37 / 30,
   DOOR_LEAD = 1.15,
@@ -72,10 +73,13 @@ export class SpriteScene {
         this.join({ viewer, at: 0.2 + i * 0.95, sequence: i });
     avatarFor(alert.viewer);
     for (const viewer of alert.participants || []) avatarFor(viewer);
-    motionReady
-      .then((atlas) => {
+    Promise.all([motionReady, preparePattern(alert.viewer)])
+      .then(([atlas, pattern]) => {
         if (this.stopped) return;
         this.atlas = atlas;
+        this.alert.viewer = { ...this.alert.viewer, _patternSurface: pattern };
+        this.started = performance.now();
+        this.root.dataset.ready = "true";
         this.tick();
       })
       .catch((error) => {
@@ -280,6 +284,14 @@ export class SpriteScene {
     this.drawDoorFront(time, cardEnd + OUT_SECONDS);
     ctx.restore();
     if (
+      !raid &&
+      !this.done &&
+      time >= cardEnd + OUT_SECONDS + DOOR_CLOSE + 0.25
+    ) {
+      this.done = true;
+      queueMicrotask(() => this.onDone?.());
+    }
+    if (
       raid &&
       !this.done &&
       time >= this.alert.raidCrowdSeconds &&
@@ -291,7 +303,13 @@ export class SpriteScene {
   }
   tick() {
     if (this.stopped) return;
-    this.render((performance.now() - this.started) / 1000);
+    try {
+      this.render((performance.now() - this.started) / 1000);
+    } catch (error) {
+      this.stop();
+      this.onError?.(error);
+      return;
+    }
     this.frame = requestAnimationFrame(() => this.tick());
   }
   stop() {

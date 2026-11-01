@@ -9,7 +9,7 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
   const store = new SharedStore(":memory:", {
     encryptionKey: randomBytes(32),
     patternSeed: randomBytes(32),
-    catalog: [],
+    catalog: [{ id: "green_marble_pattern_tiles", tier: 1 }],
   });
   for (const id of ["123", "789"]) {
     store.upsertViewer(id, "Streamer");
@@ -155,6 +155,19 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
   assert.equal(alert.viewer.id, "123");
   assert.equal(alert.settings.preset, "02");
   assert.equal(store.viewer("123").points, 0);
+  // A real award earns an installed pattern; the next webhook must carry it
+  // to any participating channel's display stream without altering its scale.
+  store.record({
+    id: randomUUID(),
+    channel: "123",
+    at: new Date().toISOString(),
+    type: "gift",
+    tier: "1000",
+    gifts: 10,
+    viewer: { id: "456", name: "Supporter" },
+  });
+  store.selectPattern("456", "green_marble_pattern_tiles");
+  store.updateAppearance("456", { patternScale: 1.5 });
   assert.equal(
     (
       await fetch(base + "/api/channel/test", {
@@ -210,7 +223,9 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
   assert.equal(alert.type, "cheer");
   assert.equal(alert.bits, 500);
   assert.equal(alert.demo, false);
-  assert.equal(store.viewer("456").points, 1);
+  assert.equal(store.viewer("456").points, 11);
+  assert.equal(alert.viewer.selectedPattern, "green_marble_pattern_tiles");
+  assert.equal(alert.viewer.patternScale, 1.5);
   assert.equal(
     (
       await fetch(base + "/api/channel/settings", {
