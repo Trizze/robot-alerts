@@ -46,7 +46,12 @@ const assert = require("node:assert/strict");
           settings = r.request().postDataJSON();
           writes.push(settings);
         }
-        data = { channelId: "14824099", settings };
+        data = {
+          channelId: "14824099",
+          displayName: "Trizze",
+          followAllowed: true,
+          settings,
+        };
       }
       if (
         u.pathname.endsWith("/appearance") ||
@@ -55,11 +60,25 @@ const assert = require("node:assert/strict");
         writes.push(r.request().postDataJSON());
         return r.fulfill({ status: 204 });
       }
-      if (u.pathname.endsWith("/streamers"))
+      if (
+        u.pathname.endsWith("/streamers") ||
+        u.pathname.endsWith("/streamers/status")
+      )
         data = {
           streamers: [
-            { id: "14824099", displayName: "Trizze" },
-            { id: "429225647", displayName: "itsTrizze" },
+            {
+              id: "14824099",
+              displayName: "Trizze",
+              live: true,
+              games: ["VALORANT"],
+              avatar: "/robot/assets/twitch-default.webp",
+            },
+            {
+              id: "429225647",
+              displayName: "itsTrizze",
+              live: false,
+              category: "Just Chatting",
+            },
           ],
         };
       return r.fulfill({
@@ -86,7 +105,6 @@ const assert = require("node:assert/strict");
         "Your Robot",
         "Streamer Dashboard",
         "Privacy",
-        "Get Started",
         "Streamers",
         "How it works",
       ],
@@ -161,7 +179,13 @@ const assert = require("node:assert/strict");
     await p.screenshot({ path: "/tmp/robot-pages-dashboard.png" });
     await p.goto(base + "/robot/streamers/");
     await p.waitForSelector(".streamer-link");
+    await p.waitForSelector(".directory-group h2");
     assert.equal(await p.locator(".streamer-link").count(), 2);
+    assert.equal(
+      await p.locator(".directory-group h2").first().textContent(),
+      "Live",
+    );
+    assert.equal(await p.locator(".streamer-link img").count(), 2);
     await p.locator("#streamer-search").fill("its");
     assert.equal(await p.locator(".streamer-link").count(), 1);
     await p.screenshot({ path: "/tmp/robot-pages-streamers.png" });

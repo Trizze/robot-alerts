@@ -1,4 +1,4 @@
-import { prepareChest } from "./chest-surface.js?v=pages-1";
+import { prepareChest } from "./chest-surface.js?v=fast-1";
 import { preparePattern } from "./pattern-loader.js?v=patterns-1";
 import { placeAlertPanel } from "../shared/alert-layout.js";
 import { RaidStream } from "../shared/raid-stream.js";
@@ -7,7 +7,7 @@ import {
   motionFrame,
   drawRobot,
   avatarFor,
-} from "./sprite-renderer.js?v=pages-1";
+} from "./sprite-renderer.js?v=fast-1";
 const RUN_SECONDS = 54 / 30,
   OUT_SECONDS = 37 / 30,
   DOOR_LEAD = 1.15,
@@ -303,7 +303,11 @@ export class SpriteScene {
     if (
       raid &&
       !this.done &&
-      time >= this.alert.raidCrowdSeconds &&
+      time >=
+        Math.max(
+          this.alert.raidCrowdSeconds || 0,
+          cardEnd + OUT_SECONDS + DOOR_CLOSE + 0.25,
+        ) &&
       this.world.empty
     ) {
       this.done = true;

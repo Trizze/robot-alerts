@@ -7,11 +7,28 @@
     <link rel="stylesheet" href="../style.css?v=pages-1" />
     <link rel="stylesheet" href="../shared/alert-card.css" />
     <link rel="stylesheet" href="./setup.css?v=designs-2" />
-    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=pages-1" />
-    <link rel="icon" href="/robot/brand/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=fast-1" />
+    <link rel="icon" href="/robot/brand/favicon-v2.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/robot/shared/compact.css?v=fast-1" />
   </head>
   <body>
-    <header data-site-header></header>
+    <header data-site-header>
+      <a class="brand" href="/robots/"
+        ><img
+          src="/robot/brand/crt-logo-v2.svg"
+          width="34"
+          height="34"
+          alt=""
+        /><span>RobotAlerts</span></a
+      >
+      <nav aria-label="Main navigation">
+        <a href="/robot/">Your Robot</a
+        ><a href="/robot/dashboard/">Streamer Dashboard</a
+        ><a href="/robot/privacy/">Privacy</a
+        ><a href="/robot/streamers/">Streamers</a
+        ><a href="/robot/how-it-works/">How it works</a>
+      </nav>
+    </header>
     <main class="setup">
       <div class="eyebrow">YOUR COMMUNITY, ON SCREEN</div>
       <h1>Let’s get you <em>set up.</em></h1>
@@ -121,6 +138,7 @@
           Change the box around the alert. Your viewers’ robot looks stay the
           same.
         </p>
+        <div id="event-options" class="event-options"></div>
         <div
           id="design-options"
           class="design-options"
@@ -153,10 +171,7 @@
       ></p>
       <a class="back-picker" href="../">← Back to the robot picker</a>
     </main>
-    <script
-      type="module"
-      src="/robot/shared/channel-controls.js?v=pages-1"
-    ></script>
-    <script type="module" src="/robot/shared/site-nav.js?v=pages-1"></script>
+    <script type="module" src="/robot/shared/channel-fast.js?v=fast-1"></script>
+    <script type="module" src="/robot/shared/site-nav.js?v=fast-1"></script>
   </body>
 </html>

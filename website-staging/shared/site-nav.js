@@ -2,16 +2,21 @@ const links = [
   ["Your Robot", "/robot/"],
   ["Streamer Dashboard", "/robot/dashboard/"],
   ["Privacy", "/robot/privacy/"],
-  ["Get Started", "/robot/start/"],
   ["Streamers", "/robot/streamers/"],
   ["How it works", "/robot/how-it-works/"],
 ];
 for (const header of document.querySelectorAll("[data-site-header]")) {
+  if (header.children.length) {
+    for (const a of header.querySelectorAll("nav a"))
+      if (location.pathname === a.getAttribute("href"))
+        a.setAttribute("aria-current", "page");
+    continue;
+  }
   const brand = document.createElement("a");
   brand.className = "brand";
   brand.href = "/robots/";
   const image = document.createElement("img");
-  image.src = "/robot/brand/crt-logo.svg";
+  image.src = "/robot/brand/crt-logo-v2.svg";
   image.alt = "";
   image.width = 40;
   image.height = 40;

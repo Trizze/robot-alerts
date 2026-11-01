@@ -1,5 +1,5 @@
 import { API_BASE } from "../config.js?v=shared-service-1";
-import { SpriteScene } from "./sprite-scene.js?v=pages-1";
+import { SpriteScene } from "./sprite-scene.js?v=fast-1";
 import { createAlertCard } from "../shared/alert-card.js";
 const stage = document.querySelector("#stage"),
   status = document.querySelector("#connection");
@@ -28,7 +28,8 @@ function next() {
   const alert = {
     ...message,
     startedAt: Date.now(),
-    textDuration: 6,
+    textDuration: message.type === "raid" ? 3 : 6,
+    raidCrowdSeconds: 0,
     settings: {
       ...settings,
       scale: 1,

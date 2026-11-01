@@ -15,9 +15,9 @@ const fs = require("node:fs"),
     const p = await b.newPage({ viewport: { width: 1920, height: 1080 } });
     const errors = [];
     p.on("pageerror", (e) => errors.push(e.message));
-    await p.route("https://static-cdn.jtvnw.net/robot-demo-trizze.png", (r) =>
+    await p.route("https://static-cdn.jtvnw.net/robot-demo-default.png", (r) =>
       r.fulfill({
-        path: "data/avatars/14824099.png",
+        path: "assets/robot/site-demo/twitch-default.png",
         contentType: "image/png",
         headers: { "access-control-allow-origin": "*" },
       }),
@@ -25,7 +25,7 @@ const fs = require("node:fs"),
     await p.goto("http://127.0.0.1:3902/robot/overlay/");
     await p.addStyleTag({
       content:
-        "body{background:#252b34!important} #connection{display:none!important}",
+        "body{background:#14151e url(../assets/demo-background.webp) center/cover no-repeat!important} #connection{display:none!important}",
     });
     const variants = [
       {
@@ -33,21 +33,21 @@ const fs = require("node:fs"),
         chest: "304486301",
         preset: "02",
         type: "cheer",
-        name: "Trizze",
+        name: "PixelPilot",
       },
       {
         pattern: "fabric_pattern_07",
         chest: "emotesv2_5d523adb8bbb4786821cd7091e47da21",
         preset: "08",
         type: "resub",
-        name: "itsTrizze",
+        name: "CosmicCat",
       },
     ];
     let frame = 0;
     for (const [episode, v] of variants.entries()) {
       await p.evaluate(async (v) => {
         window.demoScene?.stop();
-        const { SpriteScene } = await import("./sprite-scene.js?v=pages-1");
+        const { SpriteScene } = await import("./sprite-scene.js?v=fast-1");
         const { createAlertCard } = await import("../shared/alert-card.js");
         const alert = {
           type: v.type,
@@ -56,9 +56,9 @@ const fs = require("node:fs"),
           textDuration: 6,
           startedAt: Date.now(),
           viewer: {
-            id: "14824099",
+            id: "demo-viewer",
             name: v.name,
-            avatar: "https://static-cdn.jtvnw.net/robot-demo-trizze.png",
+            avatar: "https://static-cdn.jtvnw.net/robot-demo-default.png",
             selectedPattern: v.pattern,
             patternScale: 1,
             chestType: "emote",
@@ -108,7 +108,7 @@ const fs = require("node:fs"),
           path: file,
           type: "jpeg",
           quality: 94,
-          clip: { x: 240, y: 135, width: 1440, height: 810 },
+          clip: { x: 0, y: 0, width: 1920, height: 1080 },
         });
         if (i === 125)
           fs.copyFileSync(
@@ -123,7 +123,7 @@ const fs = require("node:fs"),
       }
       const hero = await p.evaluate(async () => {
         const s = window.demoScene,
-          { drawRobot } = await import("./sprite-renderer.js?v=pages-1");
+          { drawRobot } = await import("./sprite-renderer.js?v=fast-1");
         const source = document.createElement("canvas");
         source.width = 1920;
         source.height = 1080;

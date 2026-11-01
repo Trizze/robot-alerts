@@ -1,4 +1,4 @@
-import { chestFrame } from "./chest-surface.js?v=pages-1";
+import { chestFrame } from "./chest-surface.js?v=fast-1";
 import { drawPattern } from "./pattern-loader.js?v=patterns-1";
 import { createPixelText } from "./layer-proof/pixel-text.js";
 const base = new URL("./static-motion-60/", import.meta.url).href;
@@ -43,7 +43,11 @@ export const motionReady = (async () => {
 motionReady.catch(() => {});
 export function avatarFor(viewer) {
   const src = viewer?.avatar;
-  if (!allowedAvatar.test(src || "")) return null;
+  if (
+    !allowedAvatar.test(src || "") &&
+    src !== "/robot/assets/twitch-default.webp"
+  )
+    return null;
   if (!avatars.has(src)) {
     const pic = new Image();
     pic.crossOrigin = "anonymous";
@@ -54,20 +58,10 @@ export function avatarFor(viewer) {
   return avatars.get(src);
 }
 function screenFor(viewer, alert, picture) {
-  const n = (value) => (Number.isSafeInteger(value) && value >= 0 ? value : 0);
-  const label =
-    alert.type === "sub"
-      ? "SUB"
-      : alert.type === "resub"
-        ? `${n(alert.months)} MO`
-        : alert.type === "cheer"
-          ? String(n(alert.bits))
-          : "";
   const recipient =
     alert.type === "gift" ? avatarFor(alert.giftedViewer) : null;
-  if (!label && !(recipient?.complete && recipient.naturalWidth))
-    return picture;
-  const key = `${viewer?.avatar}|${alert.type}|${label}|${alert.giftedViewer?.avatar || ""}`;
+  if (!(recipient?.complete && recipient.naturalWidth)) return picture;
+  const key = `${viewer?.avatar}|${alert.type}|${alert.giftedViewer?.avatar || ""}`;
   if (screenImages.has(key)) return screenImages.get(key);
   const canvas = document.createElement("canvas");
   canvas.width = 600;
@@ -77,13 +71,6 @@ function screenFor(viewer, alert, picture) {
     c.drawImage(picture, 0, 0, 300, 600);
     c.drawImage(recipient, 300, 0, 300, 600);
   } else c.drawImage(picture, 0, 0, 600, 600);
-  if (label) {
-    const text = createPixelText(label, "#ffffff");
-    c.fillStyle = "rgba(12,22,31,.88)";
-    c.fillRect(305, 475, 280, 110);
-    c.imageSmoothingEnabled = false;
-    c.drawImage(text, 315, 480, 260, 100);
-  }
   if (screenImages.size >= 32)
     screenImages.delete(screenImages.keys().next().value);
   screenImages.set(key, canvas);
@@ -116,7 +103,7 @@ function textFor(alert, viewer) {
     {
       sub: tier,
       resub: `${n(alert.months)} MO`,
-      gift: `x${n(alert.gifts)}`,
+      gift: `x${n(viewer?.anonymous ? viewer.anonymousGiftTotal : alert.gifts)}`,
       cheer: String(n(alert.bits)),
       follow: "Hi!",
       raid: String(n(alert.raidSize)),

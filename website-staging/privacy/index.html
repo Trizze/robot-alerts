@@ -5,35 +5,83 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Privacy · RobotAlerts</title>
     <link rel="stylesheet" href="/robot/style.css?v=pages-1" />
-    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=pages-1" />
-    <link rel="icon" href="/robot/brand/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=fast-1" />
+    <link rel="icon" href="/robot/brand/favicon-v2.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/robot/shared/compact.css?v=fast-1" />
   </head>
   <body>
-    <header data-site-header></header>
-    <main class="page-main">
-      <h1>Privacy</h1>
-      <section class="privacy" id="privacy">
-        <div>
-          <span class="label">YOUR DATA</span>
-          <h2>Small footprint.</h2>
-        </div>
-        <div>
+    <header data-site-header>
+      <a class="brand" href="/robots/"
+        ><img
+          src="/robot/brand/crt-logo-v2.svg"
+          width="34"
+          height="34"
+          alt=""
+        /><span>RobotAlerts</span></a
+      >
+      <nav aria-label="Main navigation">
+        <a href="/robot/">Your Robot</a
+        ><a href="/robot/dashboard/">Streamer Dashboard</a
+        ><a href="/robot/privacy/">Privacy</a
+        ><a href="/robot/streamers/">Streamers</a
+        ><a href="/robot/how-it-works/">How it works</a>
+      </nav>
+    </header>
+    <main class="page-main info-page">
+      <div class="page-title">
+        <h1>Privacy</h1>
+        <p>Your data, kept small and under your control.</p>
+      </div>
+      <div class="info-grid">
+        <section class="info-card">
+          <h2>What we store</h2>
+          <dl>
+            <dt>Your robot</dt>
+            <dd>
+              Twitch ID, display name, points, unlocked/seen patterns, equipped
+              skin, size and chest display.
+            </dd>
+            <dt>Your contributions</dt>
+            <dd>
+              Viewer and channel IDs, event type, points and timestamp. No
+              message text or payment details.
+            </dd>
+            <dt>Streamer setup</dt>
+            <dd>
+              Connected channel, public categories, event switches, resolution
+              and alert design.
+            </dd>
+          </dl>
+        </section>
+        <section class="info-card">
+          <h2>Retention &amp; security</h2>
+          <dl>
+            <dt>Event IDs</dt>
+            <dd>7 days, to prevent duplicates.</dd>
+            <dt>Sign-in sessions</dt>
+            <dd>Hashed, expire within 30 days.</dd>
+            <dt>Twitch credentials</dt>
+            <dd>Encrypted; removed when disconnected.</dd>
+            <dt>Unlock notices</dt>
+            <dd>
+              Structured counts, tier and event type only; removed after
+              delivery or within 7 days. Bot credentials are encrypted.
+            </dd>
+            <dt>Anonymous gifts</dt>
+            <dd>
+              One aggregate sub count per channel; no hidden donor identity is
+              available or stored.
+            </dd>
+            <dt>Never collected</dt>
+            <dd>Emails, IPs, chat messages or browser fingerprints.</dd>
+          </dl>
+        </section>
+        <section class="info-card privacy-account">
+          <h2>Your controls</h2>
           <p>
-            Robot Alerts stores your Twitch user ID, display name, selected
-            pattern, pattern size and chest display choice. It also keeps
-            point-award records containing your Twitch ID, the participating
-            channel ID, event type, points and time. Event IDs are kept for
-            seven days to prevent duplicates. Session records contain a hash and
-            an expiry of up to 30 days. Streamer credentials are encrypted and
-            removed when the channel disconnects. Connected channel names are
-            shown in the public Streamers directory. Streamer accounts also
-            store overlay resolution, theme and alert-box design preferences.
-          </p>
-          <p>
-            The service does not store email addresses, IP addresses, chat
-            messages or browser details. You can manage deletion below after
-            signing in. Streamers can also disconnect their channel and remove
-            its point records.
+            Deleting viewer data removes points and appearance across channels.
+            Disconnecting a channel deletes its contributions and recalculates
+            affected totals.
           </p>
           <details id="data-management" class="data-management" hidden>
             <summary>Manage account data</summary>
@@ -54,8 +102,17 @@
               </button>
             </div>
           </details>
-        </div>
-      </section>
+        </section>
+        <section class="info-card">
+          <h2>Public information</h2>
+          <p>
+            Connected streamers appear in the directory with their public Twitch
+            picture and category. Your robot is shown when an alert is
+            triggered.
+          </p>
+          <p><a href="/robot/how-it-works/">How progression works →</a></p>
+        </section>
+      </div>
       <dialog
         id="confirm-dialog"
         aria-labelledby="confirm-title"
@@ -89,7 +146,7 @@
     <footer>
       <span>RobotAlerts</span><a href="/robot/credits.html">Credits</a>
     </footer>
-    <script type="module" src="/robot/shared/site-nav.js?v=pages-1"></script>
+    <script type="module" src="/robot/shared/site-nav.js?v=fast-1"></script>
     <script type="module" src="./privacy.js?v=pages-1"></script>
   </body>
 </html>

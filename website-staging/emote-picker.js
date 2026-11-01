@@ -6,8 +6,7 @@ export function createEmotePicker(root, onChoose) {
     count = root.querySelector("[data-emote-count]"),
     more = root.querySelector("[data-emote-more]");
   let items = [],
-    selected = "",
-    limit = 100;
+    selected = "";
   function render() {
     const term = search.value.trim().toLowerCase();
     const matches = items.filter(
@@ -16,7 +15,7 @@ export function createEmotePicker(root, onChoose) {
         e.name.toLowerCase().includes(term),
     );
     grid.replaceChildren();
-    for (const emote of matches.slice(0, limit)) {
+    for (const emote of matches) {
       const button = document.createElement("button");
       button.type = "button";
       button.className =
@@ -54,16 +53,11 @@ export function createEmotePicker(root, onChoose) {
       grid.append(button);
     }
     count.textContent = matches.length
-      ? `Showing ${Math.min(limit, matches.length)} of ${matches.length} emotes`
+      ? `${matches.length} emotes`
       : "No matching emotes";
-    more.hidden = matches.length <= limit;
+    if (more) more.hidden = true;
   }
   search.oninput = animated.onchange = () => {
-    limit = 100;
-    render();
-  };
-  more.onclick = () => {
-    limit += 100;
     render();
   };
   return {

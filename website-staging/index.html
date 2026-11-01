@@ -12,23 +12,37 @@
     <script type="importmap">
       { "imports": { "three": "./vendor/three.module.js" } }
     </script>
-    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=pages-1" />
-    <link rel="icon" href="/robot/brand/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=fast-1" />
+    <link rel="icon" href="/robot/brand/favicon-v2.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/robot/shared/compact.css?v=fast-1" />
   </head>
-  <body>
-    <header data-site-header></header>
-    <main>
-      <section class="intro">
+  <body class="compact picker-page">
+    <header data-site-header>
+      <a class="brand" href="/robots/"
+        ><img
+          src="/robot/brand/crt-logo-v2.svg"
+          width="34"
+          height="34"
+          alt=""
+        /><span>RobotAlerts</span></a
+      >
+      <nav aria-label="Main navigation">
+        <a href="/robot/">Your Robot</a
+        ><a href="/robot/dashboard/">Streamer Dashboard</a
+        ><a href="/robot/privacy/">Privacy</a
+        ><a href="/robot/streamers/">Streamers</a
+        ><a href="/robot/how-it-works/">How it works</a>
+      </nav>
+    </header>
+    <main class="picker-main">
+      <section class="picker-title">
         <div>
-          <div class="eyebrow"><span></span> YOUR ROBOT, EVERYWHERE</div>
-          <h1>Make it <em>yours.</em></h1>
-          <p>
-            One robot. Your earned patterns. Take your look to every
-            participating stream.
-          </p>
+          <div class="eyebrow">YOUR ROBOT, EVERYWHERE</div>
+          <h1>Meet your robot.</h1>
         </div>
         <div class="account">
-          <span id="account-status" role="status">Checking sign-in…</span
+          <span id="account-status" role="status" data-loading="true"
+            >Checking sign-in…</span
           ><button id="login" class="primary" type="button" hidden>
             Sign in with Twitch <span aria-hidden="true">↗</span></button
           ><button id="account-retry" class="quiet" type="button" hidden>
@@ -38,15 +52,8 @@
           </button>
         </div>
       </section>
-      <section class="workspace" aria-label="Robot customizer">
+      <section class="workspace">
         <div class="preview-panel">
-          <div class="panel-heading">
-            <div>
-              <span class="label">YOUR ROBOT</span>
-              <h2>Meet your robot</h2>
-            </div>
-            <span class="live-indicator"><i></i> 3D VIEW</span>
-          </div>
           <div class="viewer-wrap">
             <canvas
               id="robot-view"
@@ -56,7 +63,8 @@
               PREVIEW - LOCKED
             </div>
             <div id="viewer-status" class="viewer-status" role="status">
-              Loading robot…
+              <div class="skeleton" aria-hidden="true"></div>
+              <span>Loading robot…</span>
             </div>
             <div class="viewer-floor"></div>
           </div>
@@ -79,8 +87,6 @@
               value="100"
             />
           </div>
-        </div>
-        <div class="inventory-panel">
           <div class="custom-controls">
             <label class="chest-label" for="chest-kind">Chest display</label>
             <div class="chest-row">
@@ -141,15 +147,10 @@
               hidden
             ></div>
           </div>
-          <div class="panel-heading">
-            <div>
-              <h2>Pattern inventory</h2>
-            </div>
-          </div>
-          <p class="inventory-intro" id="inventory-intro">
-            Sign in to see what you’ve earned. You can preview any pattern
-            below.
-          </p>
+        </div>
+        <div class="inventory-panel">
+          <div class="panel-heading"><h2>Pattern inventory</h2></div>
+          <p id="inventory-intro" hidden></p>
           <div class="progress-card">
             <div>
               <span class="label">YOUR PROGRESS</span
@@ -185,7 +186,17 @@
             ><button class="filter" data-tier="5" type="button">T5</button
             ><span class="count" id="pattern-count">—</span>
           </div>
-          <div class="inventory" id="inventory" aria-live="polite"></div>
+          <div class="inventory" id="inventory" aria-live="polite">
+            <div class="pattern skeleton"><i></i><span></span></div>
+            <div class="pattern skeleton"><i></i><span></span></div>
+            <div class="pattern skeleton"><i></i><span></span></div>
+            <div class="pattern skeleton"><i></i><span></span></div>
+            <div class="pattern skeleton"><i></i><span></span></div>
+            <div class="pattern skeleton"><i></i><span></span></div>
+            <div class="pattern skeleton"><i></i><span></span></div>
+            <div class="pattern skeleton"><i></i><span></span></div>
+            <div class="pattern skeleton"><i></i><span></span></div>
+          </div>
           <p id="action-status" class="action-status" role="status"></p>
         </div>
       </section>
@@ -202,7 +213,7 @@
       hidden
     ></div>
 
-    <script type="module" src="./app-pages.js?v=pages-1"></script>
-    <script type="module" src="/robot/shared/site-nav.js?v=pages-1"></script>
+    <script type="module" src="./app-fast.js?v=fast-1"></script>
+    <script type="module" src="/robot/shared/site-nav.js?v=fast-1"></script>
   </body>
 </html>

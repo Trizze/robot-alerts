@@ -5,12 +5,29 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>Streamers · RobotAlerts</title>
     <link rel="stylesheet" href="/robot/style.css?v=pages-1" />
-    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=pages-1" />
-    <link rel="icon" href="/robot/brand/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/robot/shared/site-nav.css?v=fast-1" />
+    <link rel="icon" href="/robot/brand/favicon-v2.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/robot/shared/compact.css?v=fast-1" />
   </head>
   <body>
-    <header data-site-header></header>
-    <main class="page-main">
+    <header data-site-header>
+      <a class="brand" href="/robots/"
+        ><img
+          src="/robot/brand/crt-logo-v2.svg"
+          width="34"
+          height="34"
+          alt=""
+        /><span>RobotAlerts</span></a
+      >
+      <nav aria-label="Main navigation">
+        <a href="/robot/">Your Robot</a
+        ><a href="/robot/dashboard/">Streamer Dashboard</a
+        ><a href="/robot/privacy/">Privacy</a
+        ><a href="/robot/streamers/">Streamers</a
+        ><a href="/robot/how-it-works/">How it works</a>
+      </nav>
+    </header>
+    <main class="page-main directory-main">
       <h1>Streamers</h1>
       <p>
         Earn progress in any of these connected channels. Your points and robot
@@ -24,12 +41,17 @@
         placeholder="Search streamers…"
       />
       <p id="directory-status" role="status">Loading streamers…</p>
-      <div id="streamer-list" class="streamer-list"></div>
+      <div id="streamer-list" class="directory-groups" aria-busy="true">
+        <div class="streamer-list">
+          <div class="skeleton" style="height: 80px"></div>
+          <div class="skeleton" style="height: 80px"></div>
+        </div>
+      </div>
     </main>
     <footer>
       <span>RobotAlerts</span><a href="/robot/credits.html">Credits</a>
     </footer>
-    <script type="module" src="/robot/shared/site-nav.js?v=pages-1"></script>
-    <script type="module" src="./streamers.js?v=pages-1"></script>
+    <script type="module" src="/robot/shared/site-nav.js?v=fast-1"></script>
+    <script type="module" src="./streamers.js?v=fast-1"></script>
   </body>
 </html>
