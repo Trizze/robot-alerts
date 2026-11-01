@@ -92,7 +92,7 @@ const commands = new Commands(
   (event) => {
     if (!queue.raidCrowdOpen(event.channel, false)) enqueue(event);
   },
-  reply,
+  async () => {},
 );
 function enqueue(event, unlocked = []) {
   const viewer = event.viewer?.id ? store.viewer(event.viewer.id) : null;
@@ -169,7 +169,7 @@ async function ingest(event) {
     );
   }
   await store.flushAnnouncements({
-    allow: (row) => demo || allowedViewer(row.viewer),
+    allow: () => false,
     deliver: async (row) => {
       log("unlock", row.message);
       if (!demo) await reply(row.channel, row.message, row.viewer);

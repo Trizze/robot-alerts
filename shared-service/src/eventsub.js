@@ -2,11 +2,13 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { normalize } from "../../src/twitch/normalize.js";
 
 const MAX_AGE_MS = 10 * 60 * 1000;
-const TYPES = new Set([
-  "channel.subscribe",
-  "channel.subscription.message",
-  "channel.subscription.gift",
-  "channel.cheer",
+const TYPES = new Map([
+  ["channel.subscribe", "1"],
+  ["channel.subscription.message", "1"],
+  ["channel.subscription.gift", "1"],
+  ["channel.cheer", "1"],
+  ["channel.follow", "2"],
+  ["channel.raid", "1"],
 ]);
 
 // Verify the exact raw request body before parsing or acting on it.
@@ -54,8 +56,21 @@ export function parseWebhook(headers, rawBody, secret, now = Date.now()) {
   if (
     !subscription ||
     !TYPES.has(subscription.type) ||
-    subscription.version !== "1" ||
-    !/^\d+$/.test(subscription.condition?.broadcaster_user_id || "")
+    subscription.version !== TYPES.get(subscription.type) ||
+    !/^\d+$/.test(
+      (subscription.type === "channel.raid"
+        ? subscription.condition?.to_broadcaster_user_id
+        : subscription.condition?.broadcaster_user_id) || "",
+    )
+  )
+    return { status: 400 };
+  const target =
+    subscription.type === "channel.raid"
+      ? subscription.condition.to_broadcaster_user_id
+      : subscription.condition.broadcaster_user_id;
+  if (
+    subscription.type === "channel.follow" &&
+    subscription.condition.moderator_user_id !== target
   )
     return { status: 400 };
   // Twitch does not include these headers on callback verification requests.
@@ -75,7 +90,7 @@ export function parseWebhook(headers, rawBody, secret, now = Date.now()) {
     return {
       status: 200,
       challenge: payload.challenge,
-      channel: subscription.condition.broadcaster_user_id,
+      channel: target,
       subscriptionId: subscription.id,
       subscriptionType: subscription.type,
     };
@@ -84,12 +99,12 @@ export function parseWebhook(headers, rawBody, secret, now = Date.now()) {
     return {
       status: 204,
       revoked: true,
-      channel: subscription.condition.broadcaster_user_id,
+      channel: target,
       subscriptionId: subscription.id,
       subscriptionType: subscription.type,
     };
   if (type !== "notification") return { status: 400 };
-  const channel = subscription.condition.broadcaster_user_id;
+  const channel = target;
   const event = normalize(
     {
       metadata: {

@@ -18,14 +18,18 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
     });
   }
   const secret = randomBytes(32).toString("hex");
+  let profileLookups = 0;
   const server = createService({
     store,
     webhookSecret: secret,
     frontendUrl: "https://trizze.tv/robot/",
     twitch: {
-      lookup: async () => ({
-        profile_image_url: "https://static-cdn.jtvnw.net/example-300x300.png",
-      }),
+      lookup: async () => {
+        profileLookups++;
+        return {
+          profile_image_url: "https://static-cdn.jtvnw.net/example-300x300.png",
+        };
+      },
       revoke: async () => true,
     },
   });
@@ -115,7 +119,13 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
     return JSON.parse(row.replace(/^data: /, ""));
   }
   assert.equal((await message()).kind, "settings");
-  const settings = { resolution: "1440p", preset: "02", theme: "gaming" };
+  const settings = {
+    resolution: "1440p",
+    preset: "02",
+    theme: "gaming",
+    events: ["sub", "resub", "gift", "cheer"],
+    games: [],
+  };
   assert.equal(
     (
       await fetch(base + "/api/channel/settings", {
@@ -152,6 +162,7 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
   );
   let alert = (await message()).alert;
   assert.equal(alert.demo, true);
+  assert.equal(alert.viewer.avatar, "/robot/assets/twitch-default.webp");
   assert.equal(alert.viewer.id, "123");
   assert.equal(alert.settings.preset, "02");
   assert.equal(store.viewer("123").points, 0);
@@ -246,6 +257,63 @@ test("streamer setup enforces ownership, validates settings, and sends deduplica
     (await message()).kind,
     "settings",
     "duplicate delivery emitted no second alert",
+  );
+  const muted = { ...settings, events: [] };
+  assert.equal(
+    (
+      await fetch(base + "/api/channel/settings", {
+        method: "POST",
+        headers: owner,
+        body: JSON.stringify(muted),
+      })
+    ).status,
+    200,
+  );
+  assert.equal((await message()).kind, "settings");
+  const lookupsBefore = profileLookups;
+  const mutedId = randomUUID(),
+    mutedTime = new Date().toISOString();
+  const mutedHeaders = {
+    ...headers,
+    "twitch-eventsub-message-id": mutedId,
+    "twitch-eventsub-message-timestamp": mutedTime,
+    "twitch-eventsub-message-signature":
+      "sha256=" +
+      createHmac("sha256", secret)
+        .update(mutedId)
+        .update(mutedTime)
+        .update(payload)
+        .digest("hex"),
+  };
+  assert.equal(
+    (
+      await fetch(base + "/eventsub", {
+        method: "POST",
+        headers: mutedHeaders,
+        body: payload,
+      })
+    ).status,
+    204,
+  );
+  assert.equal(
+    store.viewer("456").points,
+    12,
+    "disabled visuals still earn shared points",
+  );
+  assert.equal(
+    profileLookups,
+    lookupsBefore,
+    "disabled visuals make no profile calls",
+  );
+  await fetch(base + "/api/channel/settings", {
+    method: "POST",
+    headers: owner,
+    body: JSON.stringify(settings),
+  });
+  assert.equal(
+    (await message()).kind,
+    "settings",
+    "muted event emitted no alert",
   );
   await reader.cancel();
   store.saveChannel("123", "Reconnected", {

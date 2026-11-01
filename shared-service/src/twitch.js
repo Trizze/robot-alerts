@@ -61,8 +61,13 @@ export function twitchClient({
         response_type: "code",
         state,
         ...(role === "streamer"
-          ? { scope: "channel:read:subscriptions bits:read" }
-          : {}),
+          ? {
+              scope:
+                "channel:read:subscriptions bits:read moderator:read:followers",
+            }
+          : role === "bot"
+            ? { scope: "user:write:chat", force_verify: "true" }
+            : {}),
       }).toString();
       return url.href;
     },
@@ -85,26 +90,78 @@ export function twitchClient({
     async globalEmotes() {
       return (await helix("chat/emotes/global", await app())).data;
     },
+    async directory(ids) {
+      const value = await app(),
+        items = [];
+      for (let offset = 0; offset < ids.length; offset += 100) {
+        const batch = ids.slice(offset, offset + 100);
+        const userQuery = new URLSearchParams(batch.map((id) => ["id", id]));
+        const channelQuery = new URLSearchParams(
+          batch.map((id) => ["broadcaster_id", id]),
+        );
+        const streamQuery = new URLSearchParams(
+          batch.map((id) => ["user_id", id]),
+        );
+        const [users, channels, streams] = await Promise.all([
+          helix(`users?${userQuery}`, value),
+          helix(`channels?${channelQuery}`, value),
+          helix(`streams?${streamQuery}`, value),
+        ]);
+        for (const id of batch) {
+          const user = users.data.find((x) => x.id === id),
+            channel = channels.data.find((x) => x.broadcaster_id === id),
+            live = streams.data.find((x) => x.user_id === id);
+          items.push({
+            id,
+            login: user?.login,
+            avatar: user?.profile_image_url,
+            live: Boolean(live),
+            category: live?.game_name || channel?.game_name || "",
+          });
+        }
+      }
+      return items;
+    },
     async lookup(id) {
       const query = new URLSearchParams({ id });
       return (await helix(`users?${query}`, await app())).data[0];
     },
-    async subscribe(channel) {
+    async subscribe(channel, { follow = false, events = [] } = {}) {
       const value = await app();
-      for (const type of [
-        "channel.subscribe",
-        "channel.subscription.message",
-        "channel.subscription.gift",
-        "channel.cheer",
-      ]) {
+      const types = [
+        ...[
+          "channel.subscribe",
+          "channel.subscription.message",
+          "channel.subscription.gift",
+          "channel.cheer",
+        ].map((type) => ({
+          type,
+          version: "1",
+          condition: { broadcaster_user_id: channel },
+        })),
+      ];
+      if (events.includes("raid"))
+        types.push({
+          type: "channel.raid",
+          version: "1",
+          condition: { to_broadcaster_user_id: channel },
+        });
+      if (follow && events.includes("follow"))
+        types.push({
+          type: "channel.follow",
+          version: "2",
+          condition: {
+            broadcaster_user_id: channel,
+            moderator_user_id: channel,
+          },
+        });
+      for (const entry of types)
         try {
           await helix("eventsub/subscriptions", value, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-              type,
-              version: "1",
-              condition: { broadcaster_user_id: channel },
+              ...entry,
               transport: {
                 method: "webhook",
                 callback: webhookCallback,
@@ -112,10 +169,21 @@ export function twitchClient({
               },
             }),
           });
-        } catch (error) {
-          if (error.status !== 409) throw error;
+        } catch (e) {
+          if (e.status !== 409) throw e;
         }
-      }
+    },
+    async sendChat(channel, sender, message, value) {
+      const result = await helix("chat/messages", value, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          broadcaster_id: channel,
+          sender_id: sender,
+          message,
+        }),
+      });
+      return result.data?.[0]?.is_sent === true;
     },
     async subscription(channel, viewer, value) {
       const query = new URLSearchParams({

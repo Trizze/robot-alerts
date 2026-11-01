@@ -56,7 +56,12 @@ export class SharedStore {
       CREATE INDEX IF NOT EXISTS ledger_channel ON ledger(channel_id);
       CREATE TABLE IF NOT EXISTS receipts(id TEXT PRIMARY KEY, channel_id TEXT NOT NULL REFERENCES channels(id) ON DELETE CASCADE, expires_at INTEGER NOT NULL);
       CREATE TABLE IF NOT EXISTS sessions(hash TEXT PRIMARY KEY, user_id TEXT NOT NULL, role TEXT NOT NULL CHECK(role IN ('viewer','streamer')), expires_at INTEGER NOT NULL);
-      CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires_at);`);
+      CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires_at);
+      CREATE TABLE IF NOT EXISTS pattern_seen(viewer_id TEXT NOT NULL REFERENCES viewers(id) ON DELETE CASCADE, pattern_id TEXT NOT NULL, PRIMARY KEY(viewer_id,pattern_id));
+      INSERT OR IGNORE INTO pattern_seen SELECT id,selected_pattern FROM viewers WHERE selected_pattern IS NOT NULL;
+      CREATE TABLE IF NOT EXISTS bot_credentials(id INTEGER PRIMARY KEY CHECK(id=1),twitch_id TEXT NOT NULL,display_name TEXT NOT NULL,credential BLOB NOT NULL,nonce BLOB NOT NULL,tag BLOB NOT NULL);
+      CREATE TABLE IF NOT EXISTS unlock_notices(event_id TEXT PRIMARY KEY,channel_id TEXT NOT NULL REFERENCES channels(id) ON DELETE CASCADE,viewer_id TEXT NOT NULL REFERENCES viewers(id) ON DELETE CASCADE,pattern_count INTEGER NOT NULL,tier INTEGER NOT NULL,event_type TEXT NOT NULL,quantity INTEGER NOT NULL,created_at INTEGER NOT NULL,state TEXT NOT NULL DEFAULT 'pending');
+      CREATE TABLE IF NOT EXISTS anonymous_gifts(channel_id TEXT PRIMARY KEY REFERENCES channels(id) ON DELETE CASCADE,total INTEGER NOT NULL DEFAULT 0);`);
     const columns = new Set(
       this.db
         .prepare("PRAGMA table_info(viewers)")
@@ -193,12 +198,25 @@ export class SharedStore {
       throw new Error("Invalid viewer");
     this.db.exec("BEGIN IMMEDIATE");
     try {
+      const before = units ? this.viewer(event.viewer.id) : null;
       const receipt = this.db
         .prepare("INSERT OR IGNORE INTO receipts VALUES(?,?,?)")
         .run(event.id, event.channel, now + SEVEN_DAYS);
       if (!receipt.changes) {
         this.db.exec("COMMIT");
         return { duplicate: true, awarded: 0 };
+      }
+      if (
+        event.type === "gift" &&
+        event.anonymous === true &&
+        Number.isSafeInteger(event.gifts) &&
+        event.gifts > 0
+      ) {
+        this.db
+          .prepare(
+            "INSERT INTO anonymous_gifts(channel_id,total) VALUES(?,?) ON CONFLICT(channel_id) DO UPDATE SET total=total+excluded.total",
+          )
+          .run(event.channel, Math.min(event.gifts, 100000000));
       }
       if (units) {
         this.db
@@ -209,6 +227,26 @@ export class SharedStore {
         this.db
           .prepare("INSERT INTO ledger VALUES(?,?,?,?,?)")
           .run(event.viewer.id, event.channel, event.type, units, event.at);
+      }
+      if (units) {
+        const after = this.viewer(event.viewer.id);
+        const known = new Set(before?.owned.map((p) => p.id) || []);
+        const count = after.owned.filter((p) => !known.has(p.id)).length;
+        if (count)
+          this.db
+            .prepare(
+              "INSERT OR IGNORE INTO unlock_notices(event_id,channel_id,viewer_id,pattern_count,tier,event_type,quantity,created_at) VALUES(?,?,?,?,?,?,?,?)",
+            )
+            .run(
+              event.id,
+              event.channel,
+              event.viewer.id,
+              count,
+              after.tier > (before?.tier || 0) ? after.tier : 0,
+              event.type,
+              event.gifts || event.bits || 1,
+              now,
+            );
       }
       this.db.exec("COMMIT");
       return { duplicate: false, awarded: units };
@@ -239,6 +277,12 @@ export class SharedStore {
       for (let tier = 1; tier <= 5; tier++)
         owned.push(...ranked[tier - 1].slice(0, slots[tier - 1]));
     }
+    const seen = new Set(
+      this.db
+        .prepare("SELECT pattern_id FROM pattern_seen WHERE viewer_id=?")
+        .all(id)
+        .map((p) => p.pattern_id),
+    );
     return {
       id: row.id,
       displayName: row.display_name,
@@ -250,7 +294,111 @@ export class SharedStore {
       patternScale: row.pattern_scale,
       chestType: row.chest_type,
       chestValue: row.chest_value,
-      owned,
+      owned: owned.map((p) => ({ ...p, isNew: !seen.has(p.id) })),
+    };
+  }
+  saveBot(id, name, credentials) {
+    if (
+      !validId(id) ||
+      typeof name !== "string" ||
+      !credentials ||
+      typeof credentials !== "object"
+    )
+      throw new Error("Invalid bot authorization");
+    const nonce = randomBytes(12),
+      cipher = createCipheriv("aes-256-gcm", this.key, nonce);
+    cipher.setAAD(Buffer.from("robot-alerts:bot"));
+    const encrypted = Buffer.concat([
+      cipher.update(JSON.stringify(credentials), "utf8"),
+      cipher.final(),
+    ]);
+    this.db
+      .prepare(
+        "INSERT INTO bot_credentials VALUES(1,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET twitch_id=excluded.twitch_id,display_name=excluded.display_name,credential=excluded.credential,nonce=excluded.nonce,tag=excluded.tag",
+      )
+      .run(id, name.slice(0, 80), encrypted, nonce, cipher.getAuthTag());
+  }
+  botCredentials() {
+    const r = this.db.prepare("SELECT * FROM bot_credentials WHERE id=1").get();
+    if (!r) return null;
+    const c = createDecipheriv("aes-256-gcm", this.key, r.nonce);
+    c.setAAD(Buffer.from("robot-alerts:bot"));
+    c.setAuthTag(r.tag);
+    return {
+      id: r.twitch_id,
+      name: r.display_name,
+      credentials: JSON.parse(
+        Buffer.concat([c.update(r.credential), c.final()]).toString("utf8"),
+      ),
+    };
+  }
+  botStatus() {
+    const r = this.db
+      .prepare(
+        "SELECT twitch_id AS id,display_name AS name FROM bot_credentials WHERE id=1",
+      )
+      .get();
+    return r ? { connected: true, name: r.name } : { connected: false };
+  }
+  deleteBot() {
+    this.db.exec("DELETE FROM bot_credentials");
+  }
+  takeUnlockNotice(now = Date.now()) {
+    const row = this.db
+      .prepare(
+        "SELECT n.*,v.display_name AS displayName FROM unlock_notices n JOIN viewers v ON v.id=n.viewer_id JOIN channels c ON c.id=n.channel_id WHERE n.state='pending' AND n.created_at>? AND c.connected=1 ORDER BY n.created_at LIMIT 1",
+      )
+      .get(now - 15 * 60 * 1000);
+    if (!row) return null;
+    const result = this.db
+      .prepare(
+        "UPDATE unlock_notices SET state='sending' WHERE event_id=? AND state='pending'",
+      )
+      .run(row.event_id);
+    return result.changes ? row : null;
+  }
+  finishUnlockNotice(id, ok) {
+    if (ok)
+      this.db.prepare("DELETE FROM unlock_notices WHERE event_id=?").run(id);
+    else
+      this.db
+        .prepare("UPDATE unlock_notices SET state='failed' WHERE event_id=?")
+        .run(id);
+  }
+  anonymousRobot(channel, scope = "channel") {
+    const total =
+      scope === "global"
+        ? this.db
+            .prepare(
+              "SELECT COALESCE(SUM(total),0) AS total FROM anonymous_gifts",
+            )
+            .get().total
+        : this.db
+            .prepare("SELECT total FROM anonymous_gifts WHERE channel_id=?")
+            .get(channel)?.total || 0;
+    const bucket = Math.floor(total / 10);
+    const key = scope === "global" ? "global" : channel;
+    const patterns = this.catalog
+      .map((p) => ({
+        id: p.id,
+        rank: createHmac("sha256", this.patternSeed)
+          .update(`anonymous:${key}:${p.id}`)
+          .digest("hex"),
+      }))
+      .sort((a, b) => a.rank.localeCompare(b.rank));
+    return {
+      id: "anonymous",
+      name: "Anonymous",
+      anonymous: true,
+      anonymousGiftTotal: total,
+      avatar: "/robot/assets/twitch-default.webp",
+      selectedPattern:
+        bucket && patterns.length
+          ? patterns[(bucket - 1) % patterns.length].id
+          : null,
+      patternScale: 1,
+      chestType: "none",
+      chestValue: "",
     };
   }
   rankedPatterns(id) {
@@ -295,6 +443,10 @@ export class SharedStore {
     this.db
       .prepare("UPDATE viewers SET selected_pattern=? WHERE id=?")
       .run(pattern, id);
+    if (pattern !== null)
+      this.db
+        .prepare("INSERT OR IGNORE INTO pattern_seen VALUES(?,?)")
+        .run(id, pattern);
     return this.viewer(id);
   }
   updateAppearance(id, changes) {
@@ -400,6 +552,7 @@ export class SharedStore {
     }
   }
   deleteViewer(id) {
+    this.db.prepare("DELETE FROM bot_credentials WHERE twitch_id=?").run(id);
     if (!validId(id)) return;
     this.patternRankCache.delete(id);
     this.db.exec("BEGIN IMMEDIATE");
@@ -413,6 +566,11 @@ export class SharedStore {
     }
   }
   cleanup(now = Date.now()) {
+    this.db
+      .prepare(
+        "DELETE FROM unlock_notices WHERE created_at<=? OR state='failed'",
+      )
+      .run(now - SEVEN_DAYS);
     this.db.prepare("DELETE FROM receipts WHERE expires_at<=?").run(now);
     this.db.prepare("DELETE FROM sessions WHERE expires_at<=?").run(now);
   }

@@ -65,6 +65,7 @@ export function normalize(message, channel, botId) {
     return {
       ...event,
       type: "gift",
+      anonymous: raw.is_anonymous === true,
       viewer: viewer(raw.user_id, raw.user_name, raw.is_anonymous),
       gifts: safeCount(raw.total),
       tier: ["1000", "2000", "3000"].includes(raw.tier) ? raw.tier : undefined,

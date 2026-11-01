@@ -1,3 +1,6 @@
+import { unlockDispatcher } from "./unlock-notices.js";
+import { channelSettings } from "./channel-settings.js";
+import { directoryCache } from "./directory-cache.js";
 import { OverlayHub } from "./overlay-hub.js";
 import { createServer } from "node:http";
 import { randomBytes, timingSafeEqual } from "node:crypto";
@@ -36,9 +39,38 @@ export function createService({
   webhookSecret,
   frontendUrl,
   maxOAuthStates = 10000,
+  anonymousScope = "channel",
+  operatorId = "",
+  botLogin = "TrizzeBot",
   clock = Date.now,
 }) {
   const hub = new OverlayHub();
+  const notifyUnlocks = unlockDispatcher(store, twitch, { clock });
+  const streamerMetadata = directoryCache(async (ids) => {
+    const items = await twitch.directory(ids);
+    return items.map((item) => {
+      const avatar = (() => {
+        try {
+          const u = new URL(item.avatar);
+          return u.protocol === "https:" &&
+            u.hostname === "static-cdn.jtvnw.net"
+            ? u.href.replace(/\d+x\d+(?=\.[a-z]+$)/i, "70x70")
+            : undefined;
+        } catch {
+          return undefined;
+        }
+      })();
+      return {
+        id: item.id,
+        login: /^[a-z0-9_]{1,25}$/i.test(item.login || "")
+          ? item.login
+          : undefined,
+        avatar,
+        live: item.live === true,
+        category: String(item.category || "").slice(0, 100),
+      };
+    });
+  }, clock);
   const testCooldown = new Map();
   const frontend = new URL(frontendUrl),
     states = new Map(),
@@ -111,28 +143,42 @@ export function createService({
   async function publishAlert(channel, event, demo = false) {
     if (
       !store.hasChannel(channel) ||
-      !["sub", "resub", "gift", "cheer"].includes(event.type)
+      !["sub", "resub", "gift", "cheer", "follow", "raid"].includes(
+        event.type,
+      ) ||
+      (!demo && !store.overlaySettings(channel).events.includes(event.type))
     )
       return;
     const saved = event.viewer?.id ? store.viewer(event.viewer.id) : null;
-    let avatar;
+    let avatar = "/robot/assets/twitch-default.webp";
     try {
-      if (!event.viewer?.id) throw new Error("Anonymous event");
+      if (demo || !event.viewer?.id)
+        throw new Error("Neutral preview or anonymous event");
       const profile = await twitch.lookup(event.viewer.id);
       const url = new URL(profile.profile_image_url);
       if (url.protocol === "https:" && url.hostname === "static-cdn.jtvnw.net")
         avatar = url.href.replace("300x300", "600x600");
     } catch {}
-    if (!store.hasChannel(channel)) return;
-    const viewer = {
-      id: event.viewer?.id || "anonymous",
-      name: String(event.viewer?.name || "Anonymous supporter").slice(0, 80),
-      avatar,
-      selectedPattern: saved?.selectedPattern || null,
-      patternScale: saved?.patternScale || 1,
-      chestType: saved?.chestType || "none",
-      chestValue: saved?.chestValue || "",
-    };
+    if (
+      !store.hasChannel(channel) ||
+      (!demo && !store.overlaySettings(channel).events.includes(event.type))
+    )
+      return;
+    const viewer =
+      !event.viewer && ["gift", "cheer"].includes(event.type)
+        ? store.anonymousRobot(channel, anonymousScope)
+        : {
+            id: event.viewer?.id || "anonymous",
+            name: String(event.viewer?.name || "Anonymous supporter").slice(
+              0,
+              80,
+            ),
+            avatar,
+            selectedPattern: saved?.selectedPattern || null,
+            patternScale: saved?.patternScale || 1,
+            chestType: saved?.chestType || "none",
+            chestValue: saved?.chestValue || "",
+          };
     hub.send(channel, {
       kind: "alert",
       alert: {
@@ -143,6 +189,7 @@ export function createService({
         bits: event.bits,
         gifts: event.gifts,
         tier: event.tier,
+        raidSize: event.raidSize,
         demo,
         settings: store.overlaySettings(channel),
       },
@@ -186,8 +233,13 @@ export function createService({
       }
       if (req.method === "GET" && path.pathname === "/auth/start") {
         const role = path.searchParams.get("role");
-        if (!["viewer", "streamer"].includes(role))
+        if (!["viewer", "streamer", "bot"].includes(role))
           return respond(400, { error: "Invalid role" });
+        if (
+          role === "bot" &&
+          (!session || session.id !== operatorId || session.role !== "streamer")
+        )
+          return respond(403, { error: "Operator sign-in required" });
         const now = clock();
         for (const [id, entry] of states)
           if (entry.expires <= now) states.delete(id);
@@ -198,8 +250,12 @@ export function createService({
         const state = randomBytes(32).toString("base64url");
         states.set(state, {
           role,
-          returnTo:
-            path.searchParams.get("returnTo") === "start" ? "start" : "picker",
+          operator: role === "bot" ? session.id : null,
+          returnTo: ["start", "dashboard"].includes(
+            path.searchParams.get("returnTo"),
+          )
+            ? path.searchParams.get("returnTo")
+            : "picker",
           expires: now + 600000,
         });
         res.setHeader("Set-Cookie", cookie(STATE, state, 600));
@@ -224,6 +280,29 @@ export function createService({
         const user = await twitch.user(credential.access_token);
         if (!user || !/^\d+$/.test(user.id) || !user.display_name)
           return respond(400, { error: "Invalid Twitch user" });
+        if (entry.role === "bot") {
+          const activeOperator = store.session(jar[SESSION]);
+          if (
+            !session ||
+            session.id !== operatorId ||
+            entry.operator !== operatorId ||
+            activeOperator?.id !== operatorId ||
+            activeOperator?.role !== "streamer" ||
+            String(user.login || user.display_name).toLowerCase() !==
+              botLogin.toLowerCase() ||
+            !credential.scope?.includes("user:write:chat")
+          )
+            return respond(403, {
+              error:
+                "Authorize the configured bot account with chat permission",
+            });
+          store.saveBot(user.id, user.display_name, credential);
+          void notifyUnlocks();
+          res
+            .writeHead(303, { Location: new URL("dashboard/", frontend).href })
+            .end();
+          return;
+        }
         store.upsertViewer(user.id, user.display_name);
         if (entry.role === "streamer") {
           const previous = store.channelCredentials(user.id),
@@ -231,7 +310,10 @@ export function createService({
             wasConnected = store.hasChannel(user.id);
           store.saveChannel(user.id, user.display_name, credential);
           try {
-            await twitch.subscribe(user.id);
+            await twitch.subscribe(user.id, {
+              follow: credential.scope?.includes("moderator:read:followers"),
+              events: store.overlaySettings(user.id).events,
+            });
           } catch {
             if (previous) {
               store.saveChannel(user.id, previousName, previous);
@@ -249,10 +331,9 @@ export function createService({
         ]);
         res
           .writeHead(303, {
-            Location:
-              entry.returnTo === "start"
-                ? new URL("start/", frontend).href
-                : frontend.href,
+            Location: ["start", "dashboard"].includes(entry.returnTo)
+              ? new URL(entry.returnTo + "/", frontend).href
+              : frontend.href,
           })
           .end();
         return;
@@ -313,11 +394,25 @@ export function createService({
               parsed.event.type = "observation";
           }
           const receipt = store.record(parsed.event);
+          if (!receipt.duplicate) {
+            void notifyUnlocks();
+          }
           if (!receipt.duplicate)
             void publishAlert(channel, visualEvent).catch(() => {});
         }
         res.writeHead(204).end();
         return;
+      }
+      if (path.pathname === "/api/streamers/status" && req.method === "GET") {
+        const channels = store.participatingChannels();
+        const extra = await streamerMetadata(channels.map((c) => c.id));
+        return respond(200, {
+          streamers: channels.map((c) => ({
+            ...c,
+            ...extra.find((e) => e.id === c.id),
+            games: store.overlaySettings(c.id)?.games || [],
+          })),
+        });
       }
       if (path.pathname === "/api/streamers" && req.method === "GET")
         return respond(200, { streamers: store.participatingChannels() });
@@ -331,6 +426,20 @@ export function createService({
       )
         return respond(403, { error: "Invalid origin" });
       if (!session) return respond(401, { error: "Sign in required" });
+      if (path.pathname === "/api/bot") {
+        if (session.id !== operatorId || session.role !== "streamer")
+          return respond(403, { error: "Operator sign-in required" });
+        if (req.method === "GET") return respond(200, store.botStatus());
+        if (req.method === "DELETE") {
+          const old = store.botCredentials();
+          store.deleteBot();
+          if (old)
+            void twitch.revoke(old.credentials.access_token).catch(() => {});
+          res.writeHead(204).end();
+          return;
+        }
+        return respond(405, { error: "Method not allowed" });
+      }
       if (
         path.pathname === "/api/channel/settings" ||
         path.pathname === "/api/channel/test"
@@ -340,18 +449,54 @@ export function createService({
         if (path.pathname.endsWith("/settings") && req.method === "GET")
           return respond(200, {
             channelId: session.id,
+            displayName: store.channelName(session.id),
+            canManageBot: session.id === operatorId,
+            bot: session.id === operatorId ? store.botStatus() : undefined,
+            followAllowed: Boolean(
+              store
+                .channelCredentials(session.id)
+                ?.scope?.includes("moderator:read:followers"),
+            ),
             settings: store.overlaySettings(session.id),
           });
         if (path.pathname.endsWith("/settings") && req.method === "POST") {
-          let value;
+          let input;
           try {
-            value = store.saveOverlaySettings(
-              session.id,
+            input = channelSettings(
               JSON.parse((await body(req)).toString("utf8")),
             );
           } catch {
             return respond(400, { error: "Invalid channel settings" });
           }
+          const previous = store.overlaySettings(session.id);
+          const follow = Boolean(
+            store
+              .channelCredentials(session.id)
+              ?.scope?.includes("moderator:read:followers"),
+          );
+          if (input.events.includes("follow") && !follow)
+            return respond(409, {
+              error: "Reconnect Twitch to enable follow alerts",
+            });
+          if (
+            ["raid", "follow"].some(
+              (type) =>
+                input.events.includes(type) && !previous.events.includes(type),
+            )
+          ) {
+            try {
+              await twitch.subscribe(session.id, {
+                follow,
+                events: input.events,
+              });
+            } catch {
+              return respond(502, {
+                error:
+                  "Twitch connection unavailable; settings were not changed",
+              });
+            }
+          }
+          const value = store.saveOverlaySettings(session.id, input);
           hub.send(session.id, { kind: "settings", settings: value });
           return respond(200, { settings: value });
         }

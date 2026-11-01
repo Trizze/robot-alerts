@@ -45,7 +45,15 @@ const twitch = twitchClient({
 const port = Number(process.env.PORT || 8080);
 if (!Number.isInteger(port) || port < 1 || port > 65535)
   throw new Error("Invalid PORT");
-const server = createService({ store, twitch, webhookSecret, frontendUrl });
+const server = createService({
+  store,
+  twitch,
+  webhookSecret,
+  frontendUrl,
+  operatorId: process.env.OPERATOR_TWITCH_ID || "",
+  botLogin: process.env.TWITCH_BOT_LOGIN || "TrizzeBot",
+  anonymousScope: process.env.ANONYMOUS_ROBOT_SCOPE || "channel",
+});
 server.listen(port, "0.0.0.0", () =>
   console.log(`Robot Alerts service listening on port ${port}`),
 );
