@@ -37,6 +37,13 @@ These reproduce the machine rules supplied by the user and add project scope. Th
 - Setup does not read an existing `.env` and refuses to overwrite it. Application modules consume `process.env`; Node's startup loader may populate it from `.env`.
 - OAuth credentials may be sent only to Twitch's official authentication endpoints in POST bodies or authorization headers. No access/refresh tokens in URLs, terminal output or browser content.
 
+## Authorized owner-run hosted app switch
+- The owner explicitly requested `npm run setup:hosted-app` to enter a new Twitch Client ID and Secret privately on marvin and update only the hosted Robot Alerts service on universe.
+- Only the owner runs the interactive script. Never run its prompts, inspect the resulting env, or obtain the entered values. Pure helpers may be tested with generated synthetic inputs only.
+- This specific owner-run helper may privately read and atomically update `/etc/robot-alerts/robot-alerts.env`; this is an exception for that helper, not permission for the agent to read secret files. Preserve the encryption key, pattern seed and other config. Rotate the webhook secret so old-app deliveries cannot double-award after reauthorization.
+- Credentials travel only through SSH stdin to the named owner server and POST bodies to Twitch authentication, never command arguments, URLs, logs or static deploys. Keep file mode 0600. Do not touch other projects, local `.env`, deploy credentials or SSH configuration.
+- Reset old Twitch authorizations/sessions without deleting channel rows, ledger, viewers, patterns, seen markers or appearance/settings. Recreate only Robot Alerts with the current image and existing resource limits. The owner reauthorizes each streamer and bot afterward.
+
 ## Project workflow
 - Read `docs/hackathon-brief.md` first; keep innovation, impact, implementation and design in mind for every decision.
 - Read the deep dive and robot-related research as background. The research's preference for other products does not change the user's Robot Alerts decision.

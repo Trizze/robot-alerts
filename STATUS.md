@@ -10,6 +10,10 @@
 
 - Backend `robot-alerts:fast-1` is live (also release). Stopped previous container `robot-alerts-before-fast-20261101` is retained. Row counts survived unchanged: two viewers, two channels, one ledger award and ten sessions. Same DB/private env, loopback port 8100, 192 MiB / 0.5 CPU / log limits; measured idle memory about 14 MiB. No secrets read.
 
+## Owner-run Twitch app switch — ready, not executed
+
+- `npm run setup:hosted-app` privately prompts for the new app Client ID/Secret on marvin and updates only the hosted service through the existing universe-admin gate. Instructions: `docs/switch-twitch-app.md`. Only the owner runs it; no real credentials were entered or inspected. It preserves both data/pattern keys and earned data, rotates the webhook secret to reject old-app deliveries, clears old auth/sessions, and recreates the same image/limits with rollback on failed startup. Streamers and TrizzeBot must reauthorize afterward. Four new preservation/recovery/input tests pass; 118 overall and 40 shared-service tests pass. No live app credentials have been changed.
+
 ## Half done
 
 - Hosted bot credentials need the owner's one-time TrizzeBot OAuth after deployment. Only the configured operator may connect it. Hosted live-chat raid crowds, custom-media uploads, Blender effect clips/action camera and real OBS/paid-event progression verification remain unfinished.
