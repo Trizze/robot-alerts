@@ -102,3 +102,16 @@ and `robot-alerts:release` name the new image. The stopped
 `robot-alerts-before-onboarding` container retains the previous configuration
 for rollback: stop/remove the new container, rename that retained container to
 `robot-alerts`, and start it. Keep the same data directory and keys.
+
+
+## Session refresh release — 2026-11-01
+
+Current image: `robot-alerts:session-emotes-1`, also tagged `robot-alerts:release`.
+Built locally from the cached previous release, loaded through the authorized
+admin alias, with no registry pull or server build. Previous container:
+`robot-alerts-before-session-fix-20261101` (stopped, retained for rollback).
+Database, env file, network binding and resource/log limits are unchanged.
+Sessions remain in SQLite across restarts; no reauthorization is required.
+The picker restores identity without waiting for optional Twitch avatar lookup.
+Rollback uses the retained previous container/image with the same persistent
+volume and private env file; do not restore an older database over new awards.

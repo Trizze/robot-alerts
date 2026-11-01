@@ -1,5 +1,12 @@
 # Status — 2026-11-01
 
+## Account refresh and emote picker — 2026-11-01 (LIVE)
+
+- Trizze received the requested labeled `admin_tier5` ledger grant: 1,000 total points, Tier 5, 49 patterns (all lower tiers plus the first Tier 5 pattern). Only that account changed; no fake Twitch contribution or alert was emitted. Balance and eight unexpired sessions survived the service upgrade.
+- Refresh now restores the account through `/api/me?profile=0` without waiting for Twitch profile lookup. Avatar loads separately. Initial HTML says “Checking sign-in”; only HTTP 401 displays signed-out state. Temporary failures offer retry and do not clear a valid session. Streamer setup also uses the fast check; secure cookie lifetime remains 30 days.
+- Twitch emote thumbnails now have name search, animated-only filtering, visible full names and pagination. Selecting one uses the existing chest preview/save flow. Desktop/mobile views inspected and sent to PC. Public catalog verified at 307 emotes: pagination, name search and real YappingDuck animated chest playback passed as an anonymous preview. Existing global-emote cache and free API use remain unchanged.
+- Verification: 102 overall / 30 shared-service tests pass. `scripts/qa/account-emotes.cjs` covers delayed profile loading, reload without false logout, retry, anonymous state, selection/save/filtering and mobile layout. Backend `robot-alerts:session-emotes-1` is live (also tagged `release`); prior container `robot-alerts-before-session-fix-20261101` retained for rollback. Same database/env mount, loopback port, 192 MiB and 0.5 CPU limits. Health 204; picker 200. Reviewed 151-file static set published through `robot-deploy` with dependencies first.
+
 ## Animated patterns checkpoint — 2026-11-01 (LIVE)
 
 - Hosted alerts now apply the viewer's saved whole-robot pattern and 50–200% size to the approved motion, including the CRT case and joints. Blender exports rest-position/normal/lighting maps on owned copies; the overlay uses PNGs plus a 2D WebGL raster pass, no Three.js or 3D model. Face and chest remain clear. Local fallback renderer is unchanged.
