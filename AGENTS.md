@@ -2,7 +2,7 @@
 
 ## Static deployment authorization — 2026-11-01
 
-- The owner authorizes Robot Alerts static updates through `robot-deploy go` without repeated approval questions. Run and show the dry run first, then proceed. Use only `/home/marvin/robot-site` and the existing deployment script; all secret, transport and other-site restrictions remain in force.
+- The owner authorizes Robot Alerts static updates through `robot-deploy go` (`/home/marvin/robot-site` → `/robot/`) and the supplied `robots-deploy go` (`/home/marvin/robots-site` → `/robots/`) without repeated approval questions. Run and show each script’s dry run first, then proceed. Use only these folders and their existing scripts; all secret, transport and other-site restrictions remain in force.
 
 These reproduce the machine rules supplied by the user and add project scope. The user's explicit decisions take precedence over research suggestions.
 

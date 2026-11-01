@@ -115,3 +115,19 @@ Sessions remain in SQLite across restarts; no reauthorization is required.
 The picker restores identity without waiting for optional Twitch avatar lookup.
 Rollback uses the retained previous container/image with the same persistent
 volume and private env file; do not restore an older database over new awards.
+
+
+## Site pages release — 2026-11-01
+
+Current backend: `robot-alerts:pages-1` (also `release`); retained previous
+container: `robot-alerts-before-pages-20261101`. Same persistent database,
+private env, loopback binding and resource/log limits. Before rolling back to
+the previous validator, switch any No alert box choice to a named design;
+the previous release does not recognize the new `none` preset. Do not replace
+the database with an older copy and lose later awards.
+
+Static sources/deployments: `~/robot-site` → `/robot/` through `robot-deploy`;
+`~/robots-site` → `/robots/` through `robots-deploy`. Dry run each script first.
+The owner authorizes subsequent uploads without repeated permission questions.
+Both scripts upload only; existing legacy entry points remain for cached pages.
+No PHP, credentials or backend files belong in either static directory.

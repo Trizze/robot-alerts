@@ -1,5 +1,15 @@
 # Status — 2026-11-01
 
+## Site pages, progression UI and refreshed demo — 2026-11-01 (LIVE)
+
+- User verified Get Started and Send test to OBS for trizze and itsTrizze. `/robots/` is the new pitch; six shared navigation destinations are `/robot/`, `/robot/dashboard/`, `/robot/privacy/`, `/robot/start/`, `/robot/streamers/` and `/robot/how-it-works/`. Every page returns 200. The directory's real API lists both connected channels; revocations/disconnects remove channels from the public list.
+- Picker: 1% sizing below the model; next-tier progress bar and Progress Info dialog; padlocks with clickable locked previews and only `PREVIEW - LOCKED` above the head; unlocked count beside tier filters. Extra lower-page sections/footer tagline removed; deletion lives on Privacy with typed confirmation. Saved-skin restoration now handles account/catalog/model loading in any order.
+- Dashboard manages source/design settings together; Get Started retains four steps. Nine designs plus No alert box save automatically in order. No-box hides only the panel, including live settings changes; OBS URL stays the same. Saved chest emoji/emotes now reach the hosted renderer and use per-frame chest masks with the robot clock and dark glass; optional emote failure does not suppress an alert.
+- New 22-second 1280×720/30 fps demo: Black Marquina Marble + GlitchCat + Neon signal, then Fabric Pattern 07 + PopNemo + Pop arcade. Actual overlay components, synthetic events; also checked from fresh unseeked playback. Sharper 3D hero and monitor logo/favicon use approved model geometry. Scripts are in `scripts/qa/`; raw frames/review media stay local in `assets/robot/site-demo/`.
+- Verification: 105 overall / 32 shared-service tests pass; local and deployed browser checks cover navigation, progress, locked preview, sizing, automatic saves, no-panel updates, directory and guarded deletion. Real public directory and new video's 22-second/720p metadata verified. Both dry runs shown; 170 Robot files and one pitch file deployed through the supplied scripts. Cached legacy entry points remain compatible; no remote files deleted.
+- Backend `robot-alerts:pages-1` (also `release`) is healthy with the same database/env, loopback 8100, 192 MiB, 0.5 CPU and log limits. Prior stopped container: `robot-alerts-before-pages-20261101`. No keys were read. New pitch source is `/home/marvin/robots-site` (Git initialized); its deploy script is `robots-deploy`, separate from `robot-deploy`.
+- Next: refresh the existing OBS source for the chest/no-panel code; verify real paid EventSub progression across the two connected channels. Hosted follow/raid/chat delivery and hosted custom uploads remain unfinished. Test buttons and demo do not award points.
+
 ## Account refresh and emote picker — 2026-11-01 (LIVE)
 
 - Trizze received the requested labeled `admin_tier5` ledger grant: 1,000 total points, Tier 5, 49 patterns (all lower tiers plus the first Tier 5 pattern). Only that account changed; no fake Twitch contribution or alert was emitted. Balance and eight unexpired sessions survived the service upgrade.

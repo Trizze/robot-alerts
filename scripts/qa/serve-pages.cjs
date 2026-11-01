@@ -1,7 +1,7 @@
 const http = require("node:http"),
   fs = require("node:fs"),
   path = require("node:path");
-const root = path.resolve("/home/marvin/robot-alerts/website-staging");
+const root = path.resolve(__dirname, "../../website-staging");
 http
   .createServer((q, s) => {
     let p = decodeURIComponent(new URL(q.url, "http://localhost").pathname);
