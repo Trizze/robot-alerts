@@ -6,7 +6,7 @@
     <title>Streamer Dashboard · RobotAlerts</title>
     <link rel="stylesheet" href="../style.css?v=pages-1" />
     <link rel="stylesheet" href="../shared/alert-card.css" />
-    <link rel="stylesheet" href="../start/setup.css?v=sounds-1" />
+    <link rel="stylesheet" href="../start/setup.css?v=sounds-2" />
     <link rel="stylesheet" href="/robot/shared/site-nav.css?v=fast-1" />
     <link rel="icon" href="/robot/brand/favicon-v3.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/robot/shared/compact.css?v=chat-1" />
@@ -98,6 +98,16 @@
         <section id="step-3" hidden><button id="to-theme"></button></section>
         <section class="setup-panel" id="step-4" hidden>
           <h2>Alert design</h2>
+          <button
+            id="sound-toggle"
+            class="quiet"
+            type="button"
+            aria-controls="alert-sound-controls"
+            aria-expanded="false"
+            disabled
+          >
+            Sound effects
+          </button>
           <div
             id="design-options"
             class="design-options"
@@ -128,7 +138,10 @@
       <span>RobotAlerts</span><a href="/robot/start/">Setup guide</a
       ><a href="/robot/credits.html">Credits</a>
     </footer>
-    <script type="module" src="/robot/shared/channel-fast.js?v=sounds-1"></script>
+    <script
+      type="module"
+      src="/robot/shared/channel-fast.js?v=sounds-2"
+    ></script>
     <script type="module" src="/robot/shared/site-nav.js?v=chat-1"></script>
   </body>
 </html>

@@ -272,6 +272,8 @@ function eventControls() {
 function soundControls() {
   const details = document.createElement("details");
   details.className = "alert-sound-controls";
+  details.id = "alert-sound-controls";
+  details.hidden = true;
   details.innerHTML = `<summary>Alert sounds</summary>
     <p>Use audio you own or have permission to use. MP3, WAV or OGG, up to 96 KB and 15 seconds. Enable browser-source audio in OBS.</p>
     <label>Event <select id="sound-event"><option value="sub">New sub</option><option value="resub">Re-sub</option><option value="gift">Gift subs</option><option value="cheer">Cheer</option><option value="follow">Follow</option><option value="raid">Raid</option></select></label>
@@ -281,6 +283,17 @@ function soundControls() {
     <label>Start after <input id="sound-delay" type="number" min="0" max="10" step="0.1"> seconds from the animation start</label>
     <p id="sound-status" role="status"></p>`;
   $("#design-preview").after(details);
+  const toggle = $("#sound-toggle");
+  toggle.disabled = false;
+  toggle.onclick = () => {
+    const show = details.hidden;
+    details.hidden = !show;
+    details.open = show;
+    $("#design-options").hidden = show;
+    $("#design-preview").hidden = show || settings.preset === "none";
+    toggle.textContent = show ? "Back to designs" : "Sound effects";
+    toggle.setAttribute("aria-expanded", String(show));
+  };
   const event = $("#sound-event"),
     file = $("#sound-file"),
     volume = $("#sound-volume"),

@@ -41,8 +41,8 @@ const assert = require("node:assert/strict");
       });
     });
     await page.goto("http://127.0.0.1:3902/robot/dashboard/");
-    await page.waitForSelector(".alert-sound-controls");
-    await page.locator(".alert-sound-controls summary").click();
+    await page.waitForSelector("#sound-toggle:not(:disabled)");
+    await page.locator("#sound-toggle").click();
     await page.locator("#sound-builtin").click();
     await page.waitForFunction(() =>
       document
@@ -103,13 +103,11 @@ const assert = require("node:assert/strict");
     );
     assert.equal(settings.sounds.gift, undefined);
     assert.equal(settings.sounds.sub, "/robot/sounds/robot-arrival.mp3");
-    await page
-      .locator("#sound-file")
-      .setInputFiles({
-        name: "fake.mp3",
-        mimeType: "audio/mpeg",
-        buffer: Buffer.from("<script>bad</script>"),
-      });
+    await page.locator("#sound-file").setInputFiles({
+      name: "fake.mp3",
+      mimeType: "audio/mpeg",
+      buffer: Buffer.from("<script>bad</script>"),
+    });
     await page.waitForFunction(
       () =>
         document.querySelector("#sound-status").textContent ===

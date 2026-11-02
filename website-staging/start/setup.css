@@ -228,6 +228,16 @@
   cursor: pointer;
   font-weight: 650;
 }
+.alert-sound-controls[hidden],
+#design-options[hidden] {
+  display: none;
+}
+.alert-sound-controls summary {
+  display: none;
+}
+#sound-toggle {
+  margin: 0 0 12px;
+}
 .alert-sound-controls label {
   display: flex;
   align-items: center;

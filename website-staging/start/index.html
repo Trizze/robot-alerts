@@ -6,7 +6,7 @@
     <title>Get started · Robot Alerts</title>
     <link rel="stylesheet" href="../style.css?v=pages-1" />
     <link rel="stylesheet" href="../shared/alert-card.css" />
-    <link rel="stylesheet" href="./setup.css?v=sounds-1" />
+    <link rel="stylesheet" href="./setup.css?v=sounds-2" />
     <link rel="stylesheet" href="/robot/shared/site-nav.css?v=fast-1" />
     <link rel="icon" href="/robot/brand/favicon-v3.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/robot/shared/compact.css?v=chat-1" />
@@ -134,6 +134,16 @@
       <section class="setup-panel" id="step-4" hidden>
         <span class="label">STEP 4 OF 4</span>
         <h2>Pick your alert-box design.</h2>
+        <button
+          id="sound-toggle"
+          class="quiet"
+          type="button"
+          aria-controls="alert-sound-controls"
+          aria-expanded="false"
+          disabled
+        >
+          Sound effects
+        </button>
         <p>
           Change the box around the alert. Your viewers’ robot looks stay the
           same.
@@ -171,7 +181,10 @@
       ></p>
       <a class="back-picker" href="../">← Back to the robot picker</a>
     </main>
-    <script type="module" src="/robot/shared/channel-fast.js?v=sounds-1"></script>
+    <script
+      type="module"
+      src="/robot/shared/channel-fast.js?v=sounds-2"
+    ></script>
     <script type="module" src="/robot/shared/site-nav.js?v=chat-1"></script>
   </body>
 </html>

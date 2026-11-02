@@ -1,6 +1,6 @@
 # Alert sounds
 
-In Streamer Dashboard → Alert design → Alert sounds, select an event and upload an MP3, WAV or OGG, or choose **Use robot entrance mix**. Sound changes save automatically. Use Preview sound to listen; Send test to OBS tests the full entrance. Turn on browser-source audio in OBS and check its mixer volume.
+In Streamer Dashboard → Alert design → **Sound effects**, select an event and upload an MP3, WAV or OGG, or choose **Use robot entrance mix**. Sound changes save automatically. Use Preview sound to listen; Send test to OBS tests the full entrance. Back to designs restores the style picker. Turn on browser-source audio in OBS and check its mixer volume.
 
 Uploads must be at most 96 KB; the browser also checks duration (15 seconds maximum) and decodes the file before saving. Compress longer recordings to MP3/OGG first. Volume applies to all event sounds; 0 mutes them. Start delay is measured from the animation becoming ready, so slow asset loading cannot make audio start ahead of the robot. Audio stops when the alert ends. No sound is enabled automatically on existing channels.
 
