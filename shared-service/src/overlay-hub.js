@@ -13,7 +13,7 @@ export class OverlayHub {
   }
   connect(channel, req, res, settings) {
     const clients = this.channels.get(channel) || new Set();
-    if (clients.size >= 3 || this.total >= 200) {
+    if (clients.size >= 12 || this.total >= 200) {
       res.writeHead(429).end();
       return;
     }

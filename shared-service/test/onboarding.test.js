@@ -345,13 +345,14 @@ test("display streams are bounded and slow consumers are disconnected", () => {
       },
     };
   }
-  for (let i = 0; i < 4; i++) {
+  for (let i = 0; i < 13; i++) {
     const res = response();
     clients.push(res);
     hub.connect("123", {}, res, {});
   }
-  assert.equal(clients[3].status, 429);
-  assert.equal(hub.total, 3);
+  assert.equal(clients[11].status, 200);
+  assert.equal(clients[12].status, 429);
+  assert.equal(hub.total, 12);
   clients[0].write = () => false;
   hub.send("123", { kind: "settings" });
   assert.equal(clients[0].destroyed, true);
