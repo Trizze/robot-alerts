@@ -5,12 +5,13 @@
 - Removed all service-owner controls and metadata from the website. Old `/auth/start?role=bot` now returns 410. Streamer Connect/Disconnect remains per-channel and needs no bot-account login.
 - Owner runs `npm run setup:bot` on marvin through the existing unlocked universe-admin gate. It prints the exact Twitch link privately; any browser/private window logged into TrizzeBot works, with no Robot Alerts session. No Client ID/Secret entry, new redirect, tunnel or extra port. Only the owner runs it; agent has not issued a real setup link or inspected its values.
 - Server stores only one hashed, ten-minute, single-use setup state. Callback verifies the exact bot account and chat scope; tokens remain encrypted, and no viewer account/session is created. Wrong account, missing scope, denial, expiry, replay and replaced/in-flight setup reject without replacing existing credentials. Status checks are owner-requested local DB reads, never Twitch polling.
-- `robot-alerts:terminal-bot-1` is live and healthy with unchanged private env/data/limits. Previous container `robot-alerts-before-terminal-bot-20261102` retained. Trizze remains connected with announcements enabled; bot authorization awaits the owner's terminal completion. Static dry run listed 245 files; published only via robot-deploy.
+- `robot-alerts:terminal-bot-1` is live and healthy with unchanged private env/data/limits. Previous container `robot-alerts-before-terminal-bot-20261102` retained. Trizze remains connected with announcements enabled; owner completed terminal authorization successfully. Static dry run listed 245 files; published only via robot-deploy.
 - 126 overall / 48 shared-service tests pass. Local and deployed browser checks verify owner controls absent even for an owner-shaped API response and streamer controls intact. Existing progression/OBS/media behavior is preserved.
 
 ## Current chat setup
 
-- Owner requested and enabled Trizze’s per-channel announcements; confirmed through the live source. Old Trizze announcement backlog cleared; no chat messages sent. TrizzeBot service authorization is absent (checked metadata only, no tokens read). One-time owner action remains: `npm run setup:bot`, then open the printed Twitch link as TrizzeBot in any browser. Streamer Connect/Disconnect remains independent.
+- Verified after owner completed `npm run setup:bot`: TrizzeBot authorization saved, setup status complete, Trizze connected and channel announcements enabled. Service health 204. Checked only metadata; no credentials read and no chat/test message sent.
+- Only combined pattern/tier unlock announcements are enabled; no whispers, welcomes, reminders or command replies. Real Twitch contribution and chat delivery remain the live-stream verification step.
 
 ## Latest release — streamer bot opt-in and landing polish
 
@@ -52,7 +53,7 @@
 
 ## Next steps in priority order
 
-1. Owner runs `npm run setup:bot` once on marvin and opens its Twitch link as TrizzeBot. Optional follow alerts require reconnecting a broadcaster for moderator:read:followers. No tokens are entered in chat.
+1. Bot authorization is complete. Verify real Twitch events, visible alerts, point awards and unlock announcements during the planned stream. Optional follow alerts require the broadcaster permission.
 2. Verify one real paid event across both connected channels, combined announcement, NEW/equip persistence and anonymous display. Refresh existing OBS sources for the picture-only CRT renderer. Synthetic/browser tests do not award real points or send chat.
 3. Continue unfinished hosted raid chat crowds/custom uploads only within agreed scope. Finish Devpost credits/demo submission before Nov 2 23:00 Europe/Stockholm (internal target 22:00); preserve submitted artifacts afterward.
 
