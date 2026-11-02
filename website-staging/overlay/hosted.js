@@ -1,11 +1,12 @@
 import { API_BASE } from "../config.js?v=shared-service-1";
-import { SpriteScene } from "./sprite-scene.js?v=sounds-1";
+import { SpriteScene } from "./sprite-scene.js?v=dances-2";
 import { createAlertCard } from "../shared/alert-card.js";
-import { playAlertSound } from "../shared/alert-audio.js?v=bundled-1";
+import { playAlertSound } from "../shared/alert-audio.js?v=audio-fix-1";
 const stage = document.querySelector("#stage"),
   status = document.querySelector("#connection");
 const channel = new URLSearchParams(location.search).get("channel");
 let stopSound = () => {},
+  readyWatcher,
   current,
   settings = { preset: "03", theme: "default" };
 const queue = [];
@@ -20,6 +21,7 @@ function fit() {
 addEventListener("resize", fit);
 fit();
 function clear() {
+  readyWatcher?.disconnect();
   stopSound();
   current?.stop();
   current = null;
@@ -35,17 +37,30 @@ function next() {
     raidCrowdSeconds: 0,
     settings: {
       ...settings,
+      sounds: message.settings?.sounds || {},
       scale: 1,
       showAlertBox: settings.preset !== "none",
       card: { preset: settings.preset === "none" ? "03" : settings.preset },
     },
   };
+  let soundStarted = false;
   alert.onReady = () => {
-    stopSound = playAlertSound(alert.settings, alert.type, () => {
-      status.hidden = false;
-      status.textContent =
-        "Audio blocked. Click this source to enable sound; enable browser-source audio in OBS.";
-    });
+    if (soundStarted || current?.alert !== alert) return;
+    soundStarted = true;
+    readyWatcher?.disconnect();
+    stopSound = playAlertSound(
+      alert.settings,
+      alert.type,
+      () => {
+        status.hidden = false;
+        status.textContent =
+          "Audio blocked. In OBS, Interact with this source and click once. Enable Control audio via OBS.";
+      },
+      true,
+      () => {
+        status.hidden = true;
+      },
+    );
   };
   current = new SpriteScene(stage, createAlertCard(alert), alert, next, () => {
     clear();
@@ -53,6 +68,15 @@ function next() {
     status.textContent =
       "Robot animation could not load. Refresh this browser source.";
   });
+  const scene = current;
+  readyWatcher = new MutationObserver(() => {
+    if (scene.root.dataset.ready === "true") alert.onReady();
+  });
+  readyWatcher.observe(scene.root, {
+    attributes: true,
+    attributeFilter: ["data-ready"],
+  });
+  if (scene.root.dataset.ready === "true") alert.onReady();
 }
 if (!/^\d{1,32}$/.test(channel || "")) {
   status.textContent = "Set up your source at trizze.tv/robot/start/.";

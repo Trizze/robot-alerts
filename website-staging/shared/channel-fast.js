@@ -2,7 +2,7 @@ import { API_BASE } from "../config.js?v=shared-service-1";
 import { createAlertCard } from "../shared/alert-card.js";
 import { CARD_PRESETS, CARD_PRESET_ORDER } from "../shared/card-presets.js";
 import { SOUND_LIBRARY } from "./sound-library.js?v=bundled-1";
-import { playAlertSound } from "./alert-audio.js?v=bundled-1";
+import { playAlertSound } from "./alert-audio.js?v=audio-fix-1";
 const $ = (s) => document.querySelector(s),
   base = new URL(API_BASE.replace(/\/?$/, "/"), location.origin),
   dimensions = {

@@ -218,6 +218,60 @@ test("legacy uploaded sound bytes are never returned or broadcast", () => {
   }
 });
 
+test("a blocked player retries on a gesture and removes its listener on success or stop", async () => {
+  const previous = {
+    Audio: globalThis.Audio,
+    add: globalThis.addEventListener,
+    remove: globalThis.removeEventListener,
+  };
+  let listener,
+    attempts = 0,
+    blocked = 0,
+    playing = 0;
+  globalThis.addEventListener = (type, fn) => {
+    listener = fn;
+  };
+  globalThis.removeEventListener = (type, fn) => {
+    if (listener === fn) listener = undefined;
+  };
+  globalThis.Audio = class {
+    play() {
+      attempts++;
+      return attempts === 1
+        ? Promise.reject(new Error("Gesture required"))
+        : Promise.resolve();
+    }
+    pause() {}
+    removeAttribute() {}
+    load() {}
+  };
+  try {
+    const stop = playAlertSound(
+      { sounds: { sub: source } },
+      "sub",
+      () => blocked++,
+      false,
+      () => playing++,
+    );
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    assert.equal(blocked, 1);
+    assert.equal(typeof listener, "function");
+    listener();
+    await new Promise((resolve) => setTimeout(resolve, 10));
+    assert.equal(attempts, 2);
+    assert.equal(playing, 1);
+    assert.equal(listener, undefined);
+    stop();
+    assert.equal(listener, undefined);
+  } finally {
+    globalThis.Audio = previous.Audio;
+    if (previous.add) globalThis.addEventListener = previous.add;
+    else delete globalThis.addEventListener;
+    if (previous.remove) globalThis.removeEventListener = previous.remove;
+    else delete globalThis.removeEventListener;
+  }
+});
+
 test("startup removes previous uploads once and preserves points, sessions and other settings", () => {
   const folder = mkdtempSync(join(tmpdir(), "robot-sound-migration-"));
   const options = {
