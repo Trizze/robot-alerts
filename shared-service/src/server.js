@@ -546,6 +546,25 @@ export function createService({
           return respond(200, { settings: value });
         }
         if (path.pathname.endsWith("/test") && req.method === "POST") {
+          let type = "cheer";
+          try {
+            const raw = await body(req, 1024);
+            const input = raw.length ? JSON.parse(raw.toString("utf8")) : {};
+            if (
+              !input ||
+              typeof input !== "object" ||
+              Array.isArray(input) ||
+              Object.keys(input).some((key) => key !== "type") ||
+              (input.type !== undefined &&
+                !["sub", "resub", "gift", "cheer", "follow", "raid"].includes(
+                  input.type,
+                ))
+            )
+              throw new Error("Invalid test event");
+            type = input.type ?? type;
+          } catch {
+            return respond(400, { error: "Invalid test event" });
+          }
           if (!hub.channels.get(session.id)?.size)
             return respond(409, { error: "Connect an overlay before testing" });
           const now = clock();
@@ -559,8 +578,12 @@ export function createService({
           await publishAlert(
             session.id,
             {
-              type: "cheer",
+              type,
               bits: 500,
+              months: 12,
+              gifts: 5,
+              raidSize: 12,
+              tier: "1000",
               viewer: { id: session.id, name: store.channelName(session.id) },
             },
             true,

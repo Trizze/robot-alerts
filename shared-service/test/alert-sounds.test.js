@@ -159,3 +159,86 @@ test("one alert owns its audio; cancellation prevents delayed playback and relea
     globalThis.Audio = original;
   }
 });
+
+test("OBS tests use the selected event and its sound without awarding points or sending chat", async (t) => {
+  const store = new SharedStore(":memory:", {
+    encryptionKey: randomBytes(32),
+    patternSeed: randomBytes(32),
+    catalog: [],
+  });
+  store.saveChannel("123", "Demo streamer", {});
+  store.upsertViewer("123", "Demo streamer");
+  store.saveOverlaySettings("123", {
+    sounds: Object.fromEntries(
+      ["sub", "resub", "gift", "cheer", "follow", "raid"].map((type) => [
+        type,
+        source,
+      ]),
+    ),
+  });
+  let now = Date.now();
+  const server = createService({
+    store,
+    twitch: {},
+    webhookSecret: randomBytes(32).toString("hex"),
+    frontendUrl: "https://trizze.tv/robot/",
+    clock: () => now,
+  });
+  await new Promise((resolve) => server.listen(0, "127.0.0.1", resolve));
+  t.after(() => {
+    server.closeAllConnections();
+    server.close();
+    store.close();
+  });
+  const base = `http://127.0.0.1:${server.address().port}`;
+  const headers = {
+    cookie: `__Host-robot_session=${store.createSession("123", "streamer")}`,
+    origin: "https://trizze.tv",
+    "content-type": "application/json",
+  };
+  const stream = await fetch(base + "/overlay/123/events");
+  const reader = stream.body.getReader();
+  let buffer = "";
+  async function message() {
+    while (!buffer.includes("\n\n")) {
+      const next = await reader.read();
+      assert.equal(next.done, false);
+      buffer += new TextDecoder().decode(next.value);
+    }
+    const end = buffer.indexOf("\n\n"),
+      row = buffer.slice(0, end);
+    buffer = buffer.slice(end + 2);
+    return JSON.parse(row.replace(/^data: /, ""));
+  }
+  await message();
+  for (const type of ["sub", "resub", "gift", "cheer", "follow", "raid"]) {
+    now += 11000;
+    const response = await fetch(base + "/api/channel/test", {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ type }),
+    });
+    assert.equal(response.status, 200);
+    const { alert } = await message();
+    assert.equal(alert.type, type);
+    assert.deepEqual(alert.settings.sounds, { [type]: source });
+    assert.equal(alert.demo, true);
+    assert.equal(store.viewer("123").points, 0);
+  }
+  for (const input of [
+    { type: "unknown" },
+    { type: "gift", channel: "456" },
+    null,
+  ])
+    assert.equal(
+      (
+        await fetch(base + "/api/channel/test", {
+          method: "POST",
+          headers,
+          body: JSON.stringify(input),
+        })
+      ).status,
+      400,
+    );
+  await reader.cancel();
+});

@@ -10,7 +10,8 @@ const assert = require("node:assert/strict");
   try {
     const page = await b.newPage({ viewport: { width: 1440, height: 1000 } }),
       errors = [],
-      writes = [];
+      writes = [],
+      testEvents = [];
     page.on("pageerror", (e) => errors.push(e.message));
     let settings = {
       resolution: "1080p",
@@ -22,7 +23,11 @@ const assert = require("node:assert/strict");
     await page.route("**/robot/api/**", async (route) => {
       const path = new URL(route.request().url()).pathname;
       let value = {};
-      if (path.endsWith("/api/me")) value = { channel: true, streamer: true };
+      if (path.endsWith("/test")) {
+        testEvents.push(route.request().postDataJSON());
+        value = { sent: true };
+      } else if (path.endsWith("/api/me"))
+        value = { channel: true, streamer: true };
       else if (path.endsWith("/settings")) {
         if (route.request().method() === "POST") {
           settings = route.request().postDataJSON();
@@ -50,6 +55,27 @@ const assert = require("node:assert/strict");
         .textContent.startsWith("Design saved"),
     );
     assert.equal(settings.sounds.sub, "/robot/sounds/robot-arrival.mp3");
+    const enabledEvents = [...settings.events];
+    await page.locator("#sound-all").click();
+    await page.waitForFunction(() =>
+      document
+        .querySelector("#setup-feedback")
+        .textContent.startsWith("Design saved"),
+    );
+    assert.deepEqual(Object.keys(settings.sounds).sort(), [
+      "cheer",
+      "follow",
+      "gift",
+      "raid",
+      "resub",
+      "sub",
+    ]);
+    assert.ok(
+      Object.values(settings.sounds).every(
+        (src) => src === "/robot/sounds/robot-arrival.mp3",
+      ),
+    );
+    assert.deepEqual(settings.events, enabledEvents);
     await page.locator("#sound-event").selectOption("gift");
     const wav = Buffer.alloc(2044);
     wav.write("RIFF");
@@ -70,7 +96,7 @@ const assert = require("node:assert/strict");
     await page.waitForFunction(
       () =>
         document.querySelector("#sound-status").textContent ===
-        "Custom sound selected.",
+        "Uploaded sound saved.",
     );
     await page.waitForFunction(() =>
       document
@@ -78,6 +104,19 @@ const assert = require("node:assert/strict");
         .textContent.startsWith("Design saved"),
     );
     assert.match(settings.sounds.gift, /^data:audio\/wav;base64,/);
+    assert.equal(
+      await page.locator("#sound-file").evaluate((e) => e.files[0]?.name),
+      "test.wav",
+    );
+    const uploaded = settings.sounds.gift;
+    await page.locator("#sound-all").click();
+    await page.waitForFunction(() =>
+      document
+        .querySelector("#setup-feedback")
+        .textContent.startsWith("Design saved"),
+    );
+    assert.ok(Object.values(settings.sounds).every((src) => src === uploaded));
+    assert.deepEqual(settings.events, enabledEvents);
     await page.locator("#sound-volume").fill("0.35");
     await page.locator("#sound-volume").dispatchEvent("change");
     await page.locator("#sound-delay").fill("0.6");
@@ -89,6 +128,21 @@ const assert = require("node:assert/strict");
     );
     assert.equal(settings.soundVolume, 0.35);
     assert.equal(settings.soundDelay, 0.6);
+    await page.locator("#test-design").click();
+    await page.waitForFunction(() =>
+      document
+        .querySelector("#setup-feedback")
+        .textContent.startsWith("gift test sent"),
+    );
+    assert.deepEqual(testEvents.at(-1), { type: "gift" });
+    await page.locator("#test-source").click();
+    await page.waitForFunction(() =>
+      document
+        .querySelector("#setup-feedback")
+        .textContent.startsWith("gift test sent"),
+    );
+    assert.equal(testEvents.length, 2);
+    assert.ok(testEvents.every((event) => event.type === "gift"));
     await page.locator("#sound-play").click();
     await page.waitForTimeout(150);
     await page.screenshot({
@@ -102,7 +156,8 @@ const assert = require("node:assert/strict");
         .textContent.startsWith("Design saved"),
     );
     assert.equal(settings.sounds.gift, undefined);
-    assert.equal(settings.sounds.sub, "/robot/sounds/robot-arrival.mp3");
+    assert.equal(settings.sounds.sub, uploaded);
+    assert.equal(await page.locator("#sound-all").isDisabled(), true);
     await page.locator("#sound-file").setInputFiles({
       name: "fake.mp3",
       mimeType: "audio/mpeg",

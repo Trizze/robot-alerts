@@ -1,5 +1,9 @@
 # Alert sounds
 
+**Apply to all alerts** copies the currently selected event's sound to sub, resub, gift, cheer, follow and raid, saving automatically. This works with uploads and the robot entrance mix. It does not enable disabled event types or change volume/delay; you can still change an individual event's sound afterward.
+
+Both Send test to OBS buttons test the selected event while Sound effects is open; otherwise they test a cheer. Tests never award points or send chat announcements. Refresh an already-open OBS browser source once after installing the sound update. After an upload, the filename stays visible and the status confirms when the sound is saved. On a later page load, the browser's file picker starts empty for security; the saved sound remains available through Preview sound.
+
 In Streamer Dashboard → Alert design → **Sound effects**, select an event and upload an MP3, WAV or OGG, or choose **Use robot entrance mix**. Sound changes save automatically. Use Preview sound to listen; Send test to OBS tests the full entrance. Back to designs restores the style picker. Turn on browser-source audio in OBS and check its mixer volume.
 
 Uploads must be at most 96 KB; the browser also checks duration (15 seconds maximum) and decodes the file before saving. Compress longer recordings to MP3/OGG first. Volume applies to all event sounds; 0 mutes them. Start delay is measured from the animation becoming ready, so slow asset loading cannot make audio start ahead of the robot. Audio stops when the alert ends. No sound is enabled automatically on existing channels.

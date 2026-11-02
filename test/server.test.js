@@ -54,7 +54,7 @@ test(
       const state = await (await fetch(`${base}/api/state`)).json();
       assert.equal(state.mode, "demo");
       assert.equal(state.viewers.length, 4);
-      assert.equal(state.apiVersion, "robot-alerts-cards-19");
+      assert.equal(state.apiVersion, "robot-alerts-cards-20");
       assert.ok(Math.abs(state.serverTime - Date.now()) < 5000);
       assert.equal(
         (

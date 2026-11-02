@@ -1,5 +1,11 @@
 # Status — 2026-11-01
 
+## Shared sounds and matching tests — 2026-11-02
+
+- Apply to all alerts copies the selected uploaded/built-in sound to all six event types without enabling disabled events or changing volume/delay. Per-event overrides remain possible. Uploads retain their filename and show Uploaded sound saved after a successful save.
+- Fixed OBS tests always using cheer: both dashboard test buttons use the selected sound event when Sound effects is open. The backend accepts only a validated optional type, retains the cooldown/ownership/Origin checks, and generates no points/chat from tests. Existing OBS sources need one refresh to load the new sound player.
+- `robot-alerts:sounds-all-1` is healthy (204), prior container `robot-alerts-before-sounds-all-20261102`; same env/data/resource/log limits, no schema migration. Static dry run lists 247 files. 131 application / 53 shared-service tests pass; browser QA verifies copies of built-in/uploaded audio, filename retention, per-event removal, correct test type and fresh playback. Static publication completed through robot-deploy after the 247-file dry run; public dashboard 200 / API health 204. Deployed browser checks pass with all account writes and test events intercepted.
+
 ## Tier 1 at one point — 2026-11-02 (LIVE)
 
 - Tier thresholds are now 1/100/250/500/1,000 points in scoring, progress UI and explanations. One tier-1 sub or 500 cumulative bits earns the first stable random unowned Tier 1 pattern; 100 bits is 0.2 points and remains Tier 0. Existing point balances are recalculated automatically; no new ledger rows or migration draws are needed.

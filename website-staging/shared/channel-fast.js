@@ -136,20 +136,25 @@ $("#to-obs").onclick = () =>
   });
 $("#to-theme").onclick = () => step(4);
 async function test(button) {
-  await action(button, "Sending test…", async () => {
-    await api("api/channel/test", { method: "POST" });
+  await action(button, "Saving & sending test…", async () => {
+    await saveChain;
+    await save();
+    const type =
+      $("#alert-sound-controls")?.hidden === false
+        ? $("#sound-event").value
+        : "cheer";
+    await api("api/channel/test", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ type }),
+    });
     feedback(
-      "Test sent to your connected OBS source. Test alerts do not award points.",
+      `${type} test sent to your OBS source. Check browser-source audio in OBS if silent.`,
     );
   });
 }
 $("#test-source").onclick = () => test($("#test-source"));
-$("#test-design").onclick = () =>
-  action($("#test-design"), "Saving & sending test…", async () => {
-    await save();
-    await api("api/channel/test", { method: "POST" });
-    feedback("Design saved and test sent to your OBS source.");
-  });
+$("#test-design").onclick = () => test($("#test-design"));
 function preview() {
   for (const b of document.querySelectorAll("[data-preset]"))
     b.setAttribute(
@@ -208,7 +213,7 @@ function scheduleDesignSave() {
   feedback(
     connected ? "Saving design…" : "Connect your channel to save this design.",
   );
-  if (!connected) return;
+  if (!connected) return Promise.resolve(false);
   saveChain = saveChain
     .catch(() => {})
     .then(async () => {
@@ -219,11 +224,14 @@ function scheduleDesignSave() {
       });
       if (revision === saveRevision)
         feedback("Design saved. Your OBS source updates automatically.");
+      return true;
     })
     .catch(() => {
       if (revision === saveRevision)
         feedback("Could not save design. Choose it again to retry.");
+      return false;
     });
+  return saveChain;
 }
 preview();
 function eventControls() {
@@ -278,7 +286,7 @@ function soundControls() {
     <p>Use audio you own or have permission to use. MP3, WAV or OGG, up to 96 KB and 15 seconds. Enable browser-source audio in OBS.</p>
     <label>Event <select id="sound-event"><option value="sub">New sub</option><option value="resub">Re-sub</option><option value="gift">Gift subs</option><option value="cheer">Cheer</option><option value="follow">Follow</option><option value="raid">Raid</option></select></label>
     <label>Upload sound <input id="sound-file" type="file" accept=".mp3,.wav,.ogg,audio/mpeg,audio/wav,audio/ogg"></label>
-    <div class="setup-actions"><button id="sound-builtin" class="quiet" type="button">Use robot entrance mix</button><button id="sound-play" class="quiet" type="button">Preview sound</button><button id="sound-remove" class="quiet" type="button">Remove sound</button></div>
+    <div class="setup-actions"><button id="sound-builtin" class="quiet" type="button">Use robot entrance mix</button><button id="sound-play" class="quiet" type="button">Preview sound</button><button id="sound-all" class="quiet" type="button">Apply to all alerts</button><button id="sound-remove" class="quiet" type="button">Remove sound</button></div>
     <label>Volume <input id="sound-volume" type="range" min="0" max="1" step="0.01"><output id="sound-volume-value"></output></label>
     <label>Start after <input id="sound-delay" type="number" min="0" max="10" step="0.1"> seconds from the animation start</label>
     <p id="sound-status" role="status"></p>`;
@@ -304,7 +312,7 @@ function soundControls() {
   const volumeLabel = () =>
     ($("#sound-volume-value").textContent =
       ` ${Math.round(volume.value * 100)}%`);
-  const refresh = () => {
+  const refresh = (clearFile = true) => {
     stop();
     const src = settings.sounds?.[event.value];
     $("#sound-status").textContent =
@@ -315,7 +323,8 @@ function soundControls() {
           : "No sound for this event.";
     $("#sound-play").disabled = !src;
     $("#sound-remove").disabled = !src;
-    file.value = "";
+    $("#sound-all").disabled = !src;
+    if (clearFile) file.value = "";
   };
   function setSound(src) {
     const sounds = { ...settings.sounds };
@@ -331,15 +340,31 @@ function soundControls() {
       try {
         const src = await readSound(file.files[0]);
         settings.sounds = { ...settings.sounds, [targetEvent]: src };
-        refresh();
-        scheduleDesignSave();
+        refresh(event.value !== targetEvent);
+        const saved = await scheduleDesignSave();
+        if (saved && event.value === targetEvent)
+          $("#sound-status").textContent = "Uploaded sound saved.";
       } catch (error) {
         $("#sound-status").textContent = error.message;
       }
     });
-  event.onchange = refresh;
+  event.onchange = () => refresh();
   $("#sound-builtin").onclick = () => setSound(BUILTIN_SOUND);
   $("#sound-remove").onclick = () => setSound(null);
+  $("#sound-all").onclick = () => {
+    const src = settings.sounds?.[event.value];
+    if (!src) return;
+    settings.sounds = Object.fromEntries(
+      ["sub", "resub", "gift", "cheer", "follow", "raid"].map((type) => [
+        type,
+        src,
+      ]),
+    );
+    refresh(false);
+    $("#sound-status").textContent =
+      "Same sound selected for all six alert types.";
+    scheduleDesignSave();
+  };
   $("#sound-play").onclick = () => {
     stop();
     stop = playAlertSound(
