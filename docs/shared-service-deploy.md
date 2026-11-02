@@ -6,6 +6,8 @@ Backend only: static picker `https://trizze.tv/robot/`, API
 `https://trizze.tv/robot/api/`. No new server or registry. Build locally and
 transfer the image to Hetzner.
 
+Current tier release (2026-11-02): `robot-alerts:tier-one-1`, built locally from sounds-1, changes only the shared point-threshold module. Health 204, same env/data/limits, rollback container `robot-alerts-before-tier-one-20261102`. Tier 1 is now 1 point; existing ledgers recalculate without adding contributions or replaying bot notices. 130 application / 52 shared-service tests pass. Static follow-up publishes the new threshold and visible Sound effects switch after a 247-file dry run. No new database schema or live point adjustments.
+
 ## Before first start
 
 1. Register Twitch redirect

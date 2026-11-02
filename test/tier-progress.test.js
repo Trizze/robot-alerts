@@ -5,12 +5,12 @@ test("tier bar measures progress between the current and next thresholds", () =>
   assert.deepEqual(tierProgress(0), {
     tier: 0,
     from: 0,
-    to: 10,
+    to: 1,
     value: 0,
-    remaining: 10,
+    remaining: 1,
   });
-  assert.equal(tierProgress(10).value, 0);
-  assert.equal(tierProgress(55).value, 0.5);
+  assert.equal(tierProgress(1).value, 0);
+  assert.equal(tierProgress(50.5).value, 0.5);
   assert.deepEqual(tierProgress(350), {
     tier: 3,
     from: 250,

@@ -90,16 +90,24 @@ test("NEW persists until a legitimately owned skin is tried, and cannot be clear
 test("tier and multiple pattern unlocks produce one notice per real award and no command-style replies", async () => {
   const s = create();
   try {
-    s.record(event({ gifts: 5 }));
+    s.record(event({ gifts: 1 }));
+    const first = s.takeUnlockNotice();
+    assert.equal(first.tier, 1);
+    assert.equal(first.pattern_count, 1);
+    assert.match(
+      unlockMessage(first),
+      /^@Viewer, you reached Tier 1 and unlocked 1 pattern/,
+    );
+    s.finishUnlockNotice(first.event_id, true);
     assert.equal(s.takeUnlockNotice(), null);
     const e = event({ gifts: 100 });
     s.record(e);
     s.record(e);
     const notice = s.takeUnlockNotice();
     assert.equal(notice.tier, 2);
-    assert.equal(notice.pattern_count, 3);
+    assert.equal(notice.pattern_count, 2);
     const text = unlockMessage(notice);
-    assert.match(text, /reached Tier 2 and unlocked 3 patterns/);
+    assert.match(text, /reached Tier 2 and unlocked 2 patterns/);
     assert.match(text, /those 100 gifted subs/);
     assert.match(text, /trizze.tv\/robot\//);
     s.finishUnlockNotice(notice.event_id, true);

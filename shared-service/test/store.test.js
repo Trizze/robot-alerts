@@ -26,6 +26,38 @@ const event = (more = {}) => ({
   ...more,
 });
 
+test("one paid tier-1 sub unlocks a stable random pattern; 100 bits keeps fractional progress", () => {
+  const s = create();
+  try {
+    channel(s, "1");
+    s.record(event({ type: "sub", gifts: undefined }));
+    const subscriber = s.viewer("3");
+    assert.equal(subscriber.points, 1);
+    assert.equal(subscriber.tier, 1);
+    assert.equal(subscriber.owned.length, 1);
+    assert.equal(subscriber.owned[0].tier, 1);
+    assert.equal(subscriber.owned[0].isNew, true);
+    assert.deepEqual(s.viewer("3").owned, subscriber.owned);
+    const cheer = event({
+      type: "cheer",
+      bits: 100,
+      gifts: undefined,
+      viewer: { id: "4", name: "Cheerer" },
+    });
+    s.record(cheer);
+    assert.equal(s.viewer("4").points, 0.2);
+    assert.equal(s.viewer("4").tier, 0);
+    assert.equal(s.viewer("4").owned.length, 0);
+    s.record({ ...cheer, id: randomUUID(), bits: 400 });
+    assert.equal(s.viewer("4").points, 1);
+    assert.equal(s.viewer("4").owned.length, 1);
+    assert.equal(s.record(cheer).duplicate, true);
+    assert.equal(s.viewer("4").points, 1);
+  } finally {
+    s.close();
+  }
+});
+
 test("gift summary credits the gifter once and ignores recipient and anonymous notifications", () => {
   const s = create();
   try {

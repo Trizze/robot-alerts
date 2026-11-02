@@ -2,7 +2,7 @@ import { randomInt } from "node:crypto";
 
 // Use integer bit-equivalents: 500 units = 1 point, avoiding fractional rounding.
 export const UNITS_PER_POINT = 500;
-export const PATTERN_TIER_POINTS = Object.freeze([10, 100, 250, 500, 1000]);
+export const PATTERN_TIER_POINTS = Object.freeze([1, 100, 250, 500, 1000]);
 export const HIGHEST_TIER_INTERVAL_UNITS = 100 * UNITS_PER_POINT;
 const SUB_UNITS = Object.freeze({ 1000: 500, 2000: 1000, 3000: 2500 });
 

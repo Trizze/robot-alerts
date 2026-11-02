@@ -1,6 +1,6 @@
 import { inventoryOrder } from "./shared/inventory-order.js";
-import { tierProgress } from "./shared/tier-progress.js";
-import { progressInfo } from "./shared/progress-info.js";
+import { tierProgress } from "./shared/tier-progress.js?v=tier-one-1";
+import { progressInfo } from "./shared/progress-info.js?v=tier-one-1";
 import { createEmotePicker } from "./emote-picker.js?v=fast-1";
 let THREE, GLTFLoader, OrbitControls;
 import { API_BASE } from "./config.js?v=shared-service-1";

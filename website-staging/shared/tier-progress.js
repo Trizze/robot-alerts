@@ -1,4 +1,4 @@
-export const thresholds = [10, 100, 250, 500, 1000];
+export const thresholds = [1, 100, 250, 500, 1000];
 export function tierProgress(points) {
   const n = Number.isFinite(points) ? Math.max(0, points) : 0;
   const tier = thresholds.filter((p) => n >= p).length;

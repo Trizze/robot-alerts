@@ -1,5 +1,5 @@
-import { tierProgress } from "./shared/tier-progress.js";
-import { progressInfo } from "./shared/progress-info.js";
+import { tierProgress } from "./shared/tier-progress.js?v=tier-one-1";
+import { progressInfo } from "./shared/progress-info.js?v=tier-one-1";
 import { createEmotePicker } from "./emote-picker.js?v=emotes-session-1";
 import * as THREE from "three";
 import { GLTFLoader } from "./vendor/loaders/GLTFLoader.js";

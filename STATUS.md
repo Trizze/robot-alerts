@@ -1,12 +1,19 @@
 # Status — 2026-11-01
 
+## Tier 1 at one point — 2026-11-02 (LIVE)
+
+- Tier thresholds are now 1/100/250/500/1,000 points in scoring, progress UI and explanations. One tier-1 sub or 500 cumulative bits earns the first stable random unowned Tier 1 pattern; 100 bits is 0.2 points and remains Tier 0. Existing point balances are recalculated automatically; no new ledger rows or migration draws are needed.
+- Today's Trizze ledger already contains three distinct subscribing supporters and the 100-bit cheer. Per latest instruction, no catch-up awards or chat announcements were sent. Two supporters have both sub and shared-resub award rows less than a minute apart; leave those existing awards unchanged unless the owner explicitly requests correction. Do not invent extra contributions or blindly replay receipts.
+- `robot-alerts:tier-one-1` is healthy; rollback container `robot-alerts-before-tier-one-20261102` retains sounds-1. Same data/private env/limits. Static dry run listed 247 files and published via robot-deploy. Sound controls now have a visible Sound effects button above the design picker; deployed browser tests pass with writes/events intercepted.
+- 130 application / 52 shared-service tests pass, including exact 1-point unlock, fractional bits, stable draws and tagged single combined Tier 1 announcements. New live unlocks use the existing per-channel bot opt-in.
+
 ## Alert sounds — 2026-11-02 (LIVE)
 
 - Hosted dashboard/setup now supports per-event MP3/WAV/OGG uploads, preview/removal, volume and start delay. Uploads are public audio, at most 96 KB each; only authenticated channel settings have the larger bounded request limit. No external audio URLs. Audio starts after sprite assets are ready and is cancelled with the alert. Existing channels remain silent until configured.
 - Optional 4.2-second Kenney CC0 entrance mix, editable WAV, source effects and license retained; MP3/WAV/source ZIP sent to the owner's PC. `docs/alert-sounds.md` has controls and rebuild instructions; `python3 scripts/mix-alert-sound.py` rebuilds it using ffmpeg.
 - `robot-alerts:sounds-1` is healthy (204); previous stopped container `robot-alerts-before-sounds-20261102`. Same persistent data/private env and 192 MB / 0.5 CPU / loopback/log limits. Static dry run listed 247 files, published through robot-deploy. Public dashboard/audio return 200. No real chat message or point award sent by sound QA.
 - 129 application / 51 shared-service tests pass. Browser QA covers upload validation, autosave, preview, volume/delay/removal, mobile width, fresh sprite playback, audio start after readiness and cleanup. Use `node scripts/qa/serve-pages.cjs`, then `node scripts/qa/alert-sounds.cjs` with the existing Playwright/Chromium tools.
-- New requests pending: three Blender dance loops randomly selected per alert; Blender connection requires the owner's reverse tunnel. Tier 1 threshold requested at 1 point and today's contribution reconciliation are being handled next.
+- New request pending: three Blender dance loops randomly selected per alert. Blender MCP failed twice; stop retrying until the owner establishes the reverse tunnel. Provided Windows command for addon port 9876: `ssh -N -o ExitOnForwardFailure=yes -R 9876:127.0.0.1:9876 marvin@marvin`. No listener was present on marvin at the last check. Do not substitute browser limb keyframes for Blender-rendered motion.
 
 ## Terminal-only bot setup — 2026-11-02 (LIVE)
 
@@ -48,7 +55,7 @@
 
 ## Decisions and reasoning
 
-- Whole-robot patterns replace geometry cosmetics. Shared viewer progress follows participating channels. Points: Tier 1/2/3 subs = 1/2/5; 500 bits = 1; recipients/anonymous donors get no personal points. Tier thresholds 10/100/250/500/1,000; one draw at tier entry, evenly spaced further draws through Tiers 1–4, then every 100 points in Tier 5.
+- Whole-robot patterns replace geometry cosmetics. Shared viewer progress follows participating channels. Points: Tier 1/2/3 subs = 1/2/5; 500 bits = 1; recipients/anonymous donors get no personal points. Tier thresholds 1/100/250/500/1,000; one draw at tier entry, evenly spaced further draws through Tiers 1–4, then every 100 points in Tier 5.
 - CRT shows profile images only; event amounts stay on the card/chest. All examples/demos use the official default picture, never the owner's photo. Nine card presets plus no panel; no Gaming/Default categories.
 - Five header links, same position across pages; Get Started remains reachable from the dashboard/footer. Compact viewport layout, chest controls below size, full right inventory, owned-first/high-tier-first All ordering, NEW until first owned equip, all globals displayed with no Show More.
 - Streamers configure visual event switches and up to five usual categories. Funding events still earn points with visuals off. Live status/avatar/current category come from request-cached Helix data, not inferred history or polling. Follow needs broadcaster moderator:read:followers consent.

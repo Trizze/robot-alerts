@@ -29,15 +29,15 @@ test("subscriptions and bits use exact point-equivalent integer units", () => {
 test("all tier thresholds are inclusive and cumulative", () => {
   for (const [points, expected] of [
     [0, 0],
-    [9, 0],
-    [10, 1],
+    [0.998, 0],
+    [1, 1],
     [100, 2],
     [250, 3],
     [500, 4],
     [1000, 5],
   ])
     assert.equal(unlockedPatternTier(points * UNITS_PER_POINT), expected);
-  assert.equal(unlockedPatternTier(5000 - 1), 0);
+  assert.equal(unlockedPatternTier(500 - 1), 0);
   assert.equal(unlockedPatternTier(15 * 500 + 10 * 500), 1);
   assert.throws(() => unlockedPatternTier(-1), RangeError);
 });
@@ -50,10 +50,10 @@ test("gift scoring is opt-in until ownership policy is decided", () => {
 test("one pattern unlocks on entry and later rewards follow the tier interval", () => {
   const counts = [18, 11, 11, 8, 10];
   const slots = (p) => earnedPatternSlots(p * UNITS_PER_POINT, counts);
-  assert.deepEqual(slots(9), [0, 0, 0, 0, 0]);
-  assert.deepEqual(slots(10), [1, 0, 0, 0, 0]);
-  assert.deepEqual(slots(14), [1, 0, 0, 0, 0]);
-  assert.deepEqual(slots(15), [2, 0, 0, 0, 0]);
+  assert.deepEqual(slots(0), [0, 0, 0, 0, 0]);
+  assert.deepEqual(slots(1), [1, 0, 0, 0, 0]);
+  assert.deepEqual(slots(6), [1, 0, 0, 0, 0]);
+  assert.deepEqual(slots(6.5), [2, 0, 0, 0, 0]);
   assert.deepEqual(slots(95), [18, 0, 0, 0, 0]);
   assert.deepEqual(slots(100), [18, 1, 0, 0, 0]);
   assert.deepEqual(slots(250), [18, 11, 1, 0, 0]);
