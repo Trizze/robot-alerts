@@ -16,19 +16,20 @@ Run `npm run demo` to replay synthetic alerts without Twitch credentials; demo d
 
 ## Current capabilities
 
+- Three Blender-rendered dance loops, randomly selected once per alert after the run-in; patterns, avatar and chest display follow the moving robot.
 - Five bundled alert sounds in the hosted dashboard, with preview, per-event choices, Apply to all alerts and volume/delay. Custom sound uploads are disabled. See [sound controls](docs/alert-sounds.md).
 
 - Sub, resub, gift, cheer, follow and raid alerts, a configurable alert card, a settings page, event timing and optional custom media.
 - A layered, Blender-rendered 2D robot in the overlay, with a Twitch profile picture on its CRT screen. The original fallback renderer is retained.
-- A 3D viewer and whole-robot pattern previews in `website-staging/`. The separately hosted preview at <https://trizze.tv/robot/> is not connected to the shared service.
-- An experimental shared service in `shared-service/` with a points ledger, EventSub webhook verification, Twitch OAuth routes and privacy-oriented storage. See its [README](shared-service/README.md) before attempting deployment.
+- A 3D viewer and whole-robot pattern previews in `website-staging/`. The hosted picker at <https://trizze.tv/robot/> connects to the same-origin shared service, with Twitch login, inventory, a pattern-size slider and emote/emoji chest display.
+- A separately deployed shared service in `shared-service/` with a points ledger, EventSub webhook verification, Twitch OAuth routes and privacy-oriented storage. See its [README](shared-service/README.md) before attempting deployment.
 
 ## Important limitations
 
 - Live reactions and bot responses use `ALLOWED_VIEWER_IDS`: a comma-separated list of Twitch user IDs. An empty value disables normal live reactions; set `*` explicitly to allow all Twitch IDs. Raid visual participation has separate behavior. Restart the app after changing the value.
-- Shared Twitch login, cross-channel points and persistent appearance selection have not been tested end to end or deployed. The OBS overlay does not yet render the viewer's selected website pattern or chest image. Pattern preview is not a completed unlock system.
+- Shared Twitch login, cross-channel point storage, deterministic earned patterns and persistent appearance selection are deployed. The hosted OBS overlay composites each viewer's selected pattern, avatar and chest image. Both Trizze and itsTrizze OBS tests were owner-confirmed; broader real paid-event/cross-channel verification remains limited.
 - Real Twitch event and OBS testing is still required for the latest renderer. Twitch's resubscription message event depends on the viewer sharing it, so it cannot reliably report every renewal.
-- A small list of Twitch global emotes is available in the disconnected website preview. The full global list requires the shared backend. Animated chest preview depends on browser support and has not been verified with an actual animated Twitch emote.
+- The hosted backend caches the active Twitch global-emote list on demand for one hour, including animated variants. Emoji and emote chest selection are available; playback depends on browser support.
 - This repository includes the runnable art and relevant original asset licenses. Large intermediate animation archives and research renders are kept outside the repository; they are not needed to run the app.
 
 ## Credits
@@ -37,6 +38,6 @@ The CRT monitor is adapted from Jampre's **Crt Monitor**, and the entrance door 
 
 ## Twitch global emote list
 
-The hosted shared service fetches Twitch's global-emote list on demand, caching the result for an hour. There is no periodic Twitch polling. Until that service is hosted, the operator can privately run `npm run emotes:refresh` from the project directory to generate a current, public-only snapshot in `website-staging/global-emotes.json`. The command reads Twitch app credentials from the runtime environment; Node can load the operator's existing `.env` at startup. It prints a count, not credentials. To update the hosted static preview, copy the generated snapshot into the authorized static-site checkout and use the approved deployment workflow. This snapshot remains fixed until refreshed and published again. The command is optional; the app and demo run without it.
+The hosted shared service fetches Twitch's global-emote list on demand, caching the result for an hour. There is no periodic Twitch polling. For a standalone static snapshot, the operator can privately run `npm run emotes:refresh` from the project directory to generate a current, public-only snapshot in `website-staging/global-emotes.json`. The command reads Twitch app credentials from the runtime environment; Node can load the operator's existing `.env` at startup. It prints a count, not credentials. To update the hosted static preview, copy the generated snapshot into the authorized static-site checkout and use the approved deployment workflow. This snapshot remains fixed until refreshed and published again. The command is optional; the app and demo run without it.
 
 Local SQLite databases, avatar cache and uploaded media default to the project’s `data/` directory regardless of the shell working directory. Advanced users can set `ROBOT_DATA_DIR` to a separate directory.

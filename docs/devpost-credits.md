@@ -7,3 +7,5 @@ The five optional bundled robot alert sounds combine Kenney's Interface Sounds 1
 This is a draft for the Devpost description; it has not been published.
 
 The current product demo also displays the Twitch global emotes PopNemo and GlitchCat, unmodified through the official Twitch CDN. The CRT geometry is reused in the logo and favicon; the same Jampre CC BY 4.0 attribution applies.
+
+The entrance uses **Door with frame** by witnessk (https://skfb.ly/6VKAQ), CC BY 4.0, scaled/oriented, animated and rendered with split foreground occlusion. Whole-robot materials include Poly Haven and Meshy CC0 textures; individual source records are in CREDITS.md. The owner-supplied demo background still needs its redistribution provenance confirmed before submission.

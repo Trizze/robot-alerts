@@ -148,3 +148,8 @@ The hosted source at `/robot/overlay/?channel=<numeric-id>&resolution=<preset>` 
 ## Bundled alert sounds — 2026-11-02
 
 Offer five shipped sound choices per event, plus silence, preview, shared volume/delay and Apply to all alerts. Do not accept uploaded audio or arbitrary sound URLs. Both API validation and the browser player accept only the exact shipped catalog entries. Remove prior custom sound data as explicitly authorized by the owner, preserving all other channel/viewer data. No new dependencies, paid API or background processing.
+
+
+## Implemented dance extension — 2026-11-02
+
+After run-in, choose one of three Blender-rendered loops per alert: shuffle, disco, victory. Each is 96 frames at 60 fps (1.6 seconds), with eight synchronized part layers, neutral pattern maps and per-frame CRT/chest projections. The selection stays fixed during the alert. The card keeps its configured hold duration; the robot may finish its current dance loop before run-out. Original idle/run clips and fallback renderer stay available. No procedural browser limb animation is substituted.

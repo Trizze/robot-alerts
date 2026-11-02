@@ -1,4 +1,14 @@
-# Status — 2026-11-01
+# Status — 2026-11-02
+
+## Latest release — dances, OBS audio and reconnects
+
+- Three 96-frame / 60 fps Blender dances (shuffle, disco, victory) are live, randomly chosen once per alert. One clock drives all eight layers and four pattern maps; screen/chest projections follow the motion. Text duration stays unchanged; the robot finishes a loop before exiting. Original rig/idle retained. Source scene/scripts and corrected corner data are in assets/robot/dances and scripts/blender; large source PNG ZIPs are retained locally but ignored by Git.
+- Fresh browser playback inspected at 1080p and 1440p: all three dances, patterns/avatar/chest, cards and cleanup; no browser errors. Review video and stills sent to PC. npm test: 140 pass; shared-service tests: 57 pass. Run npm test and node --test shared-service/test/*.test.js. Browser QA scripts need existing Playwright/Chromium paths.
+- Hosted sounds now use each queued alert's own selection, detect renderer readiness with callback/observer, and retry blocked playback on interaction. Static publication: 290 files after dry run. Actual OBS audio still needs owner confirmation. Trizze source: https://trizze.tv/robot/overlay/?channel=14824099&v=audio-dances-2 .
+- Raised per-channel SSE connections from 3 to 12 (global cap 200 unchanged) for OBS plus previews. robot-alerts:reconnect-1 healthy, public stream 200 / health 204; previous bundled-sounds container retained, same resource limits/private data/env. Owner should refresh OBS and retest; observed reconnect cause is not independently proven in their OBS.
+- Picker content/header alignment fixed and deployed. Thumbnail: assets/marketing/robot-alerts-thumbnail-v1.png, 1536x1024, 2.41 MB, sent to PC.
+- Owner privately scanned Git history: no candidates. Repository made public at owner's explicit instruction: https://github.com/Trizze/robot-alerts . Fresh online dependency audit and owner-supplied background provenance remain open audit limitations. No secret files read.
+- Next: confirm OBS sound/test delivery, finish submission/video and background permission; freeze submitted artifacts after deadline. Runtime remains npm start from /home/marvin/robot-alerts, local settings port3210, callback3211; hosted API /robot/api/. Accounts: Trizze, itsTrizze, TrizzeBot. Show files via send-to-pc; never inspect .env, credentials or keys.
 
 ## Bundled sound library — 2026-11-02
 
@@ -7,7 +17,7 @@
 - Owner explicitly authorized deleting previous custom audio after automatic review requested clarification. Startup cleanup removes only unsupported sound entries, retaining valid stock selections and all other preferences. Production check confirms zero channels with data-URL sounds. No secret files/token values were inspected; no live point/chat test was generated.
 - `robot-alerts:bundled-sounds-1` is healthy (204); prior container `robot-alerts-before-bundled-sounds-20261102` retained with unchanged private env/data/limits. Do not roll back to an upload-capable release for public use. Static dry run listed 252 files and robot-deploy published them. Dashboard/catalog/audio return 200; API health 204. Local browser QA passed; automatic review blocked interactive production QA, so public verification used read-only requests.
 - 134 application / 56 shared-service tests pass, including idempotent cleanup preserving points/sessions/settings. Browser QA covers all five decodable MP3s, absent upload controls, per-event/all/silence selection, volume/delay and fresh overlay playback. Sound files/ZIP sent to PC. Rebuild new mixes with `python3 scripts/mix-sound-library.py`.
-- Three Blender dances are still NOT implemented; no tunnel listener on marvin at 9876/9877. Waiting for the owner's Windows reverse SSH tunnel before another Blender call. OBS continues using the existing idle clip.
+- Superseded: three Blender dance loops are now rendered and deployed; see the latest release above.
 
 ## Shared sounds and matching tests — 2026-11-02
 
