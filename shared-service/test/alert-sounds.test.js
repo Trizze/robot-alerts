@@ -1,31 +1,57 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { randomBytes } from "node:crypto";
+import { readFileSync, mkdtempSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { SOUND_LIBRARY } from "../../website-staging/shared/sound-library.js";
 import { channelSettings } from "../src/channel-settings.js";
 import {
   validSound,
   BUILTIN_SOUND,
-  MAX_SOUND_BYTES,
+  librarySoundsOnly,
   overlaySoundSettings,
 } from "../src/alert-sounds.js";
 import { SharedStore } from "../src/store.js";
 import { createService } from "../src/server.js";
 import { playAlertSound } from "../../website-staging/shared/alert-audio.js";
 
-const wav = Buffer.alloc(48);
-wav.write("RIFF");
-wav.write("WAVE", 8);
-const source = `data:audio/wav;base64,${wav.toString("base64")}`;
+const source = BUILTIN_SOUND;
+const oldUpload =
+  "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAIA+AAACABAAZGF0YQAAAAA=";
 
-test("sound settings restrict formats, size, event keys and finite playback settings", () => {
+test("every bundled sound is a unique shipped MP3 and is accepted by the API", () => {
+  assert.equal(SOUND_LIBRARY.length, 5);
+  assert.equal(new Set(SOUND_LIBRARY.map((item) => item.src)).size, 5);
+  for (const item of SOUND_LIBRARY) {
+    assert.ok(item.name && item.duration > 0 && item.duration < 5);
+    const file = readFileSync(
+      new URL(
+        "../../website-staging" + item.src.replace("/robot/", "/"),
+        import.meta.url,
+      ),
+    );
+    assert.ok(file.length > 100 && file.length < 100000);
+    assert.equal(validSound(item.src), true);
+  }
+});
+
+test("sound settings accept only bundled paths and finite playback settings", () => {
   assert.equal(validSound(source), true);
+  assert.equal(validSound(oldUpload), false);
+  assert.deepEqual(librarySoundsOnly({ sub: oldUpload, cheer: source }), {
+    cheer: source,
+  });
   assert.equal(validSound(BUILTIN_SOUND), true);
   for (const src of [
     "https://example.invalid/sound.mp3",
     "javascript:alert(1)",
     "data:text/html;base64,AAAA",
     "data:audio/wav;base64,SGVsbG8=",
-    `data:audio/ogg;base64,${Buffer.alloc(MAX_SOUND_BYTES + 1).toString("base64")}`,
+    "/robot/sounds/not-bundled.mp3",
+    source + "?arbitrary=1",
+    "/robot/sounds/../other.mp3",
+    "https://trizze.tv" + source,
   ])
     assert.equal(validSound(src), false);
   for (const input of [
@@ -51,7 +77,7 @@ test("sound settings restrict formats, size, event keys and finite playback sett
   assert.equal(overlaySoundSettings(settings).sounds, undefined);
 });
 
-test("audio upload settings stay channel-owned, persist and are removed on disconnect", async (t) => {
+test("bundled sound settings stay channel-owned and reject uploads", async (t) => {
   const store = new SharedStore(":memory:", {
     encryptionKey: randomBytes(32),
     patternSeed: randomBytes(32),
@@ -77,11 +103,8 @@ test("audio upload settings stay channel-owned, persist and are removed on disco
     origin: "https://trizze.tv",
     "content-type": "application/json",
   };
-  // Exercise a valid upload larger than the previous 64 KB JSON limit.
-  const larger = Buffer.alloc(60000);
-  wav.copy(larger);
   const input = {
-    sounds: { gift: `data:audio/wav;base64,${larger.toString("base64")}` },
+    sounds: { gift: source },
     soundVolume: 0.4,
     soundDelay: 1.2,
   };
@@ -103,9 +126,10 @@ test("audio upload settings stay channel-owned, persist and are removed on disco
     (await save({ sounds: { sub: "data:audio/mpeg;base64,bad" } })).status,
     400,
   );
+  assert.equal((await save({ sounds: { sub: oldUpload } })).status, 400);
   assert.deepEqual(store.overlaySettings("123").sounds, input.sounds);
   assert.equal(
-    (await save({ sounds: { sub: source }, junk: "x".repeat(800001) })).status,
+    (await save({ sounds: { sub: source }, junk: "x".repeat(65537) })).status,
     400,
   );
   assert.equal((await save({ sounds: {} })).status, 200);
@@ -154,9 +178,93 @@ test("one alert owns its audio; cancellation prevents delayed playback and relea
     assert.equal(players[1].paused, true);
     playAlertSound({ ...settings, soundVolume: 0 }, "sub");
     playAlertSound(settings, "raid");
+    playAlertSound({ sounds: { sub: oldUpload } }, "sub");
+    playAlertSound(
+      { sounds: { sub: "https://evil.invalid/audio.mp3" } },
+      "sub",
+    );
     assert.equal(players.length, 2);
   } finally {
     globalThis.Audio = original;
+  }
+});
+
+test("legacy uploaded sound bytes are never returned or broadcast", () => {
+  const store = new SharedStore(":memory:", {
+    encryptionKey: randomBytes(32),
+    patternSeed: randomBytes(32),
+    catalog: [],
+  });
+  try {
+    store.saveChannel("123", "Demo", {});
+    const legacy = {
+      preset: "02",
+      sounds: { sub: oldUpload, cheer: source },
+      soundVolume: 0.4,
+      soundDelay: 1.2,
+    };
+    store.db
+      .prepare("UPDATE channels SET overlay_settings=? WHERE id=?")
+      .run(JSON.stringify(legacy), "123");
+    const settings = store.overlaySettings("123");
+    assert.deepEqual(settings.sounds, { cheer: source });
+    assert.equal(settings.preset, "02");
+    assert.equal(settings.soundVolume, 0.4);
+    assert.equal(settings.soundDelay, 1.2);
+    assert.equal(overlaySoundSettings(settings, "sub").sounds, undefined);
+    assert.equal(JSON.stringify(settings).includes("base64"), false);
+  } finally {
+    store.close();
+  }
+});
+
+test("startup removes previous uploads once and preserves points, sessions and other settings", () => {
+  const folder = mkdtempSync(join(tmpdir(), "robot-sound-migration-"));
+  const options = {
+    encryptionKey: randomBytes(32),
+    patternSeed: randomBytes(32),
+    catalog: [{ id: "test_skin", tier: 1 }],
+  };
+  const file = join(folder, "test.sqlite");
+  let store = new SharedStore(file, options);
+  try {
+    store.saveChannel("123", "Demo", {});
+    store.upsertViewer("123", "Demo");
+    const session = store.createSession("123", "streamer");
+    store.record({
+      id: "synthetic-sub",
+      channel: "123",
+      type: "sub",
+      tier: "1000",
+      viewer: { id: "456", name: "Demo supporter" },
+      at: new Date().toISOString(),
+    });
+    const viewer = store.viewer("456");
+    const settings = {
+      preset: "02",
+      soundVolume: 0.4,
+      soundDelay: 1.2,
+      chatAnnouncements: true,
+      sounds: { sub: oldUpload, cheer: source },
+    };
+    store.db
+      .prepare("UPDATE channels SET overlay_settings=? WHERE id=?")
+      .run(JSON.stringify(settings), "123");
+    store.close();
+    store = new SharedStore(file, options);
+    const raw = JSON.parse(
+      store.db
+        .prepare("SELECT overlay_settings FROM channels WHERE id=?")
+        .get("123").overlay_settings,
+    );
+    assert.deepEqual(raw, { ...settings, sounds: { cheer: source } });
+    assert.deepEqual(store.viewer("456"), viewer);
+    assert.equal(store.session(session).id, "123");
+    assert.equal(store.hasChannel("123"), true);
+    assert.equal(store.removeUploadedSounds(), 0);
+  } finally {
+    store.close();
+    rmSync(folder, { recursive: true, force: true });
   }
 });
 

@@ -4,6 +4,7 @@ COPY shared-service/src ./shared-service/src
 COPY src/robots/pattern-points.js ./src/robots/pattern-points.js
 COPY src/twitch/normalize.js ./src/twitch/normalize.js
 COPY website-staging/patterns/catalog.json ./website-staging/patterns/catalog.json
+COPY website-staging/shared/sound-library.js ./website-staging/shared/sound-library.js
 RUN mkdir -p /data && chown node:node /data
 USER node
 EXPOSE 8080

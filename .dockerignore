@@ -11,3 +11,5 @@
 !website-staging
 !website-staging/patterns
 !website-staging/patterns/catalog.json
+!website-staging/shared
+!website-staging/shared/sound-library.js

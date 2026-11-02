@@ -1,5 +1,6 @@
 import { channelSettings, DEFAULT_SETTINGS } from "./channel-settings.js";
 import { DatabaseSync } from "node:sqlite";
+import { librarySoundsOnly } from "./alert-sounds.js";
 import {
   createHash,
   createHmac,
@@ -93,13 +94,46 @@ export class SharedStore {
       );
     if (!channelColumns.has("overlay_settings"))
       this.db.exec("ALTER TABLE channels ADD COLUMN overlay_settings TEXT");
+    this.removeUploadedSounds();
+  }
+  // Owner-approved removal of legacy audio uploads; no other fields change.
+  removeUploadedSounds() {
+    const update = this.db.prepare(
+      "UPDATE channels SET overlay_settings=? WHERE id=?",
+    );
+    let changed = 0;
+    this.db.exec("BEGIN IMMEDIATE");
+    try {
+      for (const row of this.db
+        .prepare(
+          "SELECT id,overlay_settings FROM channels WHERE overlay_settings IS NOT NULL",
+        )
+        .iterate()) {
+        const value = JSON.parse(row.overlay_settings);
+        if (!Object.hasOwn(value, "sounds")) continue;
+        const sounds = librarySoundsOnly(value.sounds);
+        if (JSON.stringify(value.sounds) === JSON.stringify(sounds)) continue;
+        value.sounds = sounds;
+        update.run(JSON.stringify(value), row.id);
+        changed++;
+      }
+      this.db.exec("COMMIT");
+      return changed;
+    } catch (error) {
+      this.db.exec("ROLLBACK");
+      throw error;
+    }
   }
   overlaySettings(id) {
     if (!this.channelExists(id)) return null;
     const value = this.db
       .prepare("SELECT overlay_settings FROM channels WHERE id=?")
       .get(id)?.overlay_settings;
-    return value ? channelSettings(JSON.parse(value)) : { ...DEFAULT_SETTINGS };
+    if (!value) return { ...DEFAULT_SETTINGS };
+    const saved = JSON.parse(value);
+    if (Object.hasOwn(saved, "sounds"))
+      saved.sounds = librarySoundsOnly(saved.sounds);
+    return channelSettings(saved);
   }
   saveOverlaySettings(id, input) {
     if (!this.hasChannel(id)) throw new Error("Channel not connected");

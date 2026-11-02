@@ -1,5 +1,14 @@
 # Status — 2026-11-01
 
+## Bundled sound library — 2026-11-02
+
+- Replaced custom sound uploads with five bundled choices: Robot entrance, Arcade win, Soft chime, Power up and Glitch pop. Per-event selection, No sound, preview, Apply to all alerts, volume/delay and matching OBS tests remain. Older sound-upload releases documented below are superseded.
+- API and browser player accept only exact shipped catalog paths; reject data URLs, external URLs and arbitrary paths. Removed readSound/file picker and restored the 64 KB settings request limit. No new dependencies, paid API, background processing or server resource increase.
+- Owner explicitly authorized deleting previous custom audio after automatic review requested clarification. Startup cleanup removes only unsupported sound entries, retaining valid stock selections and all other preferences. Production check confirms zero channels with data-URL sounds. No secret files/token values were inspected; no live point/chat test was generated.
+- `robot-alerts:bundled-sounds-1` is healthy (204); prior container `robot-alerts-before-bundled-sounds-20261102` retained with unchanged private env/data/limits. Do not roll back to an upload-capable release for public use. Static dry run listed 252 files and robot-deploy published them. Dashboard/catalog/audio return 200; API health 204. Local browser QA passed; automatic review blocked interactive production QA, so public verification used read-only requests.
+- 134 application / 56 shared-service tests pass, including idempotent cleanup preserving points/sessions/settings. Browser QA covers all five decodable MP3s, absent upload controls, per-event/all/silence selection, volume/delay and fresh overlay playback. Sound files/ZIP sent to PC. Rebuild new mixes with `python3 scripts/mix-sound-library.py`.
+- Three Blender dances are still NOT implemented; no tunnel listener on marvin at 9876/9877. Waiting for the owner's Windows reverse SSH tunnel before another Blender call. OBS continues using the existing idle clip.
+
 ## Shared sounds and matching tests — 2026-11-02
 
 - Apply to all alerts copies the selected uploaded/built-in sound to all six event types without enabling disabled events or changing volume/delay. Per-event overrides remain possible. Uploads retain their filename and show Uploaded sound saved after a successful save.

@@ -144,3 +144,7 @@ The hosted source at `/robot/overlay/?channel=<numeric-id>&resolution=<preset>` 
 - Streamer Dashboard manages source settings and alert designs; Get Started keeps its four-step guide. Nine designs plus `none` are owner-only settings. Choices save automatically in request order; `none` keeps the robot and hides the card, including when changed during an active alert. Existing OBS URLs remain unchanged.
 - Saved chest emoji/emote selections accompany hosted display events. The canvas draws chest content through existing per-frame display corners/masks. GIF frames use the robot clock; dark glass stays `#242833`, with the Twitch avatar retained on the CRT. Failed optional emote loading falls back to event content rather than suppressing the alert.
 - Current pitch demo: two 11-second entrances, 1280×720 at 30 fps, Black Marquina Marble + GlitchCat + Neon signal, then Fabric Pattern 07 + PopNemo + Pop arcade. It is rendered from actual overlay components with synthetic events; it is not evidence of real paid Twitch events.
+
+## Bundled alert sounds — 2026-11-02
+
+Offer five shipped sound choices per event, plus silence, preview, shared volume/delay and Apply to all alerts. Do not accept uploaded audio or arbitrary sound URLs. Both API validation and the browser player accept only the exact shipped catalog entries. Remove prior custom sound data as explicitly authorized by the owner, preserving all other channel/viewer data. No new dependencies, paid API or background processing.

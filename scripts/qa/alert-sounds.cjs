@@ -48,129 +48,100 @@ const assert = require("node:assert/strict");
     await page.goto("http://127.0.0.1:3902/robot/dashboard/");
     await page.waitForSelector("#sound-toggle:not(:disabled)");
     await page.locator("#sound-toggle").click();
-    await page.locator("#sound-builtin").click();
-    await page.waitForFunction(() =>
-      document
-        .querySelector("#setup-feedback")
-        .textContent.startsWith("Design saved"),
-    );
-    assert.equal(settings.sounds.sub, "/robot/sounds/robot-arrival.mp3");
-    const enabledEvents = [...settings.events];
-    await page.locator("#sound-all").click();
-    await page.waitForFunction(() =>
-      document
-        .querySelector("#setup-feedback")
-        .textContent.startsWith("Design saved"),
-    );
-    assert.deepEqual(Object.keys(settings.sounds).sort(), [
-      "cheer",
-      "follow",
-      "gift",
-      "raid",
-      "resub",
-      "sub",
-    ]);
-    assert.ok(
-      Object.values(settings.sounds).every(
-        (src) => src === "/robot/sounds/robot-arrival.mp3",
-      ),
-    );
-    assert.deepEqual(settings.events, enabledEvents);
-    await page.locator("#sound-event").selectOption("gift");
-    const wav = Buffer.alloc(2044);
-    wav.write("RIFF");
-    wav.writeUInt32LE(wav.length - 8, 4);
-    wav.write("WAVEfmt ", 8);
-    wav.writeUInt32LE(16, 16);
-    wav.writeUInt16LE(1, 20);
-    wav.writeUInt16LE(1, 22);
-    wav.writeUInt32LE(8000, 24);
-    wav.writeUInt32LE(16000, 28);
-    wav.writeUInt16LE(2, 32);
-    wav.writeUInt16LE(16, 34);
-    wav.write("data", 36);
-    wav.writeUInt32LE(wav.length - 44, 40);
-    await page
-      .locator("#sound-file")
-      .setInputFiles({ name: "test.wav", mimeType: "audio/wav", buffer: wav });
-    await page.waitForFunction(
-      () =>
-        document.querySelector("#sound-status").textContent ===
-        "Uploaded sound saved.",
-    );
-    await page.waitForFunction(() =>
-      document
-        .querySelector("#setup-feedback")
-        .textContent.startsWith("Design saved"),
-    );
-    assert.match(settings.sounds.gift, /^data:audio\/wav;base64,/);
     assert.equal(
-      await page.locator("#sound-file").evaluate((e) => e.files[0]?.name),
-      "test.wav",
+      await page.locator("#alert-sound-controls input[type=file]").count(),
+      0,
     );
-    const uploaded = settings.sounds.gift;
+    assert.equal(await page.locator("#sound-choice option").count(), 6);
+    const enabledEvents = [...settings.events];
+    const stock = "/robot/sounds/robot-arrival.mp3";
+    const saveDone = () =>
+      page.waitForFunction(() =>
+        document
+          .querySelector("#setup-feedback")
+          .textContent.startsWith("Design saved"),
+      );
+    await page.locator("#sound-choice").selectOption(stock);
+    await saveDone();
+    assert.equal(settings.sounds.sub, stock);
     await page.locator("#sound-all").click();
-    await page.waitForFunction(() =>
-      document
-        .querySelector("#setup-feedback")
-        .textContent.startsWith("Design saved"),
-    );
-    assert.ok(Object.values(settings.sounds).every((src) => src === uploaded));
+    await saveDone();
+    assert.equal(Object.keys(settings.sounds).length, 6);
+    assert.ok(Object.values(settings.sounds).every((src) => src === stock));
     assert.deepEqual(settings.events, enabledEvents);
+    for (const src of [
+      "/robot/sounds/robot-arrival.mp3",
+      "/robot/sounds/arcade-win.mp3",
+      "/robot/sounds/soft-chime.mp3",
+      "/robot/sounds/power-up.mp3",
+      "/robot/sounds/glitch-pop.mp3",
+    ]) {
+      await page.locator("#sound-choice").selectOption(src);
+      await saveDone();
+      const duration = await page.evaluate(
+        (src) =>
+          new Promise((resolve, reject) => {
+            const sound = new Audio(src);
+            const timeout = setTimeout(
+              () => reject(new Error("Audio did not load")),
+              5000,
+            );
+            sound.onloadedmetadata = () => {
+              clearTimeout(timeout);
+              resolve(sound.duration);
+              sound.removeAttribute("src");
+              sound.load();
+            };
+            sound.onerror = () => {
+              clearTimeout(timeout);
+              reject(new Error("Audio decode failed"));
+            };
+            sound.load();
+          }),
+        src,
+      );
+      assert.ok(duration > 0 && duration < 5);
+      await page.locator("#sound-play").click();
+    }
+    await page.locator("#sound-event").selectOption("gift");
+    const chosen = "/robot/sounds/soft-chime.mp3";
+    await page.locator("#sound-choice").selectOption(chosen);
+    await saveDone();
+    assert.equal(settings.sounds.gift, chosen);
+    assert.equal(settings.sounds.sub, "/robot/sounds/glitch-pop.mp3");
     await page.locator("#sound-volume").fill("0.35");
     await page.locator("#sound-volume").dispatchEvent("change");
     await page.locator("#sound-delay").fill("0.6");
     await page.locator("#sound-delay").dispatchEvent("change");
-    await page.waitForFunction(() =>
-      document
-        .querySelector("#setup-feedback")
-        .textContent.startsWith("Design saved"),
-    );
+    await saveDone();
     assert.equal(settings.soundVolume, 0.35);
     assert.equal(settings.soundDelay, 0.6);
-    await page.locator("#test-design").click();
-    await page.waitForFunction(() =>
-      document
-        .querySelector("#setup-feedback")
-        .textContent.startsWith("gift test sent"),
-    );
-    assert.deepEqual(testEvents.at(-1), { type: "gift" });
-    await page.locator("#test-source").click();
-    await page.waitForFunction(() =>
-      document
-        .querySelector("#setup-feedback")
-        .textContent.startsWith("gift test sent"),
-    );
+    for (const id of ["test-design", "test-source"]) {
+      await page.locator("#" + id).click();
+      await page.waitForFunction(() =>
+        document
+          .querySelector("#setup-feedback")
+          .textContent.startsWith("gift test sent"),
+      );
+    }
     assert.equal(testEvents.length, 2);
     assert.ok(testEvents.every((event) => event.type === "gift"));
-    await page.locator("#sound-play").click();
-    await page.waitForTimeout(150);
     await page.screenshot({
       path: "/tmp/robot-alert-sound-controls.png",
       fullPage: true,
     });
-    await page.locator("#sound-remove").click();
-    await page.waitForFunction(() =>
-      document
-        .querySelector("#setup-feedback")
-        .textContent.startsWith("Design saved"),
-    );
+    await page.locator("#sound-choice").selectOption("");
+    await saveDone();
     assert.equal(settings.sounds.gift, undefined);
-    assert.equal(settings.sounds.sub, uploaded);
-    assert.equal(await page.locator("#sound-all").isDisabled(), true);
-    await page.locator("#sound-file").setInputFiles({
-      name: "fake.mp3",
-      mimeType: "audio/mpeg",
-      buffer: Buffer.from("<script>bad</script>"),
-    });
-    await page.waitForFunction(
-      () =>
-        document.querySelector("#sound-status").textContent ===
-        "This file is not supported audio.",
-    );
+    assert.equal(await page.locator("#sound-play").isDisabled(), true);
+    assert.equal(settings.sounds.sub, "/robot/sounds/glitch-pop.mp3");
+    await page.locator("#sound-all").click();
+    await saveDone();
+    assert.deepEqual(settings.sounds, {});
+    assert.deepEqual(settings.events, enabledEvents);
     assert.deepEqual(errors, []);
     console.log(
-      "Dashboard: per-event upload, preview, volume, delay, autosave, removal and invalid-file rejection passed.",
+      "Dashboard: five decodable library sounds; no upload control; per-event selection, preview, apply-to-all, silence, autosave, volume/delay and matching tests passed.",
     );
     await page.setViewportSize({ width: 390, height: 844 });
     assert.equal(
@@ -234,10 +205,7 @@ const assert = require("node:assert/strict");
         };
       },
       {
-        src:
-          settings.sounds.sub === undefined
-            ? ""
-            : `data:audio/wav;base64,${wav.toString("base64")}`,
+        src: "/robot/sounds/soft-chime.mp3",
       },
     );
     await overlay.goto("http://127.0.0.1:3902/robot/overlay/?channel=123");

@@ -16,6 +16,8 @@ Run `npm run demo` to replay synthetic alerts without Twitch credentials; demo d
 
 ## Current capabilities
 
+- Five bundled alert sounds in the hosted dashboard, with preview, per-event choices, Apply to all alerts and volume/delay. Custom sound uploads are disabled. See [sound controls](docs/alert-sounds.md).
+
 - Sub, resub, gift, cheer, follow and raid alerts, a configurable alert card, a settings page, event timing and optional custom media.
 - A layered, Blender-rendered 2D robot in the overlay, with a Twitch profile picture on its CRT screen. The original fallback renderer is retained.
 - A 3D viewer and whole-robot pattern previews in `website-staging/`. The separately hosted preview at <https://trizze.tv/robot/> is not connected to the shared service.

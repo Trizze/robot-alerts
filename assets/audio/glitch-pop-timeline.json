@@ -1,0 +1,30 @@
+{
+  "duration": 1.4,
+  "loudnessTarget": -21,
+  "tracks": [
+    [
+      "glitch_001.wav",
+      0.02,
+      0.3,
+      1.0
+    ],
+    [
+      "glitch_001.wav",
+      0.14,
+      0.23,
+      0.75
+    ],
+    [
+      "click_003.wav",
+      0.28,
+      0.25,
+      0.8
+    ],
+    [
+      "confirmation_002.wav",
+      0.34,
+      0.3,
+      1.3
+    ]
+  ]
+}

@@ -1,0 +1,24 @@
+{
+  "duration": 1.8,
+  "loudnessTarget": -20,
+  "tracks": [
+    [
+      "confirmation_002.wav",
+      0.0,
+      0.45,
+      1.0
+    ],
+    [
+      "confirmation_002.wav",
+      0.3,
+      0.35,
+      1.25
+    ],
+    [
+      "confirmation_002.wav",
+      0.6,
+      0.4,
+      1.5
+    ]
+  ]
+}

@@ -1,7 +1,7 @@
 import { API_BASE } from "../config.js?v=shared-service-1";
 import { SpriteScene } from "./sprite-scene.js?v=sounds-1";
 import { createAlertCard } from "../shared/alert-card.js";
-import { playAlertSound } from "../shared/alert-audio.js?v=sounds-1";
+import { playAlertSound } from "../shared/alert-audio.js?v=bundled-1";
 const stage = document.querySelector("#stage"),
   status = document.querySelector("#connection");
 const channel = new URLSearchParams(location.search).get("channel");

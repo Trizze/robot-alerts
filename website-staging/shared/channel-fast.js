@@ -1,11 +1,8 @@
 import { API_BASE } from "../config.js?v=shared-service-1";
 import { createAlertCard } from "../shared/alert-card.js";
 import { CARD_PRESETS, CARD_PRESET_ORDER } from "../shared/card-presets.js";
-import {
-  BUILTIN_SOUND,
-  readSound,
-  playAlertSound,
-} from "./alert-audio.js?v=sounds-1";
+import { SOUND_LIBRARY } from "./sound-library.js?v=bundled-1";
+import { playAlertSound } from "./alert-audio.js?v=bundled-1";
 const $ = (s) => document.querySelector(s),
   base = new URL(API_BASE.replace(/\/?$/, "/"), location.origin),
   dimensions = {
@@ -283,10 +280,10 @@ function soundControls() {
   details.id = "alert-sound-controls";
   details.hidden = true;
   details.innerHTML = `<summary>Alert sounds</summary>
-    <p>Use audio you own or have permission to use. MP3, WAV or OGG, up to 96 KB and 15 seconds. Enable browser-source audio in OBS.</p>
+    <p>Choose a bundled sound. Enable browser-source audio in OBS.</p>
     <label>Event <select id="sound-event"><option value="sub">New sub</option><option value="resub">Re-sub</option><option value="gift">Gift subs</option><option value="cheer">Cheer</option><option value="follow">Follow</option><option value="raid">Raid</option></select></label>
-    <label>Upload sound <input id="sound-file" type="file" accept=".mp3,.wav,.ogg,audio/mpeg,audio/wav,audio/ogg"></label>
-    <div class="setup-actions"><button id="sound-builtin" class="quiet" type="button">Use robot entrance mix</button><button id="sound-play" class="quiet" type="button">Preview sound</button><button id="sound-all" class="quiet" type="button">Apply to all alerts</button><button id="sound-remove" class="quiet" type="button">Remove sound</button></div>
+    <label>Sound <select id="sound-choice"><option value="">No sound</option></select></label>
+    <div class="setup-actions"><button id="sound-play" class="quiet" type="button">Preview sound</button><button id="sound-all" class="quiet" type="button">Apply to all alerts</button></div>
     <label>Volume <input id="sound-volume" type="range" min="0" max="1" step="0.01"><output id="sound-volume-value"></output></label>
     <label>Start after <input id="sound-delay" type="number" min="0" max="10" step="0.1"> seconds from the animation start</label>
     <p id="sound-status" role="status"></p>`;
@@ -303,66 +300,54 @@ function soundControls() {
     toggle.setAttribute("aria-expanded", String(show));
   };
   const event = $("#sound-event"),
-    file = $("#sound-file"),
+    choice = $("#sound-choice"),
     volume = $("#sound-volume"),
     delay = $("#sound-delay");
+  for (const sound of SOUND_LIBRARY) {
+    const option = document.createElement("option");
+    option.value = sound.src;
+    option.textContent = `${sound.name} · ${sound.duration.toFixed(1)}s`;
+    choice.append(option);
+  }
   let stop = () => {};
   volume.value = settings.soundVolume ?? 0.7;
   delay.value = settings.soundDelay ?? 0;
   const volumeLabel = () =>
     ($("#sound-volume-value").textContent =
       ` ${Math.round(volume.value * 100)}%`);
-  const refresh = (clearFile = true) => {
+  const refresh = () => {
     stop();
-    const src = settings.sounds?.[event.value];
-    $("#sound-status").textContent =
-      src === BUILTIN_SOUND
-        ? "Robot entrance mix selected."
-        : src
-          ? "Custom sound selected."
-          : "No sound for this event.";
-    $("#sound-play").disabled = !src;
-    $("#sound-remove").disabled = !src;
-    $("#sound-all").disabled = !src;
-    if (clearFile) file.value = "";
+    const sound = SOUND_LIBRARY.find(
+      (item) => item.src === settings.sounds?.[event.value],
+    );
+    choice.value = sound?.src || "";
+    $("#sound-status").textContent = sound
+      ? `${sound.name} selected.`
+      : "No sound for this event.";
+    $("#sound-play").disabled = !sound;
   };
-  function setSound(src) {
-    const sounds = { ...settings.sounds };
-    if (src) sounds[event.value] = src;
-    else delete sounds[event.value];
-    settings.sounds = sounds;
+  choice.onchange = () => {
+    settings.sounds = { ...settings.sounds };
+    if (choice.value) settings.sounds[event.value] = choice.value;
+    else delete settings.sounds[event.value];
     refresh();
     scheduleDesignSave();
-  }
-  file.onchange = () =>
-    action($("#sound-builtin"), "Reading audio…", async () => {
-      const targetEvent = event.value;
-      try {
-        const src = await readSound(file.files[0]);
-        settings.sounds = { ...settings.sounds, [targetEvent]: src };
-        refresh(event.value !== targetEvent);
-        const saved = await scheduleDesignSave();
-        if (saved && event.value === targetEvent)
-          $("#sound-status").textContent = "Uploaded sound saved.";
-      } catch (error) {
-        $("#sound-status").textContent = error.message;
-      }
-    });
-  event.onchange = () => refresh();
-  $("#sound-builtin").onclick = () => setSound(BUILTIN_SOUND);
-  $("#sound-remove").onclick = () => setSound(null);
+  };
+  event.onchange = refresh;
   $("#sound-all").onclick = () => {
-    const src = settings.sounds?.[event.value];
-    if (!src) return;
-    settings.sounds = Object.fromEntries(
-      ["sub", "resub", "gift", "cheer", "follow", "raid"].map((type) => [
-        type,
-        src,
-      ]),
-    );
-    refresh(false);
-    $("#sound-status").textContent =
-      "Same sound selected for all six alert types.";
+    const src = choice.value;
+    settings.sounds = src
+      ? Object.fromEntries(
+          ["sub", "resub", "gift", "cheer", "follow", "raid"].map((type) => [
+            type,
+            src,
+          ]),
+        )
+      : {};
+    refresh();
+    $("#sound-status").textContent = src
+      ? "Same sound selected for all six alert types."
+      : "No sound selected for all alert types.";
     scheduleDesignSave();
   };
   $("#sound-play").onclick = () => {
@@ -372,7 +357,7 @@ function soundControls() {
       event.value,
       () =>
         ($("#sound-status").textContent =
-          "Could not play this audio. Try a different file."),
+          "Could not play this sound. Refresh and try again."),
       false,
     );
   };

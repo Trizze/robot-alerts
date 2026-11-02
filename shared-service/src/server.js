@@ -499,7 +499,7 @@ export function createService({
         if (path.pathname.endsWith("/settings") && req.method === "POST") {
           let input;
           try {
-            const raw = JSON.parse((await body(req, 800000)).toString("utf8"));
+            const raw = JSON.parse((await body(req)).toString("utf8"));
             channelSettings(raw);
             input = channelSettings({
               ...store.overlaySettings(session.id),
