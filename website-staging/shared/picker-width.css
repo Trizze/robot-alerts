@@ -1,0 +1,11 @@
+/* Match the header edges; the legacy main rule adds a second inset. */
+.picker-page .picker-main {
+  width: min(1152px, calc(100vw - 40px));
+  max-width: none;
+  padding: 0;
+}
+@media (max-width: 760px) {
+  .picker-page .picker-main {
+    width: calc(100vw - 28px);
+  }
+}
