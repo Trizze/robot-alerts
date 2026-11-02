@@ -1,5 +1,7 @@
 # Robot Alerts shared service: deploy and rollback
 
+Latest sound release (2026-11-02): `robot-alerts:sounds-1`, built locally from the cached `terminal-bot-1` runtime with only service source replaced, no registry pull or new dependencies. Previous stopped container: `robot-alerts-before-sounds-20261102`. Health 204, dashboard/audio 200; same private env/data/resource/log limits. Static dry run listed 247 files, uploaded via robot-deploy. See `docs/alert-sounds.md` for rollback compatibility: remove sound fields using the new validator before reverting to an older validator. No schema migration or live-point changes were made by this release.
+
 Backend only: static picker `https://trizze.tv/robot/`, API
 `https://trizze.tv/robot/api/`. No new server or registry. Build locally and
 transfer the image to Hetzner.

@@ -1,5 +1,13 @@
 # Status — 2026-11-01
 
+## Alert sounds — 2026-11-02 (LIVE)
+
+- Hosted dashboard/setup now supports per-event MP3/WAV/OGG uploads, preview/removal, volume and start delay. Uploads are public audio, at most 96 KB each; only authenticated channel settings have the larger bounded request limit. No external audio URLs. Audio starts after sprite assets are ready and is cancelled with the alert. Existing channels remain silent until configured.
+- Optional 4.2-second Kenney CC0 entrance mix, editable WAV, source effects and license retained; MP3/WAV/source ZIP sent to the owner's PC. `docs/alert-sounds.md` has controls and rebuild instructions; `python3 scripts/mix-alert-sound.py` rebuilds it using ffmpeg.
+- `robot-alerts:sounds-1` is healthy (204); previous stopped container `robot-alerts-before-sounds-20261102`. Same persistent data/private env and 192 MB / 0.5 CPU / loopback/log limits. Static dry run listed 247 files, published through robot-deploy. Public dashboard/audio return 200. No real chat message or point award sent by sound QA.
+- 129 application / 51 shared-service tests pass. Browser QA covers upload validation, autosave, preview, volume/delay/removal, mobile width, fresh sprite playback, audio start after readiness and cleanup. Use `node scripts/qa/serve-pages.cjs`, then `node scripts/qa/alert-sounds.cjs` with the existing Playwright/Chromium tools.
+- New requests pending: three Blender dance loops randomly selected per alert; Blender connection requires the owner's reverse tunnel. Tier 1 threshold requested at 1 point and today's contribution reconciliation are being handled next.
+
 ## Terminal-only bot setup — 2026-11-02 (LIVE)
 
 - Removed all service-owner controls and metadata from the website. Old `/auth/start?role=bot` now returns 410. Streamer Connect/Disconnect remains per-channel and needs no bot-account login.

@@ -89,6 +89,7 @@ export class SpriteScene {
         };
         this.started = performance.now();
         this.root.dataset.ready = "true";
+        this.alert.onReady?.();
         this.tick();
       })
       .catch((error) => {

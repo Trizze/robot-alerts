@@ -1,10 +1,12 @@
 import { API_BASE } from "../config.js?v=shared-service-1";
-import { SpriteScene } from "./sprite-scene.js?v=fast-1";
+import { SpriteScene } from "./sprite-scene.js?v=sounds-1";
 import { createAlertCard } from "../shared/alert-card.js";
+import { playAlertSound } from "../shared/alert-audio.js?v=sounds-1";
 const stage = document.querySelector("#stage"),
   status = document.querySelector("#connection");
 const channel = new URLSearchParams(location.search).get("channel");
-let current,
+let stopSound = () => {},
+  current,
   settings = { preset: "03", theme: "default" };
 const queue = [];
 function fit() {
@@ -18,6 +20,7 @@ function fit() {
 addEventListener("resize", fit);
 fit();
 function clear() {
+  stopSound();
   current?.stop();
   current = null;
 }
@@ -36,6 +39,13 @@ function next() {
       showAlertBox: settings.preset !== "none",
       card: { preset: settings.preset === "none" ? "03" : settings.preset },
     },
+  };
+  alert.onReady = () => {
+    stopSound = playAlertSound(alert.settings, alert.type, () => {
+      status.hidden = false;
+      status.textContent =
+        "Audio blocked. Click this source to enable sound; enable browser-source audio in OBS.";
+    });
   };
   current = new SpriteScene(stage, createAlertCard(alert), alert, next, () => {
     clear();

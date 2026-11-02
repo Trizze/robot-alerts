@@ -1,6 +1,7 @@
 import { claimBotSetup, finishBotSetup, failBotSetup } from "./bot-setup.js";
 import { unlockDispatcher } from "./unlock-notices.js";
 import { channelSettings } from "./channel-settings.js";
+import { overlaySoundSettings } from "./alert-sounds.js";
 import { directoryCache } from "./directory-cache.js";
 import { OverlayHub } from "./overlay-hub.js";
 import { createServer } from "node:http";
@@ -24,12 +25,12 @@ const same = (a, b) =>
   typeof b === "string" &&
   a.length === b.length &&
   timingSafeEqual(Buffer.from(a), Buffer.from(b));
-async function body(req) {
+async function body(req, limit = 65536) {
   const chunks = [];
   let length = 0;
   for await (const chunk of req) {
     length += chunk.length;
-    if (length > 65536) throw new Error("Request too large");
+    if (length > limit) throw new Error("Request too large");
     chunks.push(chunk);
   }
   return Buffer.concat(chunks);
@@ -191,7 +192,10 @@ export function createService({
         tier: event.tier,
         raidSize: event.raidSize,
         demo,
-        settings: store.overlaySettings(channel),
+        settings: overlaySoundSettings(
+          store.overlaySettings(channel),
+          event.type,
+        ),
       },
     });
   }
@@ -223,7 +227,12 @@ export function createService({
           return respond(403, { error: "Invalid origin" });
         if (!store.hasChannel(overlay[1]))
           return respond(404, { error: "Channel not connected" });
-        hub.connect(overlay[1], req, res, store.overlaySettings(overlay[1]));
+        hub.connect(
+          overlay[1],
+          req,
+          res,
+          overlaySoundSettings(store.overlaySettings(overlay[1])),
+        );
         return;
       }
       if (req.method === "GET" && path.pathname === "/healthz") {
@@ -490,7 +499,7 @@ export function createService({
         if (path.pathname.endsWith("/settings") && req.method === "POST") {
           let input;
           try {
-            const raw = JSON.parse((await body(req)).toString("utf8"));
+            const raw = JSON.parse((await body(req, 800000)).toString("utf8"));
             channelSettings(raw);
             input = channelSettings({
               ...store.overlaySettings(session.id),
@@ -530,7 +539,10 @@ export function createService({
             }
           }
           const value = store.saveOverlaySettings(session.id, input);
-          hub.send(session.id, { kind: "settings", settings: value });
+          hub.send(session.id, {
+            kind: "settings",
+            settings: overlaySoundSettings(value),
+          });
           return respond(200, { settings: value });
         }
         if (path.pathname.endsWith("/test") && req.method === "POST") {

@@ -1,0 +1,98 @@
+{
+  "duration": 4.2,
+  "sampleRate": 48000,
+  "clock": "seconds from sprite assets becoming ready",
+  "tracks": [
+    {
+      "file": "drop_001.wav",
+      "at": 0.12,
+      "gain": 0.3,
+      "rate": 0.8,
+      "role": "Door descent"
+    },
+    {
+      "file": "bong_001.wav",
+      "at": 0.48,
+      "gain": 0.7,
+      "rate": 0.58,
+      "role": "Door landing"
+    },
+    {
+      "file": "open_001.wav",
+      "at": 0.8,
+      "gain": 0.38,
+      "rate": 0.8,
+      "role": "Door opening"
+    },
+    {
+      "file": "glitch_001.wav",
+      "at": 1.05,
+      "gain": 0.15,
+      "rate": 0.85,
+      "role": "Robot motor start"
+    },
+    {
+      "file": "click_003.wav",
+      "at": 1.22,
+      "gain": 0.26,
+      "rate": 0.9,
+      "role": "Robot footstep"
+    },
+    {
+      "file": "click_003.wav",
+      "at": 1.46,
+      "gain": 0.26,
+      "rate": 0.76,
+      "role": "Robot footstep"
+    },
+    {
+      "file": "click_003.wav",
+      "at": 1.7,
+      "gain": 0.26,
+      "rate": 0.9,
+      "role": "Robot footstep"
+    },
+    {
+      "file": "click_003.wav",
+      "at": 1.94,
+      "gain": 0.26,
+      "rate": 0.76,
+      "role": "Robot footstep"
+    },
+    {
+      "file": "click_003.wav",
+      "at": 2.18,
+      "gain": 0.26,
+      "rate": 0.9,
+      "role": "Robot footstep"
+    },
+    {
+      "file": "click_003.wav",
+      "at": 2.42,
+      "gain": 0.26,
+      "rate": 0.76,
+      "role": "Robot footstep"
+    },
+    {
+      "file": "click_003.wav",
+      "at": 2.66,
+      "gain": 0.18,
+      "rate": 0.9,
+      "role": "Robot footstep"
+    },
+    {
+      "file": "click_003.wav",
+      "at": 2.88,
+      "gain": 0.18,
+      "rate": 0.76,
+      "role": "Robot footstep"
+    },
+    {
+      "file": "confirmation_002.wav",
+      "at": 2.98,
+      "gain": 0.42,
+      "rate": 0.9,
+      "role": "Alert card reveal"
+    }
+  ]
+}

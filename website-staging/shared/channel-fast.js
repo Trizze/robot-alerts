@@ -1,6 +1,11 @@
 import { API_BASE } from "../config.js?v=shared-service-1";
 import { createAlertCard } from "../shared/alert-card.js";
 import { CARD_PRESETS, CARD_PRESET_ORDER } from "../shared/card-presets.js";
+import {
+  BUILTIN_SOUND,
+  readSound,
+  playAlertSound,
+} from "./alert-audio.js?v=sounds-1";
 const $ = (s) => document.querySelector(s),
   base = new URL(API_BASE.replace(/\/?$/, "/"), location.origin),
   dimensions = {
@@ -264,6 +269,90 @@ function eventControls() {
     };
   }
 }
+function soundControls() {
+  const details = document.createElement("details");
+  details.className = "alert-sound-controls";
+  details.innerHTML = `<summary>Alert sounds</summary>
+    <p>Use audio you own or have permission to use. MP3, WAV or OGG, up to 96 KB and 15 seconds. Enable browser-source audio in OBS.</p>
+    <label>Event <select id="sound-event"><option value="sub">New sub</option><option value="resub">Re-sub</option><option value="gift">Gift subs</option><option value="cheer">Cheer</option><option value="follow">Follow</option><option value="raid">Raid</option></select></label>
+    <label>Upload sound <input id="sound-file" type="file" accept=".mp3,.wav,.ogg,audio/mpeg,audio/wav,audio/ogg"></label>
+    <div class="setup-actions"><button id="sound-builtin" class="quiet" type="button">Use robot entrance mix</button><button id="sound-play" class="quiet" type="button">Preview sound</button><button id="sound-remove" class="quiet" type="button">Remove sound</button></div>
+    <label>Volume <input id="sound-volume" type="range" min="0" max="1" step="0.01"><output id="sound-volume-value"></output></label>
+    <label>Start after <input id="sound-delay" type="number" min="0" max="10" step="0.1"> seconds from the animation start</label>
+    <p id="sound-status" role="status"></p>`;
+  $("#design-preview").after(details);
+  const event = $("#sound-event"),
+    file = $("#sound-file"),
+    volume = $("#sound-volume"),
+    delay = $("#sound-delay");
+  let stop = () => {};
+  volume.value = settings.soundVolume ?? 0.7;
+  delay.value = settings.soundDelay ?? 0;
+  const volumeLabel = () =>
+    ($("#sound-volume-value").textContent =
+      ` ${Math.round(volume.value * 100)}%`);
+  const refresh = () => {
+    stop();
+    const src = settings.sounds?.[event.value];
+    $("#sound-status").textContent =
+      src === BUILTIN_SOUND
+        ? "Robot entrance mix selected."
+        : src
+          ? "Custom sound selected."
+          : "No sound for this event.";
+    $("#sound-play").disabled = !src;
+    $("#sound-remove").disabled = !src;
+    file.value = "";
+  };
+  function setSound(src) {
+    const sounds = { ...settings.sounds };
+    if (src) sounds[event.value] = src;
+    else delete sounds[event.value];
+    settings.sounds = sounds;
+    refresh();
+    scheduleDesignSave();
+  }
+  file.onchange = () =>
+    action($("#sound-builtin"), "Reading audio…", async () => {
+      const targetEvent = event.value;
+      try {
+        const src = await readSound(file.files[0]);
+        settings.sounds = { ...settings.sounds, [targetEvent]: src };
+        refresh();
+        scheduleDesignSave();
+      } catch (error) {
+        $("#sound-status").textContent = error.message;
+      }
+    });
+  event.onchange = refresh;
+  $("#sound-builtin").onclick = () => setSound(BUILTIN_SOUND);
+  $("#sound-remove").onclick = () => setSound(null);
+  $("#sound-play").onclick = () => {
+    stop();
+    stop = playAlertSound(
+      settings,
+      event.value,
+      () =>
+        ($("#sound-status").textContent =
+          "Could not play this audio. Try a different file."),
+      false,
+    );
+  };
+  volume.oninput = volumeLabel;
+  volume.onchange = () => {
+    settings.soundVolume = Number(volume.value);
+    stop();
+    scheduleDesignSave();
+  };
+  delay.onchange = () => {
+    if (!delay.checkValidity()) return delay.reportValidity();
+    settings.soundDelay = Number(delay.value);
+    scheduleDesignSave();
+  };
+  volumeLabel();
+  refresh();
+  addEventListener("pagehide", () => stop());
+}
 try {
   const value = await api("api/channel/settings");
   followAllowed = value.followAllowed === true;
@@ -278,6 +367,7 @@ try {
   source();
   preview();
   eventControls();
+  soundControls();
   if ($("#bot-controls")) {
     const box = $("#bot-controls");
     box.hidden = false;

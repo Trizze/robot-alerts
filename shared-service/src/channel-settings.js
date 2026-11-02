@@ -1,3 +1,4 @@
+import { validateSounds } from "./alert-sounds.js";
 export const PRESETS = [
   "02",
   "03",
@@ -23,7 +24,11 @@ export function channelSettings(input) {
     !input ||
     typeof input !== "object" ||
     Array.isArray(input) ||
-    Object.keys(input).some((key) => !Object.hasOwn(DEFAULT_SETTINGS, key))
+    Object.keys(input).some(
+      (key) =>
+        !Object.hasOwn(DEFAULT_SETTINGS, key) &&
+        !["sounds", "soundVolume", "soundDelay"].includes(key),
+    )
   )
     throw new Error("Invalid channel settings");
   const value = { ...DEFAULT_SETTINGS, ...input };
@@ -54,5 +59,20 @@ export function channelSettings(input) {
     throw new Error("Invalid channel settings");
   value.events = [...value.events];
   value.games = value.games.map((x) => x.trim());
+  if (Object.hasOwn(value, "sounds"))
+    value.sounds = validateSounds(value.sounds);
+  for (const [key, max] of [
+    ["soundVolume", 1],
+    ["soundDelay", 10],
+  ]) {
+    if (
+      Object.hasOwn(value, key) &&
+      (typeof value[key] !== "number" ||
+        !Number.isFinite(value[key]) ||
+        value[key] < 0 ||
+        value[key] > max)
+    )
+      throw new Error("Invalid alert sound settings");
+  }
   return value;
 }

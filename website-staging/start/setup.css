@@ -218,3 +218,42 @@
     grid-template-columns: repeat(2, 1fr);
   }
 }
+.alert-sound-controls {
+  margin: 12px 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: #ffffff06;
+}
+.alert-sound-controls summary {
+  cursor: pointer;
+  font-weight: 650;
+}
+.alert-sound-controls label {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.alert-sound-controls input[type="file"] {
+  max-width: 100%;
+  font-size: 12px;
+}
+.alert-sound-controls select,
+.alert-sound-controls input[type="number"] {
+  color: inherit;
+  background: #ffffff0b;
+  border: 1px solid #ffffff28;
+  border-radius: 6px;
+  padding: 5px 8px;
+}
+.alert-sound-controls input[type="number"] {
+  width: 70px;
+}
+.alert-sound-controls select option {
+  color: #111;
+}
+.alert-sound-controls .setup-actions {
+  flex-wrap: wrap;
+}
