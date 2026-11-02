@@ -1,5 +1,11 @@
+import {
+  DANCE_CLIPS,
+  chooseDance,
+  dancePose,
+  danceHold,
+} from "../shared/dance-choice.js?v=dances-1";
 import { prepareChest } from "./chest-surface.js?v=fast-1";
-import { preparePattern } from "./pattern-loader.js?v=patterns-1";
+import { preparePattern } from "./pattern-loader.js?v=dances-1";
 import { placeAlertPanel } from "../shared/alert-layout.js";
 import { RaidStream } from "../shared/raid-stream.js";
 import {
@@ -7,7 +13,7 @@ import {
   motionFrame,
   drawRobot,
   avatarFor,
-} from "./sprite-renderer.js?v=fast-1";
+} from "./sprite-renderer.js?v=dances-1";
 const RUN_SECONDS = 54 / 30,
   OUT_SECONDS = 37 / 30,
   DOOR_LEAD = 1.15,
@@ -19,11 +25,15 @@ export class SpriteScene {
       performance.now() - Math.max(0, Date.now() - alert.startedAt);
     this.entries = new Map();
     this.world = new RaidStream();
+    this.dance = DANCE_CLIPS.includes(alert.dance)
+      ? alert.dance
+      : chooseDance();
     this.done = false;
     this.stopped = false;
     this.root = document.createElement("section");
     this.root.className = `cinematic-scene rendered-alert ${alert.settings.theme === "gaming" ? "gaming" : "default"}`;
     this.root.dataset.event = alert.type;
+    this.root.dataset.dance = this.dance;
     this.canvas = document.createElement("canvas");
     this.canvas.width = 1920;
     this.canvas.height = 1080;
@@ -111,7 +121,12 @@ export class SpriteScene {
     avatarFor(entry.viewer);
   }
   drawActor(viewer, age, hold, scale = 1, x = 0, y = 0) {
-    const pose = motionFrame(this.atlas, age, hold);
+    const pose = dancePose(
+      this.atlas,
+      motionFrame(this.atlas, age, hold),
+      age,
+      this.dance,
+    );
     if (!pose || age < 0) return;
     this.ctx.save();
     this.ctx.translate(x, y + ((1080 - this.atlas.rig.height) * scale) / 2);
@@ -264,13 +279,15 @@ export class SpriteScene {
     ctx.clearRect(0, 0, 1920, 1080);
     const hold = this.alert.textDuration || 6,
       cardEnd = DOOR_LEAD + RUN_SECONDS + hold,
+      motionHold = danceHold(this.atlas, hold, this.dance),
+      motionEnd = DOOR_LEAD + RUN_SECONDS + motionHold,
       raid = this.alert.type === "raid",
       heroAge = time - DOOR_LEAD;
     if (raid) this.drawCrowd(time);
     ctx.save();
     ctx.translate(this.groupX, this.groupY);
     ctx.scale(this.alertScale, this.alertScale);
-    this.drawDoor(time, cardEnd + OUT_SECONDS);
+    this.drawDoor(time, motionEnd + OUT_SECONDS);
     const show = time >= DOOR_LEAD + RUN_SECONDS && time < cardEnd,
       showBox = this.alert.settings.showAlertBox !== false;
     this.panel.style.opacity = show && showBox ? "1" : "0";
@@ -283,20 +300,20 @@ export class SpriteScene {
         this.media.play().catch(() => {});
       }
     }
-    if (time < cardEnd + OUT_SECONDS) {
+    if (time < motionEnd + OUT_SECONDS) {
       ctx.save();
       ctx.beginPath();
       ctx.rect(158, 0, 1762, 1080);
       ctx.clip();
-      this.drawActor(this.alert.viewer, heroAge, hold, 1, 40, 0);
+      this.drawActor(this.alert.viewer, heroAge, motionHold, 1, 40, 0);
       ctx.restore();
     }
-    this.drawDoorFront(time, cardEnd + OUT_SECONDS);
+    this.drawDoorFront(time, motionEnd + OUT_SECONDS);
     ctx.restore();
     if (
       !raid &&
       !this.done &&
-      time >= cardEnd + OUT_SECONDS + DOOR_CLOSE + 0.25
+      time >= motionEnd + OUT_SECONDS + DOOR_CLOSE + 0.25
     ) {
       this.done = true;
       queueMicrotask(() => this.onDone?.());
@@ -307,7 +324,7 @@ export class SpriteScene {
       time >=
         Math.max(
           this.alert.raidCrowdSeconds || 0,
-          cardEnd + OUT_SECONDS + DOOR_CLOSE + 0.25,
+          motionEnd + OUT_SECONDS + DOOR_CLOSE + 0.25,
         ) &&
       this.world.empty
     ) {

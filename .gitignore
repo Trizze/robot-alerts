@@ -8,3 +8,6 @@ data/
 *.sqlite
 *.sqlite-shm
 *.sqlite-wal
+
+# Large Blender dance render sources retained locally; .blend and runtime atlases are versioned.
+assets/robot/dances/sources/

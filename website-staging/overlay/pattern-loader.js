@@ -1,4 +1,4 @@
-import { createSurfaceCompositor } from "./pattern-surface.js?v=patterns-1";
+import { createSurfaceCompositor } from "./pattern-surface.js?v=patterns-dances-1";
 import { patternSelection } from "../shared/pattern-selection.js";
 const base = new URL("./pattern-motion/", import.meta.url);
 let compositor, metadata, resources;
@@ -30,8 +30,10 @@ function mapsReady() {
   if (!resources)
     resources = (async () => {
       compositor ||= createSurfaceCompositor();
-      metadata = await readJson(new URL("manifest.json?v=patterns-1", base));
-      if (metadata.version !== "patterns-1")
+      metadata = await readJson(
+        new URL("manifest.json?v=patterns-dances-1", base),
+      );
+      if (metadata.version !== "patterns-dances-1")
         throw new Error("Refresh this source to load its robot patterns.");
       const clips = {};
       // Upload serially to keep peak decoding memory bounded. Bitmaps close immediately.
@@ -39,11 +41,18 @@ function mapsReady() {
         const images = [];
         for (const kind of metadata.kinds)
           images.push(
-            await upload(new URL(`${name}/${kind}.png?v=patterns-1`, base)),
+            await upload(
+              new URL(`${name}/${kind}.png?v=patterns-dances-1`, base),
+            ),
           );
         clips[name] = {
           textures: images.map((i) => i.texture),
           size: [images[0].width, images[0].height],
+          metadata: {
+            ...metadata,
+            origin: metadata.clips[name].origin ?? metadata.origin,
+            span: metadata.clips[name].span ?? metadata.span,
+          },
         };
       }
       return clips;
@@ -92,7 +101,7 @@ export function drawPattern(ctx, prepared, clip, index) {
   const surface = compositor.draw(
     prepared.maps[clip],
     prepared.texture,
-    metadata,
+    prepared.maps[clip].metadata,
     frame,
     prepared.scale,
   );

@@ -1,8 +1,8 @@
 import { chestFrame } from "./chest-surface.js?v=fast-1";
-import { drawPattern } from "./pattern-loader.js?v=patterns-1";
+import { drawPattern } from "./pattern-loader.js?v=dances-1";
 import { createPixelText } from "./layer-proof/pixel-text.js";
 const base = new URL("./static-motion-60/", import.meta.url).href;
-const assetVersion = "joints-20261031";
+const assetVersion = "joints-dances-20261102";
 const allowedAvatar = /^https:\/\/static-cdn\.jtvnw\.net\/[^\s]*$/;
 const avatars = new Map(),
   textImages = new Map(),

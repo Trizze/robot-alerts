@@ -1,6 +1,6 @@
 import { createPixelText } from "./layer-proof/pixel-text.js";
 const base = "/overlay/static-motion-60/";
-const assetVersion = "joints-20261031";
+const assetVersion = "joints-dances-20261102";
 const allowedAvatar =
   /^\/(?:avatars\/\d+\.(?:png|jpg|webp)|assets\/avatars\/[a-zA-Z0-9_-]+\.svg)$/;
 const avatars = new Map(),
